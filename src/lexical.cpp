@@ -45,7 +45,11 @@ lexical_analyzer::lexical_analyzer()
     for (int i = 0; i < MAXCHAR; i++)
     {
         if(isdigit(i) || i == '_')
+        {
             trie[3].son[i] = 3;
+            if(i == '_')
+                trie[3].opt[i] |= OPT_SKIP;
+        }
         else
         {
             trie[3].son[i] = 0;

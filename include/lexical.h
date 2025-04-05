@@ -25,9 +25,6 @@ struct lexical
 {
     std::string s;
     lexical_type type;
-    // lexical(std::string _s, lexical_type _type) {
-    //     s = _s, type = _type;
-    // }
 };
 
 const std::vector<lexical> key_word = {

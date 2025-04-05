@@ -15,7 +15,6 @@ enum lexical_type
     ASSIGN, 
     EQU, 
     SEP,  //分号
-    UDL,
 
     ID, 
     INT
@@ -35,8 +34,7 @@ const std::vector<lexical> key_symbol = {
     {"+", ADD},
     {"=", ASSIGN},
     {"==", EQU},
-    {";", SEP},
-    {"_", UDL}
+    {";", SEP}
 };
 
 const int MAXCHAR = 128;

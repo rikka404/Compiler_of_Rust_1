@@ -30,7 +30,7 @@ lexical_analyzer::lexical_analyzer()
     trie[2].type = ID;
     for (int i = 0; i < MAXCHAR; i++)
     {
-        if(i == '-' || islower(i) || isupper(i) || isdigit(i))
+        if(i == '_' || islower(i) || isupper(i) || isdigit(i))
             trie[2].son[i] = 2;
         else
         {

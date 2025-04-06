@@ -10,12 +10,51 @@ enum lexical_type
 
     LET, 
     MUT, 
+    I32, 
+    IF, 
+    ELSE, 
+    WHILE, 
+    RETURN, 
+    FN, 
+    FOR, 
+    IN, 
+    LOOP, 
+    BREAK, 
+    CONTINUE, 
 
-    ADD, 
     ASSIGN, 
+    ADD, 
+    SUB, 
+    MUL, 
+    DIV, 
+    MOD, 
+    ADDASSIGN, 
+    SUBASSIGN, 
+    MULASSIGN, 
+    DIVASSIGN, 
+    MODASSIGN, 
     EQU, 
-    SEP,  //分号
+    GT, 
+    GE, 
+    LT, 
+    LE, 
+    NE, 
 
+    LPRA, 
+    RPRA, 
+    LBRA, 
+    RBRA, 
+    LSQB, 
+    RSQB, 
+
+    SEMICOLON,  //分号
+    COLON,  //冒号
+    COOMA,  //冒号
+    
+    ARROW, // ->
+    DOT, // .
+    DDOT, // ..
+    
     ID, 
     INT
 };
@@ -28,13 +67,53 @@ struct lexical
 
 const std::vector<lexical> key_word = {
     {"let", LET},
-    {"mut", MUT}
+    {"mut", MUT}, 
+    {"i32", I32}, 
+    {"if", IF}, 
+    {"else", ELSE}, 
+    {"while", WHILE}, 
+    {"return", RETURN}, 
+    {"fn", FN}, 
+    {"for", FOR}, 
+    {"in", IN}, 
+    {"loop", LOOP}, 
+    {"break", BREAK}, 
+    {"continue", CONTINUE}
 };
 const std::vector<lexical> key_symbol = {
-    {"+", ADD},
     {"=", ASSIGN},
+    {"+", ADD},
+    {"-", SUB},
+    {"*", MUL},
+    {"/", DIV},
+    {"%", MOD},
+    {"+=", ADDASSIGN},
+    {"-=", SUBASSIGN},
+    {"*=", MULASSIGN},
+    {"/=", DIVASSIGN},
+    {"%=", MODASSIGN},
     {"==", EQU},
-    {";", SEP}
+    {">", GT},
+    {">=", GE},
+    {"<", LT},
+    {"<=", LE},
+    {"!=", NE},
+    
+    {"(", LPRA},
+    {")", RPRA},
+    {"{", LBRA},
+    {"}", RBRA},
+    {"[", LSQB},
+    {"]", RSQB},
+
+
+    {";", SEMICOLON},
+    {":", COLON},
+    {",", COOMA}, 
+
+    {"->", ARROW},
+    {".", DOT},
+    {"..", DDOT}
 };
 
 const int MAXCHAR = 128;

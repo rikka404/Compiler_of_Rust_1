@@ -2,62 +2,7 @@
 #include <string>
 #include <vector>
 #include <string.h>
-
-enum lexical_type
-{
-    ZERO, 
-    UNDEF, 
-
-    LET, 
-    MUT, 
-    I32, 
-    IF, 
-    ELSE, 
-    WHILE, 
-    RETURN, 
-    FN, 
-    FOR, 
-    IN, 
-    LOOP, 
-    BREAK, 
-    CONTINUE, 
-
-    ASSIGN, 
-    ADD, 
-    SUB, 
-    MUL, 
-    DIV, 
-    MOD, 
-    ADDASSIGN, 
-    SUBASSIGN, 
-    MULASSIGN, 
-    DIVASSIGN, 
-    MODASSIGN, 
-    EQU, 
-    GT, 
-    GE, 
-    LT, 
-    LE, 
-    NE, 
-
-    LPRA, 
-    RPRA, 
-    LBRA, 
-    RBRA, 
-    LSQB, 
-    RSQB, 
-
-    SEMICOLON,  //分号
-    COLON,  //冒号
-    COOMA,  //冒号
-    
-    ARROW, // ->
-    DOT, // .
-    DDOT, // ..
-    
-    ID, 
-    INT
-};
+#include "util.h"
 
 struct lexical
 {
@@ -109,7 +54,7 @@ const std::vector<lexical> key_symbol = {
 
     {";", SEMICOLON},
     {":", COLON},
-    {",", COOMA}, 
+    {",", COMMA}, 
 
     {"->", ARROW},
     {".", DOT},
@@ -127,7 +72,7 @@ struct TrieNode
     lexical_type type;
     int son[MAXCHAR]; //这里必须用int，用指针写法的话pushback的时候会乱掉
     int opt[MAXCHAR];
-    TrieNode(){
+    TrieNode() {
         memset(son, -1, sizeof(son));
         memset(opt, 0, sizeof(opt));
     }

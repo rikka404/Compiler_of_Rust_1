@@ -30,7 +30,7 @@ lexical_analyzer::lexical_analyzer()
     trie[2].type = ID;
     for (int i = 0; i < MAXCHAR; i++)
     {
-        if(i == '_' || islower(i) || isupper(i) || isdigit(i))
+        if (i == '_' || islower(i) || isupper(i) || isdigit(i))
             trie[2].son[i] = 2;
         else
         {
@@ -44,10 +44,10 @@ lexical_analyzer::lexical_analyzer()
     trie[3].type = INT;
     for (int i = 0; i < MAXCHAR; i++)
     {
-        if(isdigit(i) || i == '_')
+        if (isdigit(i) || i == '_')
         {
             trie[3].son[i] = 3;
-            if(i == '_')
+            if (i == '_')
                 trie[3].opt[i] |= OPT_SKIP;
         }
         else
@@ -65,7 +65,7 @@ lexical_analyzer::lexical_analyzer()
         int p = 0;
         for (int ch : s)
         {
-            if(trie[p].son[ch] == -1)
+            if (trie[p].son[ch] == -1)
             {
                 trie[p].son[ch] = trie.size();
                 trie.push_back(TrieNode());
@@ -80,9 +80,9 @@ lexical_analyzer::lexical_analyzer()
     {
         for (int j = 0; j < MAXCHAR; j++)
         {
-            if(trie[i].son[j] != -1)
+            if (trie[i].son[j] != -1)
                 continue;
-            if(islower(j) || isupper(j) || isdigit(j) || j == '_')
+            if (islower(j) || isupper(j) || isdigit(j) || j == '_')
                 trie[i].son[j] = idnode;
             else
             {
@@ -100,7 +100,7 @@ lexical_analyzer::lexical_analyzer()
         int p = 0;
         for (int ch : s)
         {
-            if(trie[p].son[ch] == -1)
+            if (trie[p].son[ch] == -1)
             {
                 trie[p].son[ch] = trie.size();
                 trie.push_back(TrieNode());
@@ -114,7 +114,7 @@ lexical_analyzer::lexical_analyzer()
     {
         for (int j = 0; j < MAXCHAR; j++)
         {
-            if(trie[i].son[j] != -1)
+            if (trie[i].son[j] != -1)
                 continue;
             trie[i].son[j] = 0;
             trie[i].opt[j] |= OPT_RETRACT;
@@ -125,11 +125,11 @@ lexical_analyzer::lexical_analyzer()
     //对0节点特判，字母直接到ID，数字直接到数字
     for (int i = 0; i < MAXCHAR; i++)
     {
-        if(trie[0].son[i] != -1)
+        if (trie[0].son[i] != -1)
             continue;
-        if(islower(i) || isupper(i) || i == '_')
+        if (islower(i) || isupper(i) || i == '_')
             trie[0].son[i] = 2;
-        else if(isdigit(i))
+        else if (isdigit(i))
             trie[0].son[i] = 3;
         else
             trie[0].son[i] = 1;
@@ -140,7 +140,7 @@ lexical_analyzer::lexical_analyzer()
     {
         for (int j = 0; j < MAXCHAR; j++)
         {
-            if(trie[i].son[j] == -1)
+            if (trie[i].son[j] == -1)
                 trie[i].son[j] = 1;
         }
     }
@@ -151,18 +151,18 @@ int lexical_analyzer::analyse(const std::string& s)
     for (int i = 0; i < (int)s.length(); i++)
     {
         int ch = s[i];
-        if(trie[ptr].opt[ch] & OPT_UPDLEX)
+        if (trie[ptr].opt[ch] & OPT_UPDLEX)
         {
             lex.push_back({nowstr, trie[ptr].type});
             nowstr.clear();
         }
-        if(trie[ptr].opt[ch] & OPT_RETRACT)
+        if (trie[ptr].opt[ch] & OPT_RETRACT)
             i--;
-        else if(!(trie[ptr].opt[ch] & OPT_SKIP))
+        else if (!(trie[ptr].opt[ch] & OPT_SKIP))
             nowstr.push_back(s[i]);
         ptr = trie[ptr].son[ch];
     }
-    if(ptr == 1)
+    if (ptr == 1)
         return 1;
     return 0;
 }

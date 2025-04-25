@@ -2,12 +2,17 @@
 #include <fstream>
 #include <iostream>
 
-std::vector<production> Rules::rules; // 产生式规则
-// 用于辅助查找的map
-std::map<symbol, std::vector<std::pair<std::vector<symbol>, int>>> Rules::leftRules;
-std::map<std::string, int> Rules::nonTerminalType;  // 非终结符编号
+std::vector<production> Rules::rules;  // 产生式规则 初始和运行都需要
+std::map<symbol, std::vector<std::pair<std::vector<symbol>, int>>> Rules::leftRules;  // 用于辅助查找的map 初始需要
+std::map<std::string, int> Rules::nonTerminalType;                                    // 非终结符编号 初始和运行都需要
 
-std::map<symbol, std::set<int>> Rules::firstSet;  // first集
+std::map<symbol, std::set<int>> Rules::firstSet;  // 所有first集 初始需要
+
+std::vector<std::set<item>> Rules::itemSet;       // 项目集编号->项目集 初始需要
+std::map<std::set<item>, int> Rules::mapItemSet;  // 项目集->项目集编号 初始需要
+std::vector<std::map<symbol, int>> Rules::dfa;  // 项目集图结构 初始需要
+
+std::vector<std::map<symbol, action>> Rules::actionTable;  // LR(1)分析表 初始运行需要 可以保存读取
 
 int Rules::findAndAdd(const std::string& s)
 {
@@ -36,8 +41,14 @@ int Rules::findNotAdd(const std::string& s)
     }
 }
 
-void Rules::initRules() 
+void Rules::init(bool is_read)
 {
+    Rules::initRules(is_read);
+    Rules::initFirstSet(is_read);
+    
+}
+
+void Rules::initRules(bool is_read) {
     const std::string filename = "parse/parse_rule.rule";
     std::ifstream fin(filename);
     if (!fin.is_open())
@@ -79,7 +90,8 @@ void Rules::initRules()
                     if (!p_copy.right.empty())
                     {  
                         // 对leftRules和rules进行添加
-                        Rules::leftRules[p_copy.left].push_back({p_copy.right, Rules::rules.size()});
+                        if (!is_read)
+                            Rules::leftRules[p_copy.left].push_back({p_copy.right, Rules::rules.size()});
                         Rules::rules.push_back(p_copy);
                     }
                     break;
@@ -91,7 +103,8 @@ void Rules::initRules()
                     if (!p_copy.right.empty())
                     {
                         // 对leftRules和rules进行添加
-                        Rules::leftRules[p_copy.left].push_back({p_copy.right, Rules::rules.size()});
+                        if (!is_read)
+                            Rules::leftRules[p_copy.left].push_back({p_copy.right, Rules::rules.size()});
                         Rules::rules.push_back(p_copy);
                     }
                             
@@ -130,18 +143,25 @@ void Rules::initRules()
     std::cout << "[LOG] [RULES] Complete read parse_rule.rule, count " << Rules::rules.size() << std::endl;
 }
 
-void Rules::printRules()
+void Rules::saveRules()
 {
+    const std::string filename = "parse/rules.tmp";
+    std::ofstream fout(filename);
+    if (!fout.is_open())
+    {
+        std::cout << "[ERROR] [RULES] " << filename << " can not open" << std::endl;
+        exit(0);
+    }
     // 输出确认
     for (auto& rule : Rules::rules) {
-        std::cout << rule.left.type << " -> ";
+        fout << rule.left.type << " -> ";
         for (auto& s : rule.right) {
             if (s.is_terminal)
-                std::cout << "/" << s.type << " ";
+                fout << "/" << s.type << " ";
             else
-                std::cout << s.type << " ";
+                fout << s.type << " ";
         }
-        std::cout << std::endl;
+        fout << std::endl;
     }
 }
 
@@ -150,30 +170,30 @@ void Rules::initFirstSet(bool is_read)
     const std::string filename = "parse/first.set";
     if (is_read)
     {
-        std::ifstream fin(filename);
-        if (!fin.is_open()) {
-            std::cout << "[ERROR] [RULES] " << filename << " is not exist" << std::endl;
-            exit(0);
-        }
-        // 读取first集
-        int symbol_cnt;
-        fin >> symbol_cnt;
-        symbol left;
-        left.is_terminal = false;
-        for (int i = 0; i < symbol_cnt; ++i) {
-            int set_cnt;
-            fin >> left.type >> set_cnt;
+        // std::ifstream fin(filename);
+        // if (!fin.is_open()) {
+        //     std::cout << "[ERROR] [RULES] " << filename << " is not exist" << std::endl;
+        //     exit(0);
+        // }
+        // // 读取first集
+        // int symbol_cnt;
+        // fin >> symbol_cnt;
+        // symbol left;
+        // left.is_terminal = false;
+        // for (int i = 0; i < symbol_cnt; ++i) {
+        //     int set_cnt;
+        //     fin >> left.type >> set_cnt;
 
-            Rules::firstSet[left] = std::set<int>();
+        //     Rules::firstSet[left] = std::set<int>();
             
-            int firstSymbolType;
-            for (int j = 0; j < set_cnt; ++j) {
-                fin >> firstSymbolType;
-                Rules::firstSet[left].insert(firstSymbolType);
-            }
-        }
-        fin.close();
-        std::cout << "[LOG] [RULES] Complete read first set at " << filename << std::endl;
+        //     int firstSymbolType;
+        //     for (int j = 0; j < set_cnt; ++j) {
+        //         fin >> firstSymbolType;
+        //         Rules::firstSet[left].insert(firstSymbolType);
+        //     }
+        // }
+        // fin.close();
+        // std::cout << "[LOG] [RULES] Complete read first set at " << filename << std::endl;
     }
     else
     {
@@ -236,25 +256,30 @@ void Rules::initFirstSet(bool is_read)
             }
         }
         
-        // 保存到文件
-        std::ofstream fout(filename);
-        if (!fout.is_open()) {
-            std::cout << "[ERROR] [RULES] " << filename << " can not open" << std::endl;
-            exit(0);
-        }
-        
-        fout << Rules::nonTerminalType.size() << std::endl;
-        // 只输出前面一部分
-        for (auto& [s, first] : Rules::firstSet) {
-            if (s.is_terminal) break; // 只输出非终结符的first集
-            fout << s.type << " " << first.size() << std::endl;
-            for (int firstSymbolType : first) {
-                fout << firstSymbolType << " ";
-            }
-            fout << std::endl;
-        }
-        
-        fout.close();
         std::cout << "[LOG] [RULES] Complete calculate first set" << std::endl;
     }
+}
+
+void Rules::saveFirstSet()
+{
+    const std::string filename = "parse/first.tmp";
+    std::ofstream fout(filename);
+    if (!fout.is_open()) {
+        std::cout << "[ERROR] [RULES] " << filename << " can not open" << std::endl;
+        exit(0);
+    }
+
+    fout << Rules::nonTerminalType.size() << std::endl;
+    // 只输出前面一部分
+    for (auto& [s, first] : Rules::firstSet) {
+        if (s.is_terminal)
+            break;  // 只输出非终结符的first集
+        fout << s.type << " " << first.size() << std::endl;
+        for (int firstSymbolType : first) {
+            fout << firstSymbolType << " ";
+        }
+        fout << std::endl;
+    }
+
+    fout.close();
 }

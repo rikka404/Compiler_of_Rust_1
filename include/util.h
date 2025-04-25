@@ -59,9 +59,9 @@ enum lexical_type {
 
 class Util
 {
-    static std::map<std::string, enum lexical_type> terminalType;
-
    public:
+    static std::map<std::string, enum lexical_type> terminalType; // 终结符编号
+
     static enum lexical_type getTerminalType(const std::string &s) 
     {
         auto it = terminalType.find(s);

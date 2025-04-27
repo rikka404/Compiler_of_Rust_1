@@ -53,4 +53,7 @@ std::map<std::string, enum lexical_type> Util::terminalType =
         {"ddot", DDOT},
 
         {"id", ID},
-        {"int", INT}};
+        {"int", INT},
+    
+        {"end", END}
+    };

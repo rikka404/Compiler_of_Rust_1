@@ -1,6 +1,7 @@
 #include "rust_parser.h"
 #include <fstream>
 #include <iostream>
+#include <assert.h>
 
 std::vector<production> Rules::rules;  // 产生式规则 初始和运行都需要
 std::map<symbol, std::vector<std::pair<std::vector<symbol>, int>>> Rules::leftRules;  // 用于辅助查找的map 初始需要
@@ -282,4 +283,50 @@ void Rules::saveFirstSet()
     }
 
     fout.close();
+}
+
+int Rules::analysis(const std::vector<symbol> &lexSymbols)
+{
+    assert(lexSymbols.back().type == END);
+    std::vector<int> state;
+    std::vector<symbol> SRSequence;
+    std::vector<int> nodeID;
+    state.push_back(0), SRSequence.push_back({1, END});
+    for (int pos = 0; pos < lexSymbols.size(); pos++)
+    {
+        symbol a = lexSymbols[pos];
+        action act = actionTable[state.back()][a];
+        if(act.type == SHIFT)
+        {
+            state.push_back(act.next_state);
+            SRSequence.push_back(a);
+            nodeID.push_back(parserTree.size());
+            parserTree.push_back({a, -1, {}});
+        }
+        else if(act.type == REDUCE)
+        {
+            int rightsiz = rules[act.rule_id].right.size();
+            std::deque<int> dq;
+            for (int i = 0; i < rightsiz; i++)
+            {
+                state.pop_back();
+                SRSequence.pop_back();
+                dq.push_front(nodeID.back());
+                parserTree[nodeID.back()].father = parserTree.size();
+                nodeID.pop_back();
+            }
+            state.push_back(act.next_state);
+            SRSequence.push_back(rules[act.rule_id].left);
+            nodeID.push_back(parserTree.size());
+            std::vector<int> vt(dq.begin(), dq.end());
+            parserTree.push_back({rules[act.rule_id].left, -1, vt});
+            pos--;
+        }
+        else
+        {
+            assert(nodeID.size() == 1);
+            return nodeID[0];
+        }
+    }
+    return -1;
 }

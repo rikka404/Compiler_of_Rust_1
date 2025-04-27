@@ -54,7 +54,9 @@ enum lexical_type {
     DDOT,   // ..
 
     ID,
-    INT
+    INT, 
+
+    END
 };
 
 class Util

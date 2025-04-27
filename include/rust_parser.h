@@ -1,6 +1,7 @@
 #pragma once
 #include "util.h"
 #include <set>
+#include <queue>
 
 struct symbol
 {
@@ -37,12 +38,27 @@ struct item
     }
 };
 
+enum action_type
+{
+    SHIFT,
+    REDUCE,
+    ACCEPTED
+};
+
 struct action
 {
-    int type;       // 0:移进 1:规约 2:接受
-    int rule_id;    // 产生式id
+    action_type type; // 0:移进 1:规约 2:接受
+    int rule_id; // 产生式id
     int next_state; // 下一个状态
 };
+
+struct parserTreeNode
+{
+    symbol current;
+    int father;
+    std::vector<int> children;
+};
+
 
 class Rules
 {
@@ -60,8 +76,10 @@ public:
 
     static std::vector<std::map<symbol, action>> actionTable; // LR(1)分析表 初始运行需要 可以保存读取
 
-    static int findAndAdd(const std::string &s);
-    static int findNotAdd(const std::string &s); // 查找非终结符编号 -1表示不存在
+    std::vector<parserTreeNode> parserTree;
+
+    static int findAndAdd(const std::string& s);
+    static int findNotAdd(const std::string& s);  // 查找非终结符编号 -1表示不存在
 
     static void init(bool is_read, bool tmp_print); // 完成到最后分析表的所有初始化
 
@@ -83,4 +101,10 @@ public:
     static void saveActionTable();  // 保存LR(1)分析表
     static void loadActionTable();  // 读取LR(1)分析表
     static void printActionTable(); // 打印LR(1)分析表
+    static void initFirstSet(bool is_read); // 初始所有符号的first集，可选读取或计算
+    static void saveFirstSet();            // 打印first集
+
+    static void build();
+
+    int analysis(const std::vector<symbol> &lexSymbols); // 返回一个整数，代表语法树的根节点编号，如果返回-1说明最后没走到acc
 };

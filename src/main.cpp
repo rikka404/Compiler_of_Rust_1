@@ -14,6 +14,8 @@ int main()
     //     std::cout << "[ERROR] [FILE] " << filename << " is not exist" << std::endl;
     //     return 0;
     // }
+    
+    Util::initTerminalStr(); // 初始化终结符字符串
 
     // /* 词法分析 */
     // lexical_analyzer lex_analyzer;
@@ -39,9 +41,7 @@ int main()
     //     std::cout << s << std::endl;
     // }
 
-    Rules::init(false);
-    Rules::saveRules();
-    Rules::saveFirstSet();
+    Rules::init(false, true);
 
     return 0;
 }

@@ -53,4 +53,9 @@ std::map<std::string, enum lexical_type> Util::terminalType =
         {"ddot", DDOT},
 
         {"id", ID},
-        {"int", INT}};
+        {"int", INT},
+
+        {"end", END} // 结束符
+};
+
+std::vector<std::string> Util::terminalStr; // 终结符字符串

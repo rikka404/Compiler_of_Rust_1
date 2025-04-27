@@ -1,0 +1,3 @@
+S -> E T #
+E -> T S | /fn T #
+T -> /id | /zero #

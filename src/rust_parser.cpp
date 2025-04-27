@@ -1,20 +1,22 @@
 #include "rust_parser.h"
 #include <fstream>
 #include <iostream>
+#include <queue>
 
-std::vector<production> Rules::rules;  // 产生式规则 初始和运行都需要
-std::map<symbol, std::vector<std::pair<std::vector<symbol>, int>>> Rules::leftRules;  // 用于辅助查找的map 初始需要
-std::map<std::string, int> Rules::nonTerminalType;                                    // 非终结符编号 初始和运行都需要
+std::vector<production> Rules::rules;                                                // 产生式规则 初始和运行都需要
+std::map<symbol, std::vector<int>> Rules::leftRules;                                 // 用于辅助查找的map 初始需要
+std::map<std::string, int> Rules::nonTerminalType;                                   // 非终结符编号 初始和运行都需要
+std::vector<std::string> Rules::nonTerminalStr;                                      // 非终结符编号到字符串的映射 初始和运行都需要
 
-std::map<symbol, std::set<int>> Rules::firstSet;  // 所有first集 初始需要
+std::map<symbol, std::set<int>> Rules::firstSet; // 所有first集 初始需要
 
-std::vector<std::set<item>> Rules::itemSet;       // 项目集编号->项目集 初始需要
-std::map<std::set<item>, int> Rules::mapItemSet;  // 项目集->项目集编号 初始需要
-std::vector<std::map<symbol, int>> Rules::dfa;  // 项目集图结构 初始需要
+std::vector<std::set<item>> Rules::itemSet;      // 项目集编号->项目集 初始需要
+std::map<std::set<item>, int> Rules::mapItemSet; // 项目集->项目集编号 初始需要
+std::vector<std::map<symbol, int>> Rules::dfa;   // 项目集图结构 初始需要
 
-std::vector<std::map<symbol, action>> Rules::actionTable;  // LR(1)分析表 初始运行需要 可以保存读取
+std::vector<std::map<symbol, action>> Rules::actionTable; // LR(1)分析表 初始运行需要 可以保存读取
 
-int Rules::findAndAdd(const std::string& s)
+int Rules::findAndAdd(const std::string &s)
 {
     auto it = Rules::nonTerminalType.find(s);
     if (it == Rules::nonTerminalType.end())
@@ -28,7 +30,7 @@ int Rules::findAndAdd(const std::string& s)
     }
 }
 
-int Rules::findNotAdd(const std::string& s)
+int Rules::findNotAdd(const std::string &s)
 {
     auto it = Rules::nonTerminalType.find(s);
     if (it == Rules::nonTerminalType.end())
@@ -41,14 +43,35 @@ int Rules::findNotAdd(const std::string& s)
     }
 }
 
-void Rules::init(bool is_read)
+void Rules::init(bool is_read, bool tmp_print)
 {
     Rules::initRules(is_read);
-    Rules::initFirstSet(is_read);
-    
+    Rules::initNonTerminalStr();
+    if (!is_read)
+    {
+        Rules::initFirstSet();
+        // 这个阶段需要把产生式右边为空的/zero符号删掉
+        Rules::deleteZero();
+        Rules::initDFA();
+        Rules::calActionTable();
+        Rules::saveActionTable();
+
+        if (tmp_print)
+        {
+            Rules::printRules();
+            Rules::printFirstSet();
+            Rules::printDFA();
+            Rules::printActionTable();
+        }
+    }
+    else
+    {
+        Rules::loadActionTable();
+    }
 }
 
-void Rules::initRules(bool is_read) {
+void Rules::initRules(bool is_read)
+{
     const std::string filename = "parse/parse_rule.rule";
     std::ifstream fin(filename);
     if (!fin.is_open())
@@ -56,7 +79,7 @@ void Rules::initRules(bool is_read) {
         std::cout << "[ERROR] [RULES] " << filename << " is not exist" << std::endl;
         exit(0);
     }
-    
+
     std::string left, right;
     int linecnt = 0;
     while (fin >> left)
@@ -67,13 +90,12 @@ void Rules::initRules(bool is_read) {
             std::getline(fin, left); // 读到行尾
             continue;
         }
-        
+
         // 检查加入非终结符
         production p;
         p.left.is_terminal = false;
         p.left.type = Rules::findAndAdd(left);
-        
-        
+
         bool is_line_end = false;
         fin >> right; // ->
         // 检查所有右边
@@ -88,10 +110,10 @@ void Rules::initRules(bool is_read) {
                 if (right == "|")
                 {
                     if (!p_copy.right.empty())
-                    {  
+                    {
                         // 对leftRules和rules进行添加
                         if (!is_read)
-                            Rules::leftRules[p_copy.left].push_back({p_copy.right, Rules::rules.size()});
+                            Rules::leftRules[p_copy.left].push_back(Rules::rules.size());
                         Rules::rules.push_back(p_copy);
                     }
                     break;
@@ -99,18 +121,18 @@ void Rules::initRules(bool is_read) {
                 else if (right[0] == '#')
                 {
                     is_line_end = true;
-                    std::getline(fin, left);  // 读到行尾
+                    std::getline(fin, left); // 读到行尾
                     if (!p_copy.right.empty())
                     {
                         // 对leftRules和rules进行添加
                         if (!is_read)
-                            Rules::leftRules[p_copy.left].push_back({p_copy.right, Rules::rules.size()});
+                            Rules::leftRules[p_copy.left].push_back(Rules::rules.size());
                         Rules::rules.push_back(p_copy);
                     }
-                            
+
                     break;
                 }
-                
+
                 // 检查名称
                 symbol s;
                 if (right[0] == '/')
@@ -123,7 +145,7 @@ void Rules::initRules(bool is_read) {
                         exit(0);
                     }
                 }
-                else 
+                else
                 {
                     if (!(islower(right[0]) || isupper(right[0])))
                     {
@@ -133,9 +155,8 @@ void Rules::initRules(bool is_read) {
                     s.is_terminal = false;
                     s.type = Rules::findAndAdd(right);
                 }
-                
+
                 p_copy.right.push_back(s);
-                
             }
         }
     }
@@ -143,7 +164,7 @@ void Rules::initRules(bool is_read) {
     std::cout << "[LOG] [RULES] Complete read parse_rule.rule, count " << Rules::rules.size() << std::endl;
 }
 
-void Rules::saveRules()
+void Rules::printRules()
 {
     const std::string filename = "parse/rules.tmp";
     std::ofstream fout(filename);
@@ -153,9 +174,11 @@ void Rules::saveRules()
         exit(0);
     }
     // 输出确认
-    for (auto& rule : Rules::rules) {
+    for (auto &rule : Rules::rules)
+    {
         fout << rule.left.type << " -> ";
-        for (auto& s : rule.right) {
+        for (auto &s : rule.right)
+        {
             if (s.is_terminal)
                 fout << "/" << s.type << " ";
             else
@@ -163,123 +186,375 @@ void Rules::saveRules()
         }
         fout << std::endl;
     }
+    fout.close();
 }
 
-void Rules::initFirstSet(bool is_read)
+void Rules::initNonTerminalStr()
+{
+    if (!Rules::nonTerminalStr.empty())
+        return;
+    Rules::nonTerminalStr.resize(Rules::nonTerminalType.size());
+    for (auto [s, tp] : Rules::nonTerminalType)
+    {
+        Rules::nonTerminalStr[tp] = s;
+    }
+}
+
+void Rules::initFirstSet()
 {
     const std::string filename = "parse/first.set";
-    if (is_read)
-    {
-        // std::ifstream fin(filename);
-        // if (!fin.is_open()) {
-        //     std::cout << "[ERROR] [RULES] " << filename << " is not exist" << std::endl;
-        //     exit(0);
-        // }
-        // // 读取first集
-        // int symbol_cnt;
-        // fin >> symbol_cnt;
-        // symbol left;
-        // left.is_terminal = false;
-        // for (int i = 0; i < symbol_cnt; ++i) {
-        //     int set_cnt;
-        //     fin >> left.type >> set_cnt;
 
-        //     Rules::firstSet[left] = std::set<int>();
-            
-        //     int firstSymbolType;
-        //     for (int j = 0; j < set_cnt; ++j) {
-        //         fin >> firstSymbolType;
-        //         Rules::firstSet[left].insert(firstSymbolType);
-        //     }
-        // }
-        // fin.close();
-        // std::cout << "[LOG] [RULES] Complete read first set at " << filename << std::endl;
+    symbol s;
+    // 初始化非终结符set为空
+    for (int i = 0; i < (int)Rules::nonTerminalType.size(); ++i)
+    {
+        s.is_terminal = false;
+        s.type = i;
+        Rules::firstSet[s] = std::set<int>();
     }
-    else
+    // 初始化终结符set为自身
+    for (int i = 0; i < (int)Util::terminalType.size(); ++i)
     {
-        symbol s;
-        // 初始化非终结符set为空
-        for (int i = 0; i < (int)Rules::nonTerminalType.size(); ++i) {
-            s.is_terminal = false;
-            s.type = i;
-            Rules::firstSet[s] = std::set<int>();
-        }
-        // 初始化终结符set为自身
-        for (int i = 0; i < (int)Util::terminalType.size(); ++i) {
-            s.is_terminal = true;
-            s.type = i;
-            Rules::firstSet[s] = std::set<int>();
-            Rules::firstSet[s].insert(i);
-        }
+        s.is_terminal = true;
+        s.type = i;
+        Rules::firstSet[s] = std::set<int>();
+        Rules::firstSet[s].insert(i);
+    }
 
-        // 计算first集合
-        int old_size = -1;
-        int new_size = 0;
-        while (old_size != new_size) {
-            old_size = new_size;
-            for (production& rule : Rules::rules) {
-                symbol left = rule.left;
-                std::vector<symbol> right = rule.right;
+    // 计算first集合
+    int old_size = -1;
+    int new_size = 0;
+    while (old_size != new_size)
+    {
+        old_size = new_size;
+        for (production &rule : Rules::rules)
+        {
+            symbol left = rule.left;
+            std::vector<symbol> right = rule.right;
 
-                for (int i = 0; i < (int)right.size(); ++i) {
-                    symbol s = right[i];
-                    if (s.is_terminal) {
-                        // 如果是终结符，加入first集 退出
-                        Rules::firstSet[left].insert(s.type);
-                        break;
-                    }
-                    else {
-                        // 如果是非终结符，加入first集
-                        bool exists_zero = false;
-                        for (int first : Rules::firstSet[s]) {
-                            if (first == ZERO) {
-                                // 如果含有空串，可以继续下一个非终结符
-                                exists_zero = true;
-                                if (i == (int)right.size() - 1) {
-                                    // 如果是最后一个非终结符含有空串，才加入空串
-                                    Rules::firstSet[left].insert(ZERO);
-                                }
-                            }
-                            else {
-                                Rules::firstSet[left].insert(first);
+            for (int i = 0; i < (int)right.size(); ++i)
+            {
+                symbol s = right[i];
+                if (s.is_terminal)
+                {
+                    // 如果是终结符，加入first集 退出
+                    Rules::firstSet[left].insert(s.type);
+                    break;
+                }
+                else
+                {
+                    // 如果是非终结符，加入first集
+                    bool exists_zero = false;
+                    for (int first : Rules::firstSet[s])
+                    {
+                        if (first == ZERO)
+                        {
+                            // 如果含有空串，可以继续下一个符号
+                            exists_zero = true;
+                            if (i == (int)right.size() - 1)
+                            {
+                                // 如果是最后一个非终结符含有空串，才加入空串
+                                Rules::firstSet[left].insert(ZERO);
                             }
                         }
-                        if (!exists_zero)
-                            break;
+                        else
+                        {
+                            Rules::firstSet[left].insert(first);
+                        }
                     }
+                    if (!exists_zero)
+                        break;
                 }
             }
-            // 计算new_size
-            new_size = 0;
-            for (auto& [s, first] : Rules::firstSet) {
-                new_size += first.size();
-            }
         }
-        
-        std::cout << "[LOG] [RULES] Complete calculate first set" << std::endl;
+        // 计算new_size
+        new_size = 0;
+        for (auto &[s, first] : Rules::firstSet)
+        {
+            new_size += first.size();
+        }
     }
+
+    std::cout << "[LOG] [RULES] Complete calculate first set" << std::endl;
 }
 
-void Rules::saveFirstSet()
+void Rules::printFirstSet()
 {
     const std::string filename = "parse/first.tmp";
     std::ofstream fout(filename);
-    if (!fout.is_open()) {
+    if (!fout.is_open())
+    {
         std::cout << "[ERROR] [RULES] " << filename << " can not open" << std::endl;
         exit(0);
     }
 
     fout << Rules::nonTerminalType.size() << std::endl;
     // 只输出前面一部分
-    for (auto& [s, first] : Rules::firstSet) {
+    for (auto &[s, first] : Rules::firstSet)
+    {
         if (s.is_terminal)
-            break;  // 只输出非终结符的first集
-        fout << s.type << " " << first.size() << std::endl;
-        for (int firstSymbolType : first) {
-            fout << firstSymbolType << " ";
+            break; // 只输出非终结符的first集
+        fout << Rules::nonTerminalStr[s.type] << " " << first.size() << std::endl;
+        for (int firstSymbolType : first)
+        {
+            fout << '/' << Util::terminalStr[firstSymbolType] << " ";
         }
         fout << std::endl;
     }
 
     fout.close();
 }
+
+void Rules::calFirstSet(const std::vector<symbol> &sententialForm, std::set<int> &sententFirst)
+{
+    for (int i = 0; i < (int)sententialForm.size(); ++i)
+    {
+        symbol s = sententialForm[i];
+        if (s.is_terminal)
+        {
+            // 如果是终结符，加入first集 退出
+            sententFirst.insert(s.type);
+            break;
+        }
+        else
+        {
+            // 如果是非终结符，加入first集
+            bool exists_zero = false;
+            for (int first : Rules::firstSet[s])
+            {
+                if (first == ZERO)
+                {
+                    // 如果含有空串，可以继续下一个符号
+                    exists_zero = true;
+                    if (i == (int)sententialForm.size() - 1)
+                    {
+                        // 如果是最后一个非终结符含有空串，才加入空串
+                        sententFirst.insert(ZERO);
+                    }
+                }
+                else
+                {
+                    sententFirst.insert(first);
+                }
+            }
+            if (!exists_zero)
+                break;
+        }
+    }
+}
+
+void Rules::deleteZero()
+{
+    // 删除产生式右部的/zero符号
+    for (int i = 0; i < (int)Rules::rules.size(); ++i)
+    {
+        if (Rules::rules[i].right.size() == 1)
+        {
+            symbol s = Rules::rules[i].right[0];
+            if (s.is_terminal && s.type == ZERO)
+            {
+                // 删除/zero
+                Rules::rules[i].right.clear();
+            }
+        }
+    }
+}
+
+std::pair<bool, int> Rules::closeure(std::set<item> &items)
+{
+    std::queue<item> q; // 存储当前未应用闭包方法的项目
+
+    for (auto &item : items)
+    {
+        q.push(item); // 将初始项目集加入队列
+    }
+
+    // 闭包集结果
+    while (!q.empty())
+    {
+        item nowItem = q.front(); // 当前项目
+        q.pop();
+
+        if (nowItem.dot_pos >= (int)Rules::rules[nowItem.rule_id].right.size())
+            continue; // 点在最后，跳过
+
+        symbol s = Rules::rules[nowItem.rule_id].right[nowItem.dot_pos]; // 点后面的符号
+
+        // 如果是非终结符，应用闭包方法
+        if (!s.is_terminal)
+        {
+            // 计算新的lookahead
+            std::set<int> sententFirst;
+            std::vector<symbol> sententialForm;
+            if (nowItem.dot_pos + 1 < (int)Rules::rules[nowItem.rule_id].right.size())
+                sententialForm = {Rules::rules[nowItem.rule_id].right.begin() + nowItem.dot_pos + 1, Rules::rules[nowItem.rule_id].right.end()};
+            sententialForm.push_back(symbol(true, nowItem.lookahead));
+            Rules::calFirstSet(sententialForm, sententFirst);
+            
+            // 把所有s在左边的产生式加入结果集
+            auto it = Rules::leftRules.find(s);
+            if (it != Rules::leftRules.end())
+            {
+                for (int rid : it->second)
+                {
+                    // 若项目[A→α·Bβ, a]属于CLOSURE(I)，B→ξ 是一个产生式，
+                    // 那么，对于FIRST(βa)中的每个终结符b，如果[B→·ξ, b]
+                    // 原来不在CLOSURE(I) 中，则把它加进去
+                    
+                    for (int first : sententFirst)
+                    {
+                        if (first == ZERO)
+                        {
+                            std::cout << "[ERROR] [RULES] look ahead can not be empty string" << std::endl;
+                            exit(0); // 不可能有空串
+                        }
+                        // 计算新的项目集
+                        item newItem(rid, 0, first); // 新项目集
+                        if (items.find(newItem) == items.end())
+                        {
+                            items.insert(newItem); // 加入结果集
+                            q.push(newItem);       // 加入队列
+                        }
+                    }
+                }
+            }
+            else
+            {
+                std::cout << "[ERROR] [RULES] no left rules for " << Rules::nonTerminalStr[s.type] << std::endl;
+                exit(0);
+            }
+        }
+    }
+
+    // 检查该项目集是否已经存在
+    auto it = Rules::mapItemSet.find(items);
+    if (it != Rules::mapItemSet.end())
+    {
+        return {false, it->second}; // 已存在，返回false和编号
+    }
+    else
+    {
+        int id = Rules::itemSet.size();                // 新项目集编号
+        Rules::mapItemSet[items] = id;                 // 存储id
+        Rules::itemSet.push_back(items);               // 存储项目集
+        Rules::dfa.push_back(std::map<symbol, int>()); // 新建DFA的边集合
+        return {true, id};                             // 返回true和新编号
+    }
+}
+
+void Rules::initDFA()
+{
+    std::queue<int> q; // 存储当前未计算GOTO的项目集编号
+
+    std::set<item> begItemSet = {item(0, 0, END)}; // 初始项目集
+    auto result = Rules::closeure(begItemSet);     // 计算闭包集
+    if (result.first)
+    {
+        q.push(result.second); // 将初始项目集编号加入队列
+    }
+
+    while (!q.empty())
+    {
+        int nowSetId = q.front(); // 当前项目集编号
+        q.pop();
+
+        std::map<symbol, std::set<item>> gotoSet; // 存储GOTO到的J项目集
+
+        // 遍历查找，若有可以输入的符号，改动后塞进转移到的项目集中
+        for (auto &nowItem : Rules::itemSet[nowSetId])
+        {
+            if (nowItem.dot_pos >= (int)Rules::rules[nowItem.rule_id].right.size())
+                continue; // 点在最后，跳过
+
+            symbol s = Rules::rules[nowItem.rule_id].right[nowItem.dot_pos]; // 可以输入的符号
+
+            // 将点后移一位的项目加入GOTO结果
+            gotoSet[s].insert(item(nowItem.rule_id, nowItem.dot_pos + 1, nowItem.lookahead));
+        }
+
+        // 遍历GOTO结果，计算闭包集
+        for (auto &[s, items] : gotoSet)
+        {
+            auto result = Rules::closeure(items); // 计算闭包集
+
+            Rules::dfa[nowSetId][s] = result.second; // 更新DFA
+
+            if (result.first)
+            {
+                q.push(result.second); // 将新项目集编号加入队列
+            }
+        }
+    }
+    
+    std::cout << "[LOG] [RULES] Complete calculate DFA" << std::endl;
+}
+
+void Rules::printDFA() 
+{
+    const std::string filename = "parse/dfa.tmp";
+    std::ofstream fout(filename);
+    if (!fout.is_open())
+    {
+        std::cout << "[ERROR] [RULES] " << filename << " can not open" << std::endl;
+        exit(0);
+    }
+
+    // 输出图结构
+    for (int i = 0; i < (int)Rules::dfa.size(); ++i)
+    {
+        fout << "DFA[" << i << "]:" << std::endl;
+        for (auto &[s, id] : Rules::dfa[i])
+        {
+            if (s.is_terminal)
+                fout << Util::terminalStr[s.type] << "->" << id << ' ';
+            else
+                fout << Rules::nonTerminalStr[s.type] << "->" << id << ' ';
+        }
+        fout << std::endl;
+    }
+
+    fout << std::endl;
+
+    // 输出项目集
+    for (int i = 0; i < (int)Rules::itemSet.size(); ++i)
+    {
+        fout << "ITEMSET[" << i << "]:" << std::endl;
+        for (auto &item : Rules::itemSet[i])
+        {
+            fout << Rules::nonTerminalStr[Rules::rules[item.rule_id].left.type] << "->";
+            for (int j = 0; j < (int)Rules::rules[item.rule_id].right.size(); ++j)
+            {
+                if (j == item.dot_pos)
+                    fout << "· ";
+                if (Rules::rules[item.rule_id].right[j].is_terminal)
+                    fout << "/" << Util::terminalStr[Rules::rules[item.rule_id].right[j].type] << " ";
+                else
+                    fout << Rules::nonTerminalStr[Rules::rules[item.rule_id].right[j].type] << " ";
+            }
+            if (item.dot_pos == (int)Rules::rules[item.rule_id].right.size())
+                fout << "· ";
+            fout << ", " << Util::terminalStr[item.lookahead] << std::endl;
+        }
+        fout << std::endl;
+    }
+
+    fout.close();
+}
+
+void Rules::calActionTable() 
+{
+    
+    
+    // std::cout << "[LOG] [RULES] Compelete calculate action table" << std::endl;
+}
+
+void Rules::saveActionTable() {}
+
+void Rules::loadActionTable() 
+{
+    
+    
+    // std::cout << "[LOG] [RULES] Complete load action table" << std::endl;
+}
+
+void Rules::printActionTable() {}

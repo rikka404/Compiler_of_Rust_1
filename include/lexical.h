@@ -82,11 +82,11 @@ class lexical_analyzer
 {
 private:
 
-std::vector<TrieNode> trie;
+    std::vector<TrieNode> trie;
 
 
-int ptr;
-std::string nowstr;
+    int ptr;
+    std::string nowstr;
 
 public:
     std::vector<lexical> lex;

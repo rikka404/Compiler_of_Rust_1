@@ -7,6 +7,11 @@ struct symbol
 {
     bool is_terminal;
     int type;
+    symbol(){}
+    symbol(bool s1, int s2)
+    {
+        is_terminal = s1, type = s2;
+    }
     bool operator<(const symbol &s) const
     {
         if (is_terminal != s.is_terminal)
@@ -76,6 +81,7 @@ public:
 
     static std::vector<std::map<symbol, action>> actionTable; // LR(1)分析表 初始运行需要 可以保存读取
 
+    int root = -1;
     std::vector<parserTreeNode> parserTree;
 
     static int findAndAdd(const std::string& s);
@@ -101,10 +107,8 @@ public:
     static void saveActionTable();  // 保存LR(1)分析表
     static void loadActionTable();  // 读取LR(1)分析表
     static void printActionTable(); // 打印LR(1)分析表
-    static void initFirstSet(bool is_read); // 初始所有符号的first集，可选读取或计算
-    static void saveFirstSet();            // 打印first集
 
-    static void build();
+    void drawParserTree(std::ostream&);
 
     int analysis(const std::vector<symbol> &lexSymbols); // 返回一个整数，代表语法树的根节点编号，如果返回-1说明最后没走到acc
 };

@@ -541,24 +541,7 @@ void Rules::printDFA()
     fout.close();
 }
 
-void Rules::calActionTable() 
-{
-    
-    
-    // std::cout << "[LOG] [RULES] Compelete calculate action table" << std::endl;
-}
-
-void Rules::saveActionTable() {}
-
-void Rules::loadActionTable() 
-{
-    
-    
-    // std::cout << "[LOG] [RULES] Complete load action table" << std::endl;
-}
-
-void Rules::printActionTable() {}
-void Rules::build()
+void Rules::calActionTable()
 {
     assert(dfa.size() == itemSet.size());
     actionTable.clear(), actionTable.resize(dfa.size());
@@ -578,7 +561,19 @@ void Rules::build()
             actionTable[i][{1, lookahead}] = {REDUCE, rule_id, -1};
         }
     }
+    actionTable[1][{1, END}] = {ACCEPTED, -1, -1};
 }
+
+void Rules::saveActionTable() {}
+
+void Rules::loadActionTable() 
+{
+    
+    
+    // std::cout << "[LOG] [RULES] Complete load action table" << std::endl;
+}
+
+void Rules::printActionTable() {}
 
 int Rules::analysis(const std::vector<symbol> &lexSymbols)
 {
@@ -621,8 +616,41 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols)
         else
         {
             assert(nodeID.size() == 1);
+            root = nodeID[0];
+            std::cout << "[LOG] [RULES] " << "parser analysis accepted" << std::endl;
             return nodeID[0];
         }
     }
+    std::cout << "[ERROR] [RULES] " << "parser analysis not accepted" << std::endl;
     return -1;
+}
+
+void Rules::drawParserTree(std::ostream& out)
+{
+    auto draw = [&](auto self, int cur, std::string pre, bool islast) ->void
+    {
+        if(parserTree[cur].current.is_terminal)
+            out << pre << Util::terminalStr[parserTree[cur].current.type] << std::endl;
+        else
+            out << pre << Rules::nonTerminalStr[parserTree[cur].current.type] << std::endl;
+        for (int i = 0; i < parserTree[cur].children.size(); i++)
+        {
+            std::string newpre = pre;
+            for (int t = 0; t < 4; t++)
+            {
+                newpre.pop_back();
+            }
+            if (!islast)
+            {
+                newpre += "|   ";
+            }
+            else
+            {
+                newpre += "    ";
+            }
+            newpre += (i == parserTree[cur].children.size() - 1) ? "\\-- " : "|-- ";
+            self(self, parserTree[cur].children[i], newpre, i == parserTree[cur].children.size() - 1);
+        }
+    };
+    draw(draw, root, "\\-- ", 1);
 }

@@ -285,6 +285,28 @@ void Rules::saveFirstSet()
     fout.close();
 }
 
+void Rules::build()
+{
+    assert(dfa.size() == itemSet.size());
+    actionTable.clear(), actionTable.resize(dfa.size());
+    for (int i = 0; i < dfa.size(); i++)
+    {
+        for (auto [sym, to] : dfa[i])
+        {
+            assert(!actionTable[i].count(sym));
+            actionTable[i][sym] = {SHIFT, -1, to};
+        }
+        for (item it : itemSet[i])
+        {
+            auto& [rule_id, dot_pos, lookahead] = it;
+            if(dot_pos != rules[rule_id].right.size())
+                continue;
+            assert(!actionTable[i].count({1, lookahead}));
+            actionTable[i][{1, lookahead}] = {REDUCE, rule_id, -1};
+        }
+    }
+}
+
 int Rules::analysis(const std::vector<symbol> &lexSymbols)
 {
     assert(lexSymbols.back().type == END);
@@ -315,7 +337,8 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols)
                 parserTree[nodeID.back()].father = parserTree.size();
                 nodeID.pop_back();
             }
-            state.push_back(act.next_state);
+            assert(actionTable[state.back()].count(rules[act.rule_id].left) && actionTable[state.back()][rules[act.rule_id].left].type == SHIFT);
+            state.push_back(actionTable[state.back()][rules[act.rule_id].left].next_state);
             SRSequence.push_back(rules[act.rule_id].left);
             nodeID.push_back(parserTree.size());
             std::vector<int> vt(dq.begin(), dq.end());

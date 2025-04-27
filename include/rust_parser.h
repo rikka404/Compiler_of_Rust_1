@@ -87,5 +87,7 @@ public:
     static void initFirstSet(bool is_read); // 初始所有符号的first集，可选读取或计算
     static void saveFirstSet();            // 打印first集
 
+    static void build();
+
     int analysis(const std::vector<symbol> &lexSymbols); // 返回一个整数，代表语法树的根节点编号，如果返回-1说明最后没走到acc
 };

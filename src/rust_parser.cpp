@@ -633,7 +633,7 @@ void Rules::drawParserTree(std::ostream& out)
             out << pre << Util::terminalStr[parserTree[cur].current.type] << std::endl;
         else
             out << pre << Rules::nonTerminalStr[parserTree[cur].current.type] << std::endl;
-        for (int i = 0; i < parserTree[cur].children.size(); i++)
+        for (int i = 0; i < (int)parserTree[cur].children.size(); i++)
         {
             std::string newpre = pre;
             for (int t = 0; t < 4; t++)
@@ -648,8 +648,8 @@ void Rules::drawParserTree(std::ostream& out)
             {
                 newpre += "    ";
             }
-            newpre += (i == parserTree[cur].children.size() - 1) ? "\\-- " : "|-- ";
-            self(self, parserTree[cur].children[i], newpre, i == parserTree[cur].children.size() - 1);
+            newpre += (i == (int)parserTree[cur].children.size() - 1) ? "\\-- " : "|-- ";
+            self(self, parserTree[cur].children[i], newpre, i == (int)parserTree[cur].children.size() - 1);
         }
     };
     draw(draw, root, "\\-- ", 1);

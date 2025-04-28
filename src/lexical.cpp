@@ -110,6 +110,71 @@ lexical_analyzer::lexical_analyzer()
         }
         trie[p].type = tp;
     }
+    //单行注释，在trie树中走到//这个地方就说明进了注释，之后读的所有东西都不看，直到读到'\n'
+    {
+        std::string oneLineAnno = "//";
+        int p = 0;
+        for (int ch : oneLineAnno)
+        {
+            if (trie[p].son[ch] == -1)
+            {
+                trie[p].son[ch] = trie.size();
+                trie.push_back(TrieNode());
+                trie.back().type = UNDEF; //如果没有匹配到关键字，只能认为是失败了
+            }
+            p = trie[p].son[ch];
+        }
+        for (int j = 0; j < MAXCHAR; j++)
+        {
+            trie[p].son[j] = p;
+            trie[p].opt[j] |= OPT_SKIP;
+        }
+        trie[p].son['\n'] = 0;
+        trie[p].opt['\n'] |= OPT_CLEARSTR;
+    }
+    /**
+     * 多行注释，依然是在trie树中走到"/*"
+     * 出来的时候，由于是两个字符，所以相当于是要再自动机上识别一个字符串，其实就是AC自动机
+     * 但是这里由于只有两个字符"* /"所以就偷懒直接手动建了
+     */
+    {
+        std::string mulLineAnnoLeft = "/*";
+        std::string mulLineAnnoRight = "*/";
+        int p = 0;
+        for (int ch : mulLineAnnoLeft)
+        {
+            if (trie[p].son[ch] == -1)
+            {
+                trie[p].son[ch] = trie.size();
+                trie.push_back(TrieNode());
+                trie.back().type = UNDEF; //如果没有匹配到关键字，只能认为是失败了
+            }
+            p = trie[p].son[ch];
+        }
+        int p1 = trie.size();
+        trie[p].son['*'] = trie.size();
+        trie.push_back(TrieNode());
+        for (int j = 0; j < MAXCHAR; j++)
+        {
+            if(trie[p].son[j] != -1)
+                continue;
+            trie[p].son[j] = p;
+        }
+        int p2 = trie.size();
+        trie[p1].son['/'] = trie.size();
+        trie.push_back(TrieNode());
+        for (int j = 0; j < MAXCHAR; j++)
+        {
+            if(trie[p1].son[j] != -1)
+                continue;
+            trie[p1].son[j] = p;
+        }
+        for (int j = 0; j < MAXCHAR; j++)
+        {
+            trie[p2].son[j] = 0;
+            trie[p2].opt[j] |= OPT_CLEARSTR;
+        }
+    }
     for (int i = oldsize; i < (int)trie.size(); i++)
     {
         for (int j = 0; j < MAXCHAR; j++)
@@ -160,6 +225,8 @@ int lexical_analyzer::analyse(const std::string& s)
             i--;
         else if (!(trie[ptr].opt[ch] & OPT_SKIP))
             nowstr.push_back(s[i]);
+        if (trie[ptr].opt[ch] & OPT_CLEARSTR)
+            nowstr.clear();
         ptr = trie[ptr].son[ch];
     }
     if (ptr == 1)

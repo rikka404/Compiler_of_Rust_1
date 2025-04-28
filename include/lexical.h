@@ -66,6 +66,7 @@ const int MAXCHAR = 128;
 const int OPT_RETRACT = 1;
 const int OPT_UPDLEX = 2;
 const int OPT_SKIP = 4;
+const int OPT_CLEARSTR = 8;
 
 struct TrieNode
 {

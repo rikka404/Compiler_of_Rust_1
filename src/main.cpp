@@ -36,10 +36,10 @@ int main()
         return 0;
     }
     std::cout << "[LOG] [LEXICAL] Complete lexical analyse at " << filename << std::endl;
-    // for (auto [s, _] : lex_analyzer.lex)
-    // {
-    //     std::cout << s << std::endl;
-    // }
+    for (auto [s, _] : lex_analyzer.lex)
+    {
+        std::cout << s << std::endl;
+    }
 
     Rules::init(false, true);
 

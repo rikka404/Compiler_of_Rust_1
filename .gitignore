@@ -1,4 +1,5 @@
 build/
 .vscode/
+parse/*.tmp
 Makefile
 *.exe

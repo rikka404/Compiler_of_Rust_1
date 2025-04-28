@@ -1,5 +1,6 @@
 START -> PROGRAM #
-# 1.1
+
+# 1.1 基础程序
 PROGRAM -> SHENG_MING_CHUAN #
 SHENG_MING_CHUAN -> /zero | SHENG_MING SHENG_MING_CHUAN #
 SHENG_MING -> HAN_SHU_SHENG_MING #
@@ -8,3 +9,24 @@ HAN_SHU_TOU_SHENG_MING -> /fn /id /lpra XING_CAN_LIE_BIAO /rpra #
 XING_CAN_LIE_BIAO -> /zero #
 YU_JU_KUAI -> /lbra YU_JU_CHUAN /rbra #
 YU_JU_CHUAN -> /zero #
+
+# 1.2 语句
+YU_JU_CHUAN -> YU_JU YU_JU_CHUAN #
+YU_JU -> /semicolon #
+
+# 1.3 返回语句
+YU_JU -> FAN_HUI_YU_JU #
+FAN_HUI_YU_JU -> /return /semicolon #
+
+# 0.1 变量声明内部
+BIAN_LIANG_SHENG_MING_NEI_BU -> /mut /id #
+
+# 0.2 类型
+LEI_XING -> /i32 #
+
+# 0.3 可赋值元素
+KE_FU_ZHI_YUAN_SU ->/id #
+
+# 1.4 函数输入
+XING_CAN_LIE_BIAO -> XING_CAN | XING_CAN /comma XING_CAN_LIE_BIAO #
+XING_CAN -> BIAN_LIANG_SHENG_MING_NEI_BU /colon LEI_XING #

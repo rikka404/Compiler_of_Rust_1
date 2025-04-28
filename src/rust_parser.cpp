@@ -667,8 +667,14 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols)
     for (int pos = 0; pos < (int)lexSymbols.size(); pos++)
     {
         symbol a = lexSymbols[pos];
+        // 必须含有此项
+        if (!actionTable[state.back()].count(a))
+        {
+            std::cout << "[ERROR] [RULES] " << "parser analysis not accepted" << std::endl;
+            exit(0);
+        }
         action act = actionTable[state.back()][a];
-        if(act.type == SHIFT)
+        if (act.type == SHIFT)
         {
             state.push_back(act.next_state);
             SRSequence.push_back(a);

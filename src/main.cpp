@@ -46,7 +46,7 @@ int main()
 
     /* 语法分析 */
     // 初始化分析表
-    Rules::init(true, true);
+    Rules::init(false, true);
 
     std::vector<symbol> sym;
     for (auto [s, tp] : lex_analyzer.lex)

@@ -1,4 +1,5 @@
 fn main() {
+    
     //aaaa zhong wen bian ma you wen ti, yin wei MAXCHAR=128
 }
 /*
@@ -6,6 +7,8 @@ fn main() {
 ccccccc
 */
 
-fn main0() {
-    
+fn main0(mut a:i32, mut b4:i32) {
+    ;;
+    ;
+    return;
 }

@@ -83,8 +83,7 @@ class lexical_analyzer
 {
 private:
 
-    std::vector<TrieNode> trie;
-
+    static std::vector<TrieNode> trie;
 
     int ptr;
     std::string nowstr;
@@ -92,6 +91,7 @@ private:
 public:
     std::vector<lexical> lex;
     
-    lexical_analyzer();
+    lexical_analyzer() : ptr(0) {}
+    static void init();
     int analyse(const std::string &s);
 };

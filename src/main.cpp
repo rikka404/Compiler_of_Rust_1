@@ -18,6 +18,9 @@ int main()
     Util::initTerminalStr(); // 初始化终结符字符串
 
     /* 词法分析 */
+    // 初始化字典树
+    lexical_analyzer::init();
+    
     lexical_analyzer lex_analyzer;
     int linecnt = 0;
     while (std::getline(fin, s))
@@ -41,7 +44,9 @@ int main()
         std::cout << s << std::endl;
     }
 
-    Rules::init(false, true);
+    /* 语法分析 */
+    // 初始化分析表
+    Rules::init(true, true);
 
     std::vector<symbol> sym;
     for (auto [s, tp] : lex_analyzer.lex)

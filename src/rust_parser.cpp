@@ -66,6 +66,7 @@ void Rules::init(bool is_read, bool tmp_print)
     }
     else
     {
+        Rules::deleteZero();
         Rules::loadActionTable();
     }
 }
@@ -176,13 +177,13 @@ void Rules::printRules()
     // 输出确认
     for (auto &rule : Rules::rules)
     {
-        fout << rule.left.type << " -> ";
+        fout << Rules::nonTerminalStr[rule.left.type] << " -> ";
         for (auto &s : rule.right)
         {
             if (s.is_terminal)
-                fout << "/" << s.type << " ";
+                fout << "/" << Util::terminalStr[s.type] << " ";
             else
-                fout << s.type << " ";
+                fout << Rules::nonTerminalStr[s.type] << " ";
         }
         fout << std::endl;
     }
@@ -557,26 +558,107 @@ void Rules::calActionTable()
             auto& [rule_id, dot_pos, lookahead] = it;
             if (dot_pos != (int)rules[rule_id].right.size())
                 continue;
+            // 移进规约冲突
             assert(!actionTable[i].count({1, lookahead}));
             actionTable[i][{1, lookahead}] = {REDUCE, rule_id, -1};
         }
     }
     actionTable[1][{1, END}] = {ACCEPTED, -1, -1};
+
+    std::cout << "[LOG] [RULES] Complete calculate action table" << std::endl;
 }
 
-void Rules::saveActionTable() {}
+void Rules::saveActionTable() 
+{
+    const std::string filename = "parse/action.table";
+    std::ofstream fout(filename);
+    if (!fout.is_open())
+    {
+        std::cout << "[ERROR] [RULES] " << filename << " can not open" << std::endl;
+        exit(0);
+    }
+    
+    fout << Rules::actionTable.size() << std::endl;
+    // 保存action表
+    for (int i = 0; i < (int)Rules::actionTable.size(); ++i)
+    {
+        fout << Rules::actionTable[i].size() << std::endl;
+        for (auto &[s, act] : Rules::actionTable[i])
+        {
+            fout <<  s.is_terminal << " " << s.type << " " << act.type << " " << act.rule_id << " " << act.next_state << std::endl;
+        }
+    }
+}
 
 void Rules::loadActionTable() 
 {
+    const std::string filename = "parse/action.table";
+    std::ifstream fin(filename);
+    if (!fin.is_open())
+    {
+        std::cout << "[ERROR] [RULES] " << filename << " can not open" << std::endl;
+        exit(0);
+    }
+    int size = 0;
+    fin >> size;
+    actionTable.clear(), actionTable.resize(size);
+    for (int i = 0; i < size; ++i)
+    {
+        int cnt = 0;
+        fin >> cnt;
+        for (int j = 0; j < cnt; ++j)
+        {
+            symbol s;
+            action act;
+            int act_type;
+            fin >> s.is_terminal >> s.type >> act_type >> act.rule_id >> act.next_state;
+            act.type = (action_type)act_type;
+            actionTable[i][s] = act;
+        }
+    }
     
-    
-    // std::cout << "[LOG] [RULES] Complete load action table" << std::endl;
+    fin.close();
+
+    std::cout << "[LOG] [RULES] Complete load action table" << std::endl;
 }
 
-void Rules::printActionTable() {}
+void Rules::printActionTable() 
+{
+    const std::string filename = "parse/action.tmp";
+    std::ofstream fout(filename);
+    if (!fout.is_open())
+    {
+        std::cout << "[ERROR] [RULES] " << filename << " can not open" << std::endl;
+        exit(0);
+    }
+
+    std::string actionStr[3] = {"SHIFT", "REDUCE", "ACCEPTED"};
+
+    // 输出action表
+    for (int i = 0; i < (int)Rules::actionTable.size(); ++i)
+    {
+        fout << "ACTION[" << i << "]:" << std::endl;
+        for (auto &[s, act] : Rules::actionTable[i])
+        {
+            if (s.is_terminal)
+                fout << Util::terminalStr[s.type] << " : " << actionStr[act.type] << ' ';
+            else
+                fout << Rules::nonTerminalStr[s.type] << " : " << actionStr[act.type] << ' ';
+            
+            if (act.type == SHIFT)
+                fout << act.next_state << std::endl;
+            else if (act.type == REDUCE)
+                fout << act.rule_id << std::endl;
+        }
+        fout << std::endl;
+    }
+
+    fout.close();
+}
 
 int Rules::analysis(const std::vector<symbol> &lexSymbols)
 {
+    // 最后一个是end
     assert(lexSymbols.back().type == END);
     std::vector<int> state;
     std::vector<symbol> SRSequence;

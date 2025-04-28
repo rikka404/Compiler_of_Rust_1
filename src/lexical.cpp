@@ -1,14 +1,15 @@
 #include "lexical.h"
 #include <iostream>
 
-lexical_analyzer::lexical_analyzer()
+std::vector<TrieNode> lexical_analyzer::trie;
+
+void lexical_analyzer::init()
 {
     trie.push_back(TrieNode());// 0，初始节点
     trie.push_back(TrieNode());// 1, 出错了的节点
     trie.push_back(TrieNode());// 2, ID节点
     trie.push_back(TrieNode());// 3, 数字节点
 
-    ptr = 0;
     trie[0].type = ZERO;
     trie[0].son[' '] = 0;
     trie[0].son['\n'] = 0;
@@ -132,7 +133,7 @@ lexical_analyzer::lexical_analyzer()
         trie[p].son['\n'] = 0;
         trie[p].opt['\n'] |= OPT_CLEARSTR;
     }
-    /**
+    /*
      * 多行注释，依然是在trie树中走到"/*"
      * 出来的时候，由于是两个字符，所以相当于是要再自动机上识别一个字符串，其实就是AC自动机
      * 但是这里由于只有两个字符"* /"所以就偷懒直接手动建了

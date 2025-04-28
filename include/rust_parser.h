@@ -67,7 +67,7 @@ struct parserTreeNode
 
 class Rules
 {
-public:
+private:
     static std::vector<production> rules;                                                // 产生式规则 初始和运行都需要
     static std::map<symbol, std::vector<int>> leftRules;                                 // 用于辅助查找的map 初始需要
     static std::map<std::string, int> nonTerminalType;                                   // 非终结符编号 初始和运行?都需要:可能结果输出要人能看
@@ -86,8 +86,6 @@ public:
 
     static int findAndAdd(const std::string& s);
     static int findNotAdd(const std::string& s);  // 查找非终结符编号 -1表示不存在
-
-    static void init(bool is_read, bool tmp_print); // 完成到最后分析表的所有初始化
 
     static void initRules(bool is_read); // 读取规则文件
     static void printRules();            // 打印规则
@@ -108,7 +106,8 @@ public:
     static void loadActionTable();  // 读取LR(1)分析表
     static void printActionTable(); // 打印LR(1)分析表
 
+public:
+    static void init(bool is_read, bool tmp_print); // 完成到最后分析表的所有初始化
     void drawParserTree(std::ostream&);
-
     int analysis(const std::vector<symbol> &lexSymbols); // 返回一个整数，代表语法树的根节点编号，如果返回-1说明最后没走到acc
 };

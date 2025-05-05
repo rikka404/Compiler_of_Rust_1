@@ -673,7 +673,7 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols)
         // 必须含有此项
         if (!actionTable[state.back()].count(a))
         {
-            std::cout << "[ERROR] [RULES] " << "parser analysis not accepted" << std::endl;
+            std::cout << "[ERROR] [RULES] " << "parser analysis not accepted at pos " << pos << std::endl;
             exit(0);
         }
         action act = actionTable[state.back()][a];

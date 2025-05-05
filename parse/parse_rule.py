@@ -42,7 +42,8 @@ BIAN_LIANG_SHENG_MING_YU_JU -> /let BIAN_LIANG_SHENG_MING_NEI_BU /semicolon #
 #
 # 2.2 赋值语句
 YU_JU -> FU_ZHI_YU_JU #
-FU_ZHI_YU_JU -> KE_FU_ZHI_YUAN_SU /assign BIAO_DA_SHI /semicolon #
+FU_ZHI_YU_JU -> KE_FU_ZHI_YUAN_SU FU_ZHI_YUN_SUAN_FU BIAO_DA_SHI /semicolon #
+FU_ZHI_YUN_SUAN_FU -> /assign | /addassign | /subassign | /mulassign | /divassign | /modassign #
 #
 # 2.3 变量声明赋值语句
 YU_JU -> BIAN_LIANG_SHENG_MING_FU_ZHI_YU_JU #
@@ -63,7 +64,7 @@ JIA_FA_BIAO_DA_SHI -> JIA_FA_BIAO_DA_SHI JIA_JIAN_YUN_SUAN_FU XIANG #
 XIANG -> XIANG CHENG_CHU_YUN_SUAN_FU YIN_ZI #
 BI_JIAO_YUN_SUAN_FU -> /lt | /le | /gt | /ge | /equ | /ne #
 JIA_JIAN_YUN_SUAN_FU -> /add | /sub #
-CHENG_CHU_YUN_SUAN_FU -> /mul | /div #
+CHENG_CHU_YUN_SUAN_FU -> /mul | /div | /mod #
 #
 # 3.3 函数调用
 YUAN_SU -> /id /lpra SHI_CAN_LIE_BIAO /rpra #

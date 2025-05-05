@@ -40,9 +40,11 @@ int main()
         return 0;
     }
     std::cout << "[LOG] [LEXICAL] Complete lexical analyse at " << filename << std::endl;
+    int i = 0;
     for (auto [s, _] : lex_analyzer.lex)
     {
-        std::cout << s << std::endl;
+        std::cout << i << ":" << s << std::endl;
+        ++i;
     }
 
     /* 语法分析 */

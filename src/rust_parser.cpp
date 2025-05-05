@@ -569,16 +569,19 @@ void Rules::calActionTable()
             // 移进规约冲突
             if(actionTable[i].count({1, lookahead}))
             {
-                std::cerr << "i=" << i << std::endl;
-                for (item itt : itemSet[i])
-                {
-                    std::cerr << itt << std::endl;
-                }
-                std::cerr << "look ahead = " << Util::terminalStr[lookahead] << std::endl;
-                std::cerr << "1:" << std::endl;
-                std::cerr << rules[rule_id] << std::endl;
-                std::cerr << "2:" << std::endl;
-                std::cerr << rules[actionTable[i][{1, lookahead}].rule_id] << std::endl;
+                std::cout << "[LOG] [RULES] Conflict, state=" << i << ", lookahead=" << Util::terminalStr[lookahead]
+                        << " this rules is abandoned:" << rules[rule_id] << std::endl;
+                // std::cout << "i=" << i << std::endl;
+                // // for (item itt : itemSet[i])
+                // // {
+                // //     std::cout << itt << std::endl;
+                // // }
+                // std::cout << "look ahead = " << Util::terminalStr[lookahead] << std::endl;
+                // std::cout << "1:" << std::endl;
+                // std::cout << rules[rule_id] << std::endl;
+                // std::cout << "2:" << std::endl;
+                // std::cout << rules[actionTable[i][{1, lookahead}].rule_id] << std::endl;
+                continue;
             }
             assert(!actionTable[i].count({1, lookahead}));
             actionTable[i][{1, lookahead}] = {REDUCE, rule_id, -1};

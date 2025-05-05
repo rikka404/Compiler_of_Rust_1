@@ -122,8 +122,8 @@ XUAN_ZE_BIAO_DA_SHI -> /if BIAO_DA_SHI HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI /else HAN_
 # XUN_HUAN_BIAO_DA_SHI_YU_JU_CHUAN -> XUN_HUAN_FAN_HUI_YU_JU XUN_HUAN_BIAO_DA_SHI_YU_JU_CHUAN #
 # XUN_HUAN_FAN_HUI_YU_JU -> /break BIAO_DA_SHI /semicolon #
 #
-# BIAO_DA_SHI -> LOOP_YU_JU #
-# YU_JU -> /break BIAO_DA_SHI /semicolon #
+BIAO_DA_SHI -> LOOP_YU_JU #
+YU_JU -> /break BIAO_DA_SHI /semicolon #
 #
 # 8.1 数组
 LEI_XING -> /lsqb LEI_XING /semicolon /int /rsqb #

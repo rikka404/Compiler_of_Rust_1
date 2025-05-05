@@ -76,3 +76,22 @@ ccccccc
     // }
     // return;
 // }
+
+fn main1() ->i32{
+    loop{
+        let mut a = 10;
+        break;
+    }
+    loop{
+        let mut a = 10;
+        break;
+    };
+    let mut c = 10;
+    let mut b = loop{
+        let mut a = 20;
+        if(c >= 100){
+            break a;
+        }
+        a = a + 1;
+    };
+}

@@ -58,7 +58,8 @@ const std::vector<lexical> key_symbol = {
 
     {"->", ARROW},
     {".", DOT},
-    {"..", DDOT}
+    {"..", DDOT},
+    {"&", AND}
 };
 
 const int MAXCHAR = 128;
@@ -72,7 +73,7 @@ struct TrieNode
 {
     lexical_type type;
     int son[MAXCHAR]; //这里必须用int，用指针写法的话pushback的时候会乱掉
-    int opt[MAXCHAR];
+    int opt[MAXCHAR];  // son表示经过128个字符到那个儿子节点 op表示这一步需要的附加操作
     TrieNode() {
         memset(son, -1, sizeof(son));
         memset(opt, 0, sizeof(opt));

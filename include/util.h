@@ -57,6 +57,7 @@ enum lexical_type
 
     ID,
     INT,
+    AND,
 
     END // 结束符
 };

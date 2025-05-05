@@ -142,7 +142,8 @@ void Rules::initRules(bool is_read)
                     s.type = Util::getTerminalType(right.substr(1));
                     if (s.type == UNDEF)
                     {
-                        std::cout << "[ERROR] [RULES] at line " << linecnt << ", no terminal name " << right.substr(1) << std::endl;
+                        std::cout << "[ERROR] [RULES] at line " << linecnt << ", no terminal name: " << right.substr(1) << std::endl;
+                        std::cout << left << "-->" << right << std::endl;
                         exit(0);
                     }
                 }

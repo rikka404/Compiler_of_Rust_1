@@ -53,14 +53,16 @@ void Rules::init(bool is_read, bool tmp_print)
         // 这个阶段需要把产生式右边为空的/zero符号删掉
         Rules::deleteZero();
         Rules::initDFA();
-        Rules::printDFA();
-        Rules::calActionTable();
-        Rules::saveActionTable();
-
         if (tmp_print)
         {
             Rules::printRules();
             Rules::printFirstSet();
+            Rules::printDFA();
+        }
+        Rules::calActionTable();
+        Rules::saveActionTable();
+        if (tmp_print)
+        {
             Rules::printActionTable();
         }
     }
@@ -689,7 +691,7 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols)
         // 必须含有此项
         if (!actionTable[state.back()].count(a))
         {
-            std::cout << "[ERROR] [RULES] " << "parser analysis not accepted" << std::endl;
+            std::cout << "[ERROR] [RULES] " << "parser analysis not accepted at pos " << pos << std::endl;
             exit(0);
         }
         action act = actionTable[state.back()][a];

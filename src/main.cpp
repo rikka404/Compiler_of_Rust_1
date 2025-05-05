@@ -6,6 +6,7 @@
 int main()
 {
     /* 预处理 */
+    // test是用来测试词法分析的，test2是用来测试语法分析的
     std::string filename = "test/test2.rs";
     std::ifstream fin(filename);
     std::string s;
@@ -39,9 +40,11 @@ int main()
         return 0;
     }
     std::cout << "[LOG] [LEXICAL] Complete lexical analyse at " << filename << std::endl;
+    int i = 0;
     for (auto [s, _] : lex_analyzer.lex)
     {
-        std::cout << s << std::endl;
+        std::cout << i << ":" << s << std::endl;
+        ++i;
     }
 
     /* 语法分析 */

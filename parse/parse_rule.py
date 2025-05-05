@@ -42,7 +42,8 @@ BIAN_LIANG_SHENG_MING_YU_JU -> /let BIAN_LIANG_SHENG_MING_NEI_BU /semicolon #
 #
 # 2.2 赋值语句
 YU_JU -> FU_ZHI_YU_JU #
-FU_ZHI_YU_JU -> KE_FU_ZHI_YUAN_SU /assign BIAO_DA_SHI /semicolon #
+FU_ZHI_YU_JU -> KE_FU_ZHI_YUAN_SU FU_ZHI_YUN_SUAN_FU BIAO_DA_SHI /semicolon #
+FU_ZHI_YUN_SUAN_FU -> /assign | /addassign | /subassign | /mulassign | /divassign | /modassign #
 #
 # 2.3 变量声明赋值语句
 YU_JU -> BIAN_LIANG_SHENG_MING_FU_ZHI_YU_JU #
@@ -63,7 +64,7 @@ JIA_FA_BIAO_DA_SHI -> JIA_FA_BIAO_DA_SHI JIA_JIAN_YUN_SUAN_FU XIANG #
 XIANG -> XIANG CHENG_CHU_YUN_SUAN_FU YIN_ZI #
 BI_JIAO_YUN_SUAN_FU -> /lt | /le | /gt | /ge | /equ | /ne #
 JIA_JIAN_YUN_SUAN_FU -> /add | /sub #
-CHENG_CHU_YUN_SUAN_FU -> /mul | /div #
+CHENG_CHU_YUN_SUAN_FU -> /mul | /div | /mod #
 #
 # 3.3 函数调用
 YUAN_SU -> /id /lpra SHI_CAN_LIE_BIAO /rpra #
@@ -81,53 +82,58 @@ ELSE_BU_FEN -> /else /if BIAO_DA_SHI YU_JU_KUAI ELSE_BU_FEN | /else YU_JU_KUAI |
 YU_JU -> XUN_HUAN_YU_JU #
 XUN_HUAN_YU_JU -> WHILE_YU_JU #
 WHILE_YU_JU -> /while BIAO_DA_SHI YU_JU_KUAI #
-
+#
 # 5.2 for循环结构
 XUN_HUAN_YU_JU -> FOR_YU_JU #
 FOR_YU_JU -> /for BIAN_LIANG_SHENG_MING_NEI_BU /in KE_DIE_DAI_JIE_GOU YU_JU_KUAI #
 KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI #
-
+#
 # 5.3 loop循环结构
 XUN_HUAN_YU_JU -> LOOP_YU_JU #
 LOOP_YU_JU -> /loop YU_JU_KUAI #
-
+#
 # 5.4 break和continue语句
 YU_JU -> /break /semicolon | /continue /semicolon #
-
+#
 # 6.1 声明不可变变量
 BIAN_LIANG_SHENG_MING_NEI_BU -> /id #
-
+#
 # 6.2 借用和引用
 KE_FU_ZHI_YUAN_SU -> /mul KE_FU_ZHI_YUAN_SU | /and /mut KE_FU_ZHI_YUAN_SU | /and KE_FU_ZHI_YUAN_SU #
 LEI_XING -> /and /mut LEI_XING | /and LEI_XING #
-
+#
 # 7.1 函数表达式块
 BIAO_DA_SHI -> HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI #
 HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI -> /lbra HAN_SHU_BIAO_DA_SHI_YU_JU_CHUAN /rbra #
 HAN_SHU_BIAO_DA_SHI_YU_JU_CHUAN -> BIAO_DA_SHI | YU_JU HAN_SHU_BIAO_DA_SHI_YU_JU_CHUAN #
-
+#
 # 7.2 函数表达式块作为函数体
 HAN_SHU_SHENG_MING -> HAN_SHU_TOU_SHENG_MING HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI #
-
+#
 # 7.3 选择表达式
 BIAO_DA_SHI -> XUAN_ZE_BIAO_DA_SHI #
 XUAN_ZE_BIAO_DA_SHI -> /if BIAO_DA_SHI HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI /else HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI #
-
+#
 # 7.4 循环表达式
+# BIAO_DA_SHI -> XUN_HUAN_BIAO_DA_SHI #
+# XUN_HUAN_BIAO_DA_SHI ->  /loop XUN_HUAN_BIAO_DA_SHI_YU_JU_KUAI #
+# XUN_HUAN_BIAO_DA_SHI_YU_JU_KUAI -> /lbra XUN_HUAN_BIAO_DA_SHI_YU_JU_CHUAN /rbra #
+# XUN_HUAN_BIAO_DA_SHI_YU_JU_CHUAN -> YU_JU XUN_HUAN_BIAO_DA_SHI_YU_JU_CHUAN | XUN_HUAN_FAN_HUI_YU_JU YU_JU_CHUAN #
+# XUN_HUAN_BIAO_DA_SHI_YU_JU_CHUAN -> XUN_HUAN_FAN_HUI_YU_JU XUN_HUAN_BIAO_DA_SHI_YU_JU_CHUAN #
+# XUN_HUAN_FAN_HUI_YU_JU -> /break BIAO_DA_SHI /semicolon #
+#
 # BIAO_DA_SHI -> LOOP_YU_JU #
 # YU_JU -> /break BIAO_DA_SHI /semicolon #
-
+#
 # 8.1 数组
 LEI_XING -> /lsqb LEI_XING /semicolon /int /rsqb #
-YIN_ZI -> /lsqb SHU_ZU_YUAN_SU_LIE_BIAO /rsqb | SHU_ZU_YUAN_SU #
+YIN_ZI -> /lsqb SHU_ZU_YUAN_SU_LIE_BIAO /rsqb #
 SHU_ZU_YUAN_SU_LIE_BIAO -> /zero | BIAO_DA_SHI | BIAO_DA_SHI /comma SHU_ZU_YUAN_SU_LIE_BIAO #
 
 # 8.2 数组元素
-# SHU_ZU_YUAN_SU -> YUAN_SU /lsqb BIAO_DA_SHI /rsqb #  # add
-SHU_ZU_YUAN_SU -> /id #
-KE_FU_ZHI_YUAN_SU -> SHU_ZU_YUAN_SU /lsqb BIAO_DA_SHI /rsqb #
-KE_DIE_DAI_JIE_GOU -> YUAN_SU #
-
+KE_FU_ZHI_YUAN_SU -> FU_ZA_LEI_XING_YUAN_SU #
+FU_ZA_LEI_XING_YUAN_SU -> FU_ZA_LEI_XING_YUAN_SU /lsqb BIAO_DA_SHI /rsqb | /id /lsqb BIAO_DA_SHI /rsqb #
+KE_DIE_DAI_JIE_GOU -> KE_FU_ZHI_YUAN_SU #
 
 # # 9.1 元组
 # LEI_XING -> /lpra YUAN_ZU_LEI_XING_NEI_BU /rpra #
@@ -137,5 +143,5 @@ KE_DIE_DAI_JIE_GOU -> YUAN_SU #
 # YUAN_ZU_FU_ZHI_NEI_BU -> /zero | BIAO_DA_SHI /comma YUAN_ZU_YUAN_SU_LIE_BIAO #
 # YUAN_ZU_YUAN_SU_LIE_BIAO -> /zero | BIAO_DA_SHI | BIAO_DA_SHI /comma YUAN_ZU_YUAN_SU_LIE_BIAO #
 
-# # 9.2 元组元素
-# KE_FU_ZHI_YUAN_SU -> YIN_ZI /dot /int #
+# 9.2 元组元素
+FU_ZA_LEI_XING_YUAN_SU -> FU_ZA_LEI_XING_YUAN_SU /dot /int | /id /dot /int #

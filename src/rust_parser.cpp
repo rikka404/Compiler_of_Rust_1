@@ -680,7 +680,7 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols)
             state.push_back(act.next_state);
             SRSequence.push_back(a);
             nodeID.push_back(parserTree.size());
-            parserTree.push_back({a, -1, {}});
+            parserTree.push_back({a, -1, {}, pos});
         }
         else if(act.type == REDUCE)
         {
@@ -699,7 +699,7 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols)
             SRSequence.push_back(rules[act.rule_id].left);
             nodeID.push_back(parserTree.size());
             std::vector<int> vt(dq.begin(), dq.end());
-            parserTree.push_back({rules[act.rule_id].left, -1, vt});
+            parserTree.push_back({rules[act.rule_id].left, -1, vt, -1});
             pos--;
         }
         else
@@ -714,14 +714,31 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols)
     return -1;
 }
 
-void Rules::drawParserTree(std::ostream& out)
+void Rules::drawParserTree(std::ostream &out, std::vector<std::string> &strList)
 {
+    // ANSI 转义序列
+    const std::string RED = "\033[31m";
+    const std::string GREEN = "\033[32m";
+    const std::string YELLOW = "\033[33m";
+    const std::string BLUE = "\033[34m";
+    const std::string RESET = "\033[0m"; // 重置颜色
+    
     auto draw = [&](auto self, int cur, std::string pre, bool islast) ->void
     {
-        if(parserTree[cur].current.is_terminal)
-            out << pre << Util::terminalStr[parserTree[cur].current.type] << std::endl;
+        if (parserTree[cur].current.is_terminal)
+        {
+            out << BLUE << pre;
+            out << YELLOW << Util::terminalStr[parserTree[cur].current.type];
+            out << BLUE << " --- ";
+            out << YELLOW << strList[parserTree[cur].char_pos] << RESET << std::endl;
+        }
+            
         else
-            out << pre << Rules::nonTerminalStr[parserTree[cur].current.type] << std::endl;
+        {
+            out << BLUE << pre;
+            out << GREEN << Rules::nonTerminalStr[parserTree[cur].current.type];
+            out << RESET << std::endl;
+        }
         for (int i = 0; i < (int)parserTree[cur].children.size(); i++)
         {
             std::string newpre = pre;

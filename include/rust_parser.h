@@ -62,6 +62,7 @@ struct parserTreeNode
     symbol current;
     int father;
     std::vector<int> children;
+    int char_pos; // 该节点在终结符中的位置 -1表示非终结符
 };
 
 
@@ -108,6 +109,6 @@ private:
 
 public:
     static void init(bool is_read, bool tmp_print); // 完成到最后分析表的所有初始化
-    void drawParserTree(std::ostream&);
+    void drawParserTree(std::ostream&, std::vector<std::string> &strList); // 打印语法树
     int analysis(const std::vector<symbol> &lexSymbols); // 返回一个整数，代表语法树的根节点编号，如果返回-1说明最后没走到acc
 };

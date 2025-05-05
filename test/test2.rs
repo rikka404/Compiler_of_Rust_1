@@ -1,14 +1,48 @@
 fn main() {
-    
     //aaaa zhong wen bian ma you wen ti, yin wei MAXCHAR=128
+    
+}
+fn program_6_2__1() {
+    let mut a:i32=1;
+    let mut b:&mut i32=&mut a;
+    // let b:& i32=&a;
+    let mut c:i32=*b;
+    *b=2;
 }
 /*
 * ai wo cao zhe zhong wen bian ma zen me zhe me huai a 
 ccccccc
 */
 
-fn main0(mut a:i32, mut b4:i32) {
-    ;;
-    ;
-    return;
+fn main0(mut a:i32, mut b:i32) {
+    // let mut a1:i32;
+    // let mut b1;
+    // a1=32;
+    // let mut a2:i32=98;
+    // let mut b2=14;
+    
+    // let mut a1:i32 = 1*(2+3)*4<4/2-main0(a-1, b/2)/3;
+    
+    // if a > 0 {
+    //     a = a - 1;
+    //     b = b + 1;
+    //     main0(a, b);
+    // } else if b > 0{
+    //     a = a + 1;
+    // } else {
+    //     println(a, b);
+    // }
+    
+    // let mut a1:i32 = 0;
+    // while a>0 {
+    //     a=a-1;
+    //     for mut i in 1..(a+1) / 2 {
+    //         a1=i-1;
+    //         if (a1 == 0) {
+    //             continue;
+    //         }
+    //     }
+    //     break;
+    // }
+    // return;
 }

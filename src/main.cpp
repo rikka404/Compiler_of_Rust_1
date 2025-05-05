@@ -49,16 +49,18 @@ int main()
     Rules::init(false, true);
 
     std::vector<symbol> sym;
+    std::vector<std::string> strList;
     for (auto [s, tp] : lex_analyzer.lex)
     {
         sym.push_back({1, tp});
+        strList.push_back(s);
     }
     sym.push_back({1, END});
 
     Rules rules;
     rules.analysis(sym);
 
-    rules.drawParserTree(std::cout);
+    rules.drawParserTree(std::cout, strList);
 
     return 0;
 }

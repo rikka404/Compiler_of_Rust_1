@@ -1,3 +1,7 @@
-S -> E T #
-E -> T S | /fn T #
-T -> /id | /zero #
+S -> YU_JU #
+YU_JU -> BIAN_LIANG_SHENG_MING_YU_JU #
+BIAN_LIANG_SHENG_MING_YU_JU -> /id /equ BIAO_DA_SHI #
+BIAO_DA_SHI -> LOOP_YU_JU #
+YUJU -> XUN_HUAN_YU_JU #
+XUN_HUAN_YU_JU -> LOOP_YU_JU #
+LOOP_YU_JU -> /loop #

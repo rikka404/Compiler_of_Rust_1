@@ -2,6 +2,7 @@
 #include "util.h"
 #include <set>
 #include <queue>
+#include <iostream>
 
 struct symbol
 {
@@ -25,6 +26,7 @@ struct production
     symbol left;               // 左部符号
     std::vector<symbol> right; // 右部符号
 };
+
 
 struct item
 {
@@ -68,7 +70,7 @@ struct parserTreeNode
 
 class Rules
 {
-private:
+public:
     static std::vector<production> rules;                                                // 产生式规则 初始和运行都需要
     static std::map<symbol, std::vector<int>> leftRules;                                 // 用于辅助查找的map 初始需要
     static std::map<std::string, int> nonTerminalType;                                   // 非终结符编号 初始和运行?都需要:可能结果输出要人能看
@@ -107,8 +109,12 @@ private:
     static void loadActionTable();  // 读取LR(1)分析表
     static void printActionTable(); // 打印LR(1)分析表
 
-public:
+// public:
     static void init(bool is_read, bool tmp_print); // 完成到最后分析表的所有初始化
     void drawParserTree(std::ostream&, std::vector<std::string> &strList); // 打印语法树
     int analysis(const std::vector<symbol> &lexSymbols); // 返回一个整数，代表语法树的根节点编号，如果返回-1说明最后没走到acc
 };
+
+std::ostream &operator<<(std::ostream &out, const symbol &sym);
+std::ostream &operator<<(std::ostream &out, const production &pro);
+std::ostream &operator<<(std::ostream &out, const item &it);

@@ -53,6 +53,7 @@ void Rules::init(bool is_read, bool tmp_print)
         // 这个阶段需要把产生式右边为空的/zero符号删掉
         Rules::deleteZero();
         Rules::initDFA();
+        Rules::printDFA();
         Rules::calActionTable();
         Rules::saveActionTable();
 
@@ -60,7 +61,6 @@ void Rules::init(bool is_read, bool tmp_print)
         {
             Rules::printRules();
             Rules::printFirstSet();
-            Rules::printDFA();
             Rules::printActionTable();
         }
     }
@@ -73,7 +73,7 @@ void Rules::init(bool is_read, bool tmp_print)
 
 void Rules::initRules(bool is_read)
 {
-    const std::string filename = "parse/parse_rule.rule";
+    const std::string filename = "parse/parse_rule.py";
     std::ifstream fin(filename);
     if (!fin.is_open())
     {
@@ -549,6 +549,11 @@ void Rules::calActionTable()
     actionTable.clear(), actionTable.resize(dfa.size());
     for (int i = 0; i < (int)dfa.size(); i++)
     {
+        // for (item itt : itemSet[i])
+        // {
+        //     std::cerr << itt << std::endl;
+        // }
+        // std::cerr << std::endl;
         for (auto [sym, to] : dfa[i])
         {
             assert(!actionTable[i].count(sym));
@@ -560,6 +565,19 @@ void Rules::calActionTable()
             if (dot_pos != (int)rules[rule_id].right.size())
                 continue;
             // 移进规约冲突
+            if(actionTable[i].count({1, lookahead}))
+            {
+                std::cerr << "i=" << i << std::endl;
+                for (item itt : itemSet[i])
+                {
+                    std::cerr << itt << std::endl;
+                }
+                std::cerr << "look ahead = " << Util::terminalStr[lookahead] << std::endl;
+                std::cerr << "1:" << std::endl;
+                std::cerr << rules[rule_id] << std::endl;
+                std::cerr << "2:" << std::endl;
+                std::cerr << rules[actionTable[i][{1, lookahead}].rule_id] << std::endl;
+            }
             assert(!actionTable[i].count({1, lookahead}));
             actionTable[i][{1, lookahead}] = {REDUCE, rule_id, -1};
         }
@@ -759,4 +777,47 @@ void Rules::drawParserTree(std::ostream &out, std::vector<std::string> &strList)
         }
     };
     draw(draw, root, "\\-- ", 1);
+}
+
+std::ostream& operator<<(std::ostream& out, const symbol& sym)
+{
+    if(sym.is_terminal)
+    {
+        out << Util::terminalStr[sym.type];
+    }
+    else
+    {
+        out << Rules::nonTerminalStr[sym.type];
+    }
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const production& pro)
+{
+    out << pro.left << "->";
+    for (int i = 0; i < (int)pro.right.size(); i++)
+    {
+        if(i)
+            out << ' ';
+        out << pro.right[i];
+    }
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const item &it)
+{
+    out << Rules::rules[it.rule_id].left << "->";
+    for (int i = 0; i < it.dot_pos; i++)
+    {
+        out << Rules::rules[it.rule_id].right[i];
+        out << ' ';
+    }
+    out << ".";
+    for (int i = it.dot_pos; i < (int)Rules::rules[it.rule_id].right.size(); i++)
+    {
+        out << Rules::rules[it.rule_id].right[i];
+        out << ' ';
+    }
+    out << Util::terminalStr[it.lookahead];
+    return out;
 }

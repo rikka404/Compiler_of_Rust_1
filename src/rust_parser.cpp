@@ -53,14 +53,16 @@ void Rules::init(bool is_read, bool tmp_print)
         // 这个阶段需要把产生式右边为空的/zero符号删掉
         Rules::deleteZero();
         Rules::initDFA();
-        Rules::calActionTable();
-        Rules::saveActionTable();
-
         if (tmp_print)
         {
             Rules::printRules();
             Rules::printFirstSet();
             Rules::printDFA();
+        }
+        Rules::calActionTable();
+        Rules::saveActionTable();
+        if (tmp_print)
+        {
             Rules::printActionTable();
         }
     }
@@ -73,7 +75,7 @@ void Rules::init(bool is_read, bool tmp_print)
 
 void Rules::initRules(bool is_read)
 {
-    const std::string filename = "parse/parse_rule.rule";
+    const std::string filename = "parse/parse_rule.py";
     std::ifstream fin(filename);
     if (!fin.is_open())
     {

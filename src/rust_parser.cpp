@@ -75,7 +75,7 @@ void Rules::init(bool is_read, bool tmp_print)
 
 void Rules::initRules(bool is_read)
 {
-    const std::string filename = "parse/parse_rule.py";
+    const std::string filename = "parse/parse_rule2.py";
     std::ifstream fin(filename);
     if (!fin.is_open())
     {

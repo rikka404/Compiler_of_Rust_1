@@ -99,7 +99,7 @@ YU_JU -> /break /semicolon | /continue /semicolon #
 BIAN_LIANG_SHENG_MING_NEI_BU -> /id #
 #
 # 6.2 借用和引用
-KE_FU_ZHI_YUAN_SU -> /mul KE_FU_ZHI_YUAN_SU | /and /mut KE_FU_ZHI_YUAN_SU | /and KE_FU_ZHI_YUAN_SU | /lpra KE_FU_ZHI_YUAN_SU /rpra #
+KE_FU_ZHI_YUAN_SU -> /mul KE_FU_ZHI_YUAN_SU | /and /mut KE_FU_ZHI_YUAN_SU | /and KE_FU_ZHI_YUAN_SU #
 LEI_XING -> /and /mut LEI_XING | /and LEI_XING #
 #
 # 7.1 函数表达式块
@@ -133,6 +133,7 @@ SHU_ZU_YUAN_SU_LIE_BIAO -> /zero | BIAO_DA_SHI | BIAO_DA_SHI /comma SHU_ZU_YUAN_
 # 8.2 数组元素
 KE_FU_ZHI_YUAN_SU -> FU_ZA_LEI_XING_YUAN_SU #
 FU_ZA_LEI_XING_YUAN_SU -> FU_ZA_LEI_XING_YUAN_SU /lsqb BIAO_DA_SHI /rsqb | /id /lsqb BIAO_DA_SHI /rsqb #
+FU_ZA_LEI_XING_YUAN_SU -> /lpra KE_FU_ZHI_YUAN_SU /rpra #
 KE_DIE_DAI_JIE_GOU -> KE_FU_ZHI_YUAN_SU #
 
 # 9.1 元组

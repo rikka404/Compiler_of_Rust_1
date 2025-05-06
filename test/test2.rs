@@ -28,9 +28,10 @@ fn main(){
     // let mut a:[[i32;3];3];
     // a[b[2] + 1][0] = 1;
     
-    let a:(i32,[i32;4],[(i32, i32);2]) = (1,[1*5,2,3,4],[(1,2-1),(3,4)]);
-    let mut b:i32=a.3[0].1%3;
-    a.3[0].1+=*(a);
+    // let a:(i32,[i32;4],[(i32, i32);2]) = (1,[1*5,2,3,4],[(1,2-1),(3,4)]);
+    // let mut b:i32=a.3[0].1%3;
+    // &a.3[0].1+=*a[5].0;
+    (*(&a.3[0].1))+=(*a)[5].0;
 }
 // fn program_6_2__1() {
 //     let mut a:i32=1;
@@ -77,21 +78,21 @@ ccccccc
     // return;
 // }
 
-fn main1() ->i32{
-    loop{
-        let mut a = 10;
-        break;
-    }
-    loop{
-        let mut a = 10;
-        break;
-    };
-    let mut c = 10;
-    let mut b = loop{
-        let mut a = 20;
-        if(c >= 100){
-            break a;
-        }
-        a = a + 1;
-    };
-}
+// fn main1() ->i32{
+//     loop{
+//         let mut a = 10;
+//         break;
+//     }
+//     loop{
+//         let mut a = 10;
+//         break;
+//     };
+//     let mut c = 10;
+//     let mut b = loop{
+//         let mut a = 20;
+//         if(c >= 100){
+//             break a;
+//         }
+//         a = a + 1;
+//     };
+// }

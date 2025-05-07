@@ -202,3 +202,194 @@ let mut b = loop{
 
 * ~~可赋值元素~~ 这个，不需要了
 
+---
+
+## 3 语义分析
+
+语义规则：含有set的参数表示设置到的值，含有get的参数表示获取的位置
+
+例子：`YU_JU_KUAI -> /lbra YU_JU_CHUAN /rbra [ 1 statePop 1 ] #`
+
+值：0 int 1 bool 2 mut& 3 & 4 数组 5 元组  0 变量 1 常量 2 字面量
+
+---
+
+**喜报：助教说不用写语义分析了。写这玩意规则的时候感觉我在挑战编译器的下限。**
+
+神人代码举例:
+
+**选择表达式的可读类型怎么检查？**
+
+```rust
+fn main() {
+    let mut b = 2;
+    let mut a:& mut i32;
+    a = & mut 
+    (if 7 > 1 {
+            3
+        }
+        else {
+            b
+        }
+    );
+}
+```
+这居然能编译通过（当然实际访问的时候还是会出错）。
+
+**别整你那类型推断了**
+
+```rust
+fn main() {
+    let mut a;
+    if 1 > 7 {
+        a = [1,2];
+    }
+    else {
+        a = 1;
+    }
+}
+```
+
+```
+error[E0308]: mismatched types
+ --> src/main.rs:7:13
+  |
+2 |     let mut a;
+  |         ----- expected due to the type of this binding
+...
+7 |         a = 1;
+  |             ^ expected `[{integer}; 2]`, found integer
+```
+
+先来先服务说是
+
+**句读之不解**
+
+```rust
+fn main() {
+    let mut a:[i32;1] = [1];
+    let mut b:[i32;1] = [1,];
+    let mut c:(i32) = (1);
+}
+```
+编译通过！
+
+```rust
+fn main() {
+    let mut c:(i32) = (1);
+    println!("{}", c.0)
+}
+```
+
+```
+error[E0610]: `i32` is a primitive type and therefore doesn't have fields
+ --> src/main.rs:3:22
+  |
+3 |     println!("{}", c.0)
+  |   
+```
+
+不兑！！你是谁？你不是元组，你是int。
+
+```rust
+fn main() {
+    let mut c:(i32,) = (1,);
+    println!("{}", c.0)
+}
+```
+
+这才是元组。
+
+> 9.1 元组比8.1 数组多了几条产生式，思考原因？
+
+现在知道为什么了吧？元组只有一个的情况下，最后一个必须是逗号。
+
+
+写这些神秘语义规则实在是太烧脑了，已经燃尽了。接下来的思想介绍就将就看看吧。
+
+---
+
+## 3.1 作用域语义规则
+
+基本思想：主要用到语句块、语句串、语句以及类似的函数表达式块、函数表达式串。
+
+## 3.1.1 记录变量栈
+
+变量声明语句或变量声明赋值语句规约成语句时，将变量相关信息记录到变量栈中，即`statePush 1`，同时完成语句自身属性（称为声明变量数量）设为1。
+
+## 3.1.2 数量变动
+
+如果是其他东西规约成语句设为0 `stateSet 0` 。
+
+当语句、语句串规约成语句串时，父亲声明变量数量为儿子们的加起来 `stateSum 0 1` 。
+
+当规约成语句块时，把语句串中相应数量变量从记录变量栈中弹出。
+
+这样任何时候，记录变量栈中从上到下就是当前作用域从近到远的变量，但是好像无法检查同域下重名问题？
+
+```
+语句块 -> "(" 语句串 ")" [ 1 statePop 1 ] #
+语句串 -> 空 [ 1 stateSet 0 ] #
+语句串 -> 语句 语句串 [ 1 stateSum 0 1 ] #
+语句 -> ";" [ 1 stateSet 0 ] #
+```
+
+## 3.1.3 这样还有一些问题
+
+
+原本的for循环结构无法按上述处理
+
+```
+# 5.2 for循环结构
+XUN_HUAN_YU_JU -> FOR_YU_JU #
+FOR_YU_JU -> /for BIAN_LIANG_SHENG_MING_NEI_BU /in KE_DIE_DAI_JIE_GOU YU_JU_KUAI #
+KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI #
+#
+```
+
+因为这里只有规约到for语句时，才能综合出for语句开始定义变量的类型，才可能放进变量栈里，但这时语句块已经规约了，它又得删除了。
+
+我们需要小修改一下，让它能在语句块没规约前，先把变量记录好。
+
+```
+# 5.2 for循环结构
+XUN_HUAN_YU_JU -> FOR_YU_JU #
+FOR_YU_JU -> FOR_YU_JU_SHENG_MING YU_JU_KUAI [ 1 statePop 0 ] #
+FOR_YU_JU_SHENG_MING -> /for BIAN_LIANG_SHENG_MING_NEI_BU /in KE_DIE_DAI_JIE_GOU [ 1 iteration 1 ] #
+KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ 5 numTypeCheck 0 0 numTypeCheck 2 0 numTypeSet 4 numTypeSon 0 numTypeDel 2 ] #
+```
+
+`iteration` 就是从 可迭代结构中把类型解出来给那个定义的变量，然后记录。
+
+---
+
+## 3.2 类型判断
+
+## 3.2.1 类型存储
+
+类型有读写类型（变量、常量、字面量）和数值类型（很复杂，是树）。
+
+“类型”非终结符和表达式相关的玩意都有数值类型，而表达式相关的玩意还有读写类型。
+
+这个树就十分麻烦。由于表达式中会直接取之前的作为儿子，不好采用直接复制的操作。所以只能用指针的形式，这样管理就跟麻烦了，要考虑del和new（set就是new，新建一个节点）。
+
+存到变量栈中时，直接把类型get到栈里。
+
+从变量栈中取类型，采用深拷贝把类型复制到表达式里。这样做是为了del方便。
+
+`& mut [(& i32,[i32;4],i32);4]`树长这样：
+
+```
+\--& mut
+   \--[;4]
+      \--(,,)
+         |--& 
+         |  \--i32
+         |--[;4]
+         |  \--i32
+         \--i32
+```
+
+## 3.2.2 表达式类型运算
+
+很恶心，你自己看吧

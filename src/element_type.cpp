@@ -20,21 +20,17 @@ std::shared_ptr<element_type> element_type::create(base_element_type b_type)
     return ptr;
 }
 
-std::shared_ptr<element_type> element_type::create(base_element_type b_type, element_type e_type)
+std::shared_ptr<element_type> element_type::create(base_element_type b_type, const element_type& e_type)
 {
     assert(b_type == REFER_TYPE || b_type == MUT_REFER_TYPE);
     if(b_type == REFER_TYPE)
     {
         auto ptr = std::make_shared<refer_type>(e_type);
-        ptr->type = b_type;
-        ptr->siz = 4;
         return ptr;
     }
     else if(b_type == MUT_REFER_TYPE)
     {
         auto ptr = std::make_shared<mut_refer_type>(e_type);
-        ptr->type = b_type;
-        ptr->siz = 4;
         return ptr;
     }
     else
@@ -44,12 +40,10 @@ std::shared_ptr<element_type> element_type::create(base_element_type b_type, ele
     }
 }
 
-std::shared_ptr<element_type> element_type::create(base_element_type b_type, int l, element_type e_type)
+std::shared_ptr<element_type> element_type::create(base_element_type b_type, int l, const element_type& e_type)
 {
     assert(b_type == ARRAY_TYPE);
     auto ptr = std::make_shared<array_type>(l, e_type);
-    ptr->type = b_type;
-    ptr->siz = 4;
     return ptr;
 };
 
@@ -57,8 +51,6 @@ std::shared_ptr<element_type> element_type::create(base_element_type b_type, int
 {
     assert(b_type == TUPLE_TYPE);
     auto ptr = std::make_shared<tuple_type>(l, e_type);
-    ptr->type = b_type;
-    ptr->siz = 4;
     return ptr;
 }
 
@@ -102,12 +94,12 @@ element_type element_type::shallow_copy(const element_type &e_type)
     //写不动了，之后把这个补上吧
 }
 
-element_type & element_type::operator=(element_type e_type)
+element_type & element_type::operator=(const element_type& e_type)
 {
     assert(0);//万策尽2.0，请使用工厂函数create
 }
 
-refer_type::refer_type(element_type e_type)
+refer_type::refer_type(const element_type& e_type)
 {
     this->siz = 4;
     this->offset = 0;
@@ -115,7 +107,7 @@ refer_type::refer_type(element_type e_type)
     this->t_type = element_type::create(e_type);
 }
 
-mut_refer_type::mut_refer_type(element_type e_type)
+mut_refer_type::mut_refer_type(const element_type& e_type)
 {
     this->siz = 4;
     this->offset = 0;
@@ -123,7 +115,7 @@ mut_refer_type::mut_refer_type(element_type e_type)
     this->t_type = element_type::create(e_type);
 }
 
-array_type::array_type(int l, element_type e_type)
+array_type::array_type(int l, const element_type& e_type)
 {
     this->siz = l * e_type.siz;
     this->offset = 0;
@@ -140,7 +132,7 @@ tuple_type::tuple_type(int l, const std::vector<std::shared_ptr<element_type>> e
         this->siz += et->siz;
     }
     this->offset = 0;
-    this->type = MUT_REFER_TYPE;
+    this->type = TUPLE_TYPE;
     this->len = l;
     this->t_type.resize(e_type.size());
     for (int i = 0; i < (int)e_type.size(); i++)

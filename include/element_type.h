@@ -26,8 +26,8 @@ public:
     virtual ~element_type() = default;
 
     static std::shared_ptr<element_type> create(base_element_type b_type);
-    static std::shared_ptr<element_type> create(base_element_type b_type, element_type e_type);
-    static std::shared_ptr<element_type> create(base_element_type b_type, int l, element_type e_type);
+    static std::shared_ptr<element_type> create(base_element_type b_type, const element_type& e_type);
+    static std::shared_ptr<element_type> create(base_element_type b_type, int l, const element_type& e_type);
     static std::shared_ptr<element_type> create(base_element_type b_type, int l, const std::vector<std::shared_ptr<element_type>> e_type);
     static std::shared_ptr<element_type> create(const element_type &e_type);
     static element_type shallow_copy(const element_type &e_type);
@@ -36,7 +36,7 @@ public:
     int offset; //备战未来
     base_element_type type;
 
-    element_type &operator=(element_type e_type);
+    element_type &operator=(const element_type& e_type);
     bool operator==(const element_type &e_type) const;
     bool operator!=(const element_type &e_type) const;
     // element_type operator[](int x) const;
@@ -48,7 +48,7 @@ class refer_type :public element_type
 public:
     std::shared_ptr<element_type> t_type;
     // refer_type();
-    refer_type(element_type e_type);
+    refer_type(const element_type& e_type);
 };
 
 class mut_refer_type :public element_type
@@ -56,7 +56,7 @@ class mut_refer_type :public element_type
 public:
     std::shared_ptr<element_type> t_type;
     // mut_refer_type();
-    mut_refer_type(element_type e_type);
+    mut_refer_type(const element_type& e_type);
 };
 
 class array_type :public element_type
@@ -65,7 +65,7 @@ public:
     int len;
     std::shared_ptr<element_type> t_type;
     // array_type();
-    array_type(int l, element_type e_type);
+    array_type(int l, const element_type& e_type);
 };
 
 class tuple_type :public element_type

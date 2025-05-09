@@ -67,19 +67,19 @@ int main()
     // rules.drawParserTree(std::cout, strList);
 
     auto ele1 = element_type::create(I32_TYPE);
-    auto ele2 = element_type::create(BOOL_TYPE);
-    auto ele3 = element_type::create(TUPLE_TYPE, 2, std::vector<std::shared_ptr<element_type>>{ele1, ele2});
+    auto ele2 = element_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<element_type>>{ele1, ele1, ele1});
+    auto ele3 = element_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<element_type>>{ele1, ele2, ele1});
+    auto ele4 = element_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<element_type>>{ele1, ele2, ele3});
+    auto ele5 = element_type::create(I32_TYPE);
+    auto ele6 = element_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<element_type>>{ele5, ele5, ele5});
+    auto ele7 = element_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<element_type>>{ele5, ele6, ele5});
+    auto ele8 = element_type::create(ARRAY_TYPE, 3, *ele7);
 
-    auto ele4 = element_type::create(I32_TYPE);
-    auto ele5 = element_type::create(BOOL_TYPE);
-    auto ele6 = element_type::create(TUPLE_TYPE, 2, std::vector<std::shared_ptr<element_type>>{ele4, ele5});
-
-    std::cout << (*ele1 == *ele4) << std::endl;
-    std::cout << (*ele2 == *ele5) << std::endl;
-    std::cout << (*ele3 == *ele6) << std::endl;
-    std::cout << (*ele1 == *ele4) << std::endl;
-    std::cout << (*ele1 == *ele5) << std::endl;
-    std::cout << (*ele1 == *ele6) << std::endl;
+    std::cout << (*ele4 == *ele7) << std::endl;
+    std::cout << (ele5->siz) << std::endl;
+    std::cout << (ele6->siz) << std::endl;
+    std::cout << (ele7->siz) << std::endl;
+    std::cout << (ele8->siz) << std::endl;
 
     return 0;
 }

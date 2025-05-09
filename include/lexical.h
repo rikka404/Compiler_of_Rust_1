@@ -84,13 +84,13 @@ class lexical_analyzer
 {
 private:
 
-    static std::vector<TrieNode> trie;
+    static std::vector<TrieNode> trie;  // 存储构建的DFA
 
-    int ptr;
-    std::string nowstr;
+    int ptr;  // 当前读到的字符偏移
+    std::string nowstr;  // 当前分析的词
 
 public:
-    std::vector<lexical> lex;
+    std::vector<lexical> lex;   // 存储最终得到的 词法单元 序列
     
     lexical_analyzer() : ptr(0) {}
     static void init();

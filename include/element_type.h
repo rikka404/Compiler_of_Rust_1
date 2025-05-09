@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <vector>
 #include <set>
 #include <queue>
@@ -24,10 +25,14 @@ public:
     element_type() = default;
     element_type(const element_type&);
     virtual ~element_type() = default;
+    // ~element_type()
+    // {
+    //     std::cout << "xigou" << std::endl;
+    // }
 
     static std::shared_ptr<element_type> create(base_element_type b_type);
-    static std::shared_ptr<element_type> create(base_element_type b_type, const element_type& e_type);
-    static std::shared_ptr<element_type> create(base_element_type b_type, int l, const element_type& e_type);
+    static std::shared_ptr<element_type> create(base_element_type b_type, std::shared_ptr<element_type> e_type);
+    static std::shared_ptr<element_type> create(base_element_type b_type, int l, std::shared_ptr<element_type> e_type);
     static std::shared_ptr<element_type> create(base_element_type b_type, int l, const std::vector<std::shared_ptr<element_type>> e_type);
     static std::shared_ptr<element_type> create(const element_type &e_type);
     static element_type shallow_copy(const element_type &e_type);
@@ -39,7 +44,7 @@ public:
     element_type &operator=(const element_type& e_type);
     bool operator==(const element_type &e_type) const;
     bool operator!=(const element_type &e_type) const;
-    // element_type operator[](int x) const;
+    std::shared_ptr<element_type> get_sub_class(int x) const;
     // int getoffset() const;
 };
 

@@ -20,17 +20,17 @@ std::shared_ptr<element_type> element_type::create(base_element_type b_type)
     return ptr;
 }
 
-std::shared_ptr<element_type> element_type::create(base_element_type b_type, const element_type& e_type)
+std::shared_ptr<element_type> element_type::create(base_element_type b_type, std::shared_ptr<element_type> e_type)
 {
     assert(b_type == REFER_TYPE || b_type == MUT_REFER_TYPE);
     if(b_type == REFER_TYPE)
     {
-        auto ptr = std::make_shared<refer_type>(e_type);
+        auto ptr = std::make_shared<refer_type>(*e_type);
         return ptr;
     }
     else if(b_type == MUT_REFER_TYPE)
     {
-        auto ptr = std::make_shared<mut_refer_type>(e_type);
+        auto ptr = std::make_shared<mut_refer_type>(*e_type);
         return ptr;
     }
     else
@@ -40,10 +40,10 @@ std::shared_ptr<element_type> element_type::create(base_element_type b_type, con
     }
 }
 
-std::shared_ptr<element_type> element_type::create(base_element_type b_type, int l, const element_type& e_type)
+std::shared_ptr<element_type> element_type::create(base_element_type b_type, int l, std::shared_ptr<element_type> e_type)
 {
     assert(b_type == ARRAY_TYPE);
-    auto ptr = std::make_shared<array_type>(l, e_type);
+    auto ptr = std::make_shared<array_type>(l, *e_type);
     return ptr;
 };
 
@@ -189,4 +189,32 @@ bool element_type::operator==(const element_type &e_type) const
 bool element_type::operator!=(const element_type &e_type) const
 {
     return !(*this == e_type);
+}
+
+std::shared_ptr<element_type> element_type::get_sub_class(int x) const
+{
+    if(this->type == REFER_TYPE)
+    {
+        assert(x == 0);
+        return ((refer_type *)this)->t_type;
+    }
+    else if(this->type == MUT_REFER_TYPE)
+    {
+        assert(x == 0);
+        return ((mut_refer_type *)this)->t_type;
+    }
+    else if(this->type == ARRAY_TYPE)
+    {
+        assert(x < ((array_type *)this)->len);
+        return ((array_type *)this)->t_type;
+    }
+    else if(this->type == TUPLE_TYPE)
+    {
+        assert(x < ((tuple_type *)this)->len);
+        return ((tuple_type *)this)->t_type[x];
+    }
+    else
+    {
+        assert(0);
+    }
 }

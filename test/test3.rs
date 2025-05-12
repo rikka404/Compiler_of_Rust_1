@@ -1,6 +1,16 @@
+fn test() {
+    let x = 5;
+    let y = 10;
+    let z = x + y;
+    return z;
+}
+
 fn main() {
-    // let a:(i32,[i32;4],[(i32, i32);2]) = (1,[5,2,3,4],[(1,2),(3,4)]);
-    // let mut b:i32=a.3[0].1%3;
-    (1,2,);
-    [1,2,];
+    let a = test();
+    if a > 0
+    {
+        let b = a + 1;
+    }
+    x = 5;
+    b = 10;
 }

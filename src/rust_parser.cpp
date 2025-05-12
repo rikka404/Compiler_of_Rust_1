@@ -4,6 +4,7 @@
 #include <assert.h>
 
 std::vector<production> Rules::rules;                                                // 产生式规则 初始和运行都需要
+std::vector<int> Rules::ruleToSemantic;                                              // 产生式id到语义动作函数编号的映射 初始和运行都需要
 std::map<symbol, std::vector<int>> Rules::leftRules;                                 // 用于辅助查找的map 初始需要
 std::map<std::string, int> Rules::nonTerminalType;                                   // 非终结符编号 初始和运行都需要
 std::vector<std::string> Rules::nonTerminalStr;                                      // 非终结符编号到字符串的映射 初始和运行都需要
@@ -75,7 +76,7 @@ void Rules::init(bool is_read, bool tmp_print)
 
 void Rules::initRules(bool is_read)
 {
-    const std::string filename = "parse/parse_rule2.py";
+    const std::string filename = "parse/meaning_rule2.py";
     std::ifstream fin(filename);
     if (!fin.is_open())
     {
@@ -110,31 +111,47 @@ void Rules::initRules(bool is_read)
             {
                 fin >> right;
                 // 检查结束
-                if (right == "|")
+                if (right == "[")
                 {
-                    if (!p_copy.right.empty())
-                    {
-                        // 对leftRules和rules进行添加
-                        if (!is_read)
-                            Rules::leftRules[p_copy.left].push_back(Rules::rules.size());
-                        Rules::rules.push_back(p_copy);
-                    }
-                    break;
-                }
-                else if (right[0] == '#')
-                {
-                    is_line_end = true;
-                    std::getline(fin, left); // 读到行尾
-                    if (!p_copy.right.empty())
-                    {
-                        // 对leftRules和rules进行添加
-                        if (!is_read)
-                            Rules::leftRules[p_copy.left].push_back(Rules::rules.size());
-                        Rules::rules.push_back(p_copy);
-                    }
+                    int temp = 0;
+                    fin >> temp; // 读入语义动作函数编号
+                    Rules::ruleToSemantic.push_back(temp);
+                    fin >> right; // 读入]
+                    fin >> right; // 读入下一个符号
 
-                    break;
+                    if (right == "|")
+                    {
+                        if (!p_copy.right.empty())
+                        {
+                            // 对leftRules和rules进行添加
+                            if (!is_read)
+                                Rules::leftRules[p_copy.left].push_back(Rules::rules.size());
+                            Rules::rules.push_back(p_copy);
+                        }
+                        break;
+                    }
+                    else if (right[0] == '#')
+                    {
+                        is_line_end = true;
+                        std::getline(fin, left); // 读到行尾
+                        if (!p_copy.right.empty())
+                        {
+                            // 对leftRules和rules进行添加
+                            if (!is_read)
+                                Rules::leftRules[p_copy.left].push_back(Rules::rules.size());
+                            Rules::rules.push_back(p_copy);
+                        }
+
+                        break;
+                    }
+                    else
+                    {
+                        std::cout << "[ERROR] [RULES] at line " << linecnt << ", no end of rule" << std::endl;
+                        std::cout << left << "-->" << right << std::endl;
+                        exit(0);
+                    }
                 }
+                
 
                 // 检查名称
                 symbol s;
@@ -154,6 +171,7 @@ void Rules::initRules(bool is_read)
                     if (!(islower(right[0]) || isupper(right[0])))
                     {
                         std::cout << "[ERROR] [RULES] at line " << linecnt << ", non-terminal can not name as " << right << std::endl;
+                        std::cout << left << "-->" << right << std::endl;
                         exit(0);
                     }
                     s.is_terminal = false;

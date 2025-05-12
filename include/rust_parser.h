@@ -3,6 +3,7 @@
 #include <set>
 #include <queue>
 #include <iostream>
+#include <semantic.h>
 
 struct symbol
 {
@@ -72,6 +73,7 @@ class Rules
 {
 public:
     static std::vector<production> rules;                                                // 产生式规则 初始和运行都需要
+    static std::vector<int> ruleToSemantic;                                              // 产生式id到语义动作函数编号的映射 初始和运行都需要
     static std::map<symbol, std::vector<int>> leftRules;                                 // 用于辅助查找的map 初始需要
     static std::map<std::string, int> nonTerminalType;                                   // 非终结符编号 初始和运行?都需要:可能结果输出要人能看
     static std::vector<std::string> nonTerminalStr;                                      // 非终结符编号到字符串的映射 初始和运行都需要

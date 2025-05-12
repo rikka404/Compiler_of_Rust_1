@@ -7,7 +7,7 @@ int main()
 {
     /* 预处理 */
     // test是用来测试词法分析的，test2是用来测试语法分析的
-    std::string filename = "test/test3.rs";
+    std::string filename = "test/test2.rs";
     std::ifstream fin(filename);
     std::string s;
     if (!fin.is_open())

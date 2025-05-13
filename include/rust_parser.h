@@ -3,16 +3,17 @@
 #include <set>
 #include <queue>
 #include <iostream>
-#include <semantic.h>
+#include "semantic.h"
 
 struct symbol
 {
     bool is_terminal;
     int type;
+    std::string val;
     symbol(){}
-    symbol(bool s1, int s2)
+    symbol(bool s1, int s2, std::string _val = "")
     {
-        is_terminal = s1, type = s2;
+        is_terminal = s1, type = s2, val = _val;
     }
     bool operator<(const symbol &s) const
     {
@@ -114,7 +115,7 @@ public:
 // public:
     static void init(bool is_read, bool tmp_print); // 完成到最后分析表的所有初始化
     void drawParserTree(std::ostream&, std::vector<std::string> &strList); // 打印语法树
-    int analysis(const std::vector<symbol> &lexSymbols); // 返回一个整数，代表语法树的根节点编号，如果返回-1说明最后没走到acc
+    int analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic); // 返回一个整数，代表语法树的根节点编号，如果返回-1说明最后没走到acc
 };
 
 std::ostream &operator<<(std::ostream &out, const symbol &sym);

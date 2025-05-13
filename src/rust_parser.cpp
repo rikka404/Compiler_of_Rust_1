@@ -698,7 +698,7 @@ void Rules::printActionTable()
     fout.close();
 }
 
-int Rules::analysis(const std::vector<symbol> &lexSymbols)
+int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
 {
     // 最后一个是end
     assert(lexSymbols.back().type == END);
@@ -722,6 +722,8 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols)
             SRSequence.push_back(a);
             nodeID.push_back(parserTree.size());
             parserTree.push_back({a, -1, {}, pos});
+            semantic.attributes.push_back(attribute());
+            (semantic.*Semantic::semanticTerminalActions[a.type])(semantic.attributes.back());
         }
         else if(act.type == REDUCE)
         {
@@ -740,7 +742,15 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols)
             SRSequence.push_back(rules[act.rule_id].left);
             nodeID.push_back(parserTree.size());
             std::vector<int> vt(dq.begin(), dq.end());
+            std::vector<attribute> vt_attr;
+            for (int no : vt)
+            {
+                vt_attr.push_back(semantic.attributes[no]);
+            }
             parserTree.push_back({rules[act.rule_id].left, -1, vt, -1});
+            semantic.attributes.push_back(attribute());
+            if(ruleToSemantic[act.rule_id] != -1)
+                (semantic.*Semantic::semanticActions[ruleToSemantic[act.rule_id]])(vt_attr, semantic.attributes.back());
             pos--;
         }
         else

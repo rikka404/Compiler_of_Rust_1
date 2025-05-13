@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include "datapath.h"
 
 enum read_type
 {
@@ -14,8 +15,8 @@ enum read_type
 class element_type
 {
 public:
-    std::string dataType = "";          // 数据类型
-    enum read_type readType = NONETYPE; // 读写类型
+    std::shared_ptr<data_type> dataType;    // 数据类型
+    enum read_type readType = NONETYPE;     // 读写类型
 };
 
 class functionEntry

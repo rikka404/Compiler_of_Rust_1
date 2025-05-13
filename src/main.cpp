@@ -2,7 +2,7 @@
 #include <fstream>
 #include "lexical.h"
 #include "rust_parser.h"
-#include "element_type.h"
+#include "data_type.h"
 
 int main()
 {
@@ -66,48 +66,48 @@ int main()
 
     // rules.drawParserTree(std::cout, strList);
 
-    // // 第一组测试
-    // auto ele1 = element_type::create(I32_TYPE);
-    // auto ele2 = element_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<element_type>>{ele1, ele1, ele1});
-    // auto ele3 = element_type::create(REFER_TYPE, ele2);
-    // auto ele4 = element_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<element_type>>{ele1, ele2, ele3});
-    // auto ele5 = element_type::create(I32_TYPE);
-    // auto ele6 = element_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<element_type>>{ele5, ele5, ele5});
-    // auto ele7 = element_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<element_type>>{ele5, ele6, ele5});
-    // auto ele8 = element_type::create(ARRAY_TYPE, 100, ele7);
-    // auto ele9 = element_type::create(REFER_TYPE, ele8);
+    // 第一组测试
+    auto ele1 = data_type::create(I32_TYPE);
+    auto ele2 = data_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<data_type>>{ele1, ele1, ele1});
+    auto ele3 = data_type::create(REFER_TYPE, ele2);
+    auto ele4 = data_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<data_type>>{ele1, ele2, ele3});
+    auto ele5 = data_type::create(I32_TYPE);
+    auto ele6 = data_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<data_type>>{ele5, ele5, ele5});
+    auto ele7 = data_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<data_type>>{ele5, ele6, ele5});
+    auto ele8 = data_type::create(ARRAY_TYPE, 100, ele7);
+    auto ele9 = data_type::create(REFER_TYPE, ele8);
 
-    // std::cout << (*ele4 == *ele7) << std::endl;
-    // std::cout << (ele5->siz) << std::endl;
-    // std::cout << (ele6->siz) << std::endl;
-    // std::cout << (ele7->siz) << std::endl;
-    // std::cout << (ele8->siz) << std::endl;
+    std::cout << (*ele4 == *ele7) << std::endl;
+    std::cout << (ele5->siz) << std::endl;
+    std::cout << (ele6->siz) << std::endl;
+    std::cout << (ele7->siz) << std::endl;
+    std::cout << (ele8->siz) << std::endl;
 
-    // std::cout << (ele9->siz) << std::endl;
-    // std::cout << (*ele3 == *ele9) << std::endl;
+    std::cout << (ele9->siz) << std::endl;
+    std::cout << (*ele3 == *ele9) << std::endl;
 
     // // 第二组测试
-    // auto ele1 = element_type::create(I32_TYPE);
-    // ele1 = element_type::create(BOOL_TYPE);
-    // ele1 = element_type::create(I32_TYPE);
+    // auto ele1 = data_type::create(I32_TYPE);
+    // ele1 = data_type::create(BOOL_TYPE);
+    // ele1 = data_type::create(I32_TYPE);
     // //成功执行三次析构函数
 
     // // 第三组测试
-    // auto ele1 = element_type::create(I32_TYPE);
+    // auto ele1 = data_type::create(I32_TYPE);
     // {
-    //     auto ele2 = element_type::create(ARRAY_TYPE, 3, ele1);
-    //     ele1 = element_type::create(TUPLE_TYPE, 4, std::vector<std::shared_ptr<element_type>>{ele2, ele2, ele2, ele2});
+    //     auto ele2 = data_type::create(ARRAY_TYPE, 3, ele1);
+    //     ele1 = data_type::create(TUPLE_TYPE, 4, std::vector<std::shared_ptr<data_type>>{ele2, ele2, ele2, ele2});
     // }
     // // 这里三次析构，没问题
     // std::cout << ele1->siz << std::endl;
     // // 这里九次析构，没问题
 
     // // 第四组测试
-    // auto ele0 = element_type::create(BOOL_TYPE);
-    // auto ele1 = element_type::create(I32_TYPE);
-    // auto ele2 = element_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<element_type>>{ele0, ele1, ele1});
-    // auto ele3 = element_type::create(REFER_TYPE, ele2);
-    // auto ele4 = element_type::create(ARRAY_TYPE, 3, ele3);
+    // auto ele0 = data_type::create(BOOL_TYPE);
+    // auto ele1 = data_type::create(I32_TYPE);
+    // auto ele2 = data_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<data_type>>{ele0, ele1, ele1});
+    // auto ele3 = data_type::create(REFER_TYPE, ele2);
+    // auto ele4 = data_type::create(ARRAY_TYPE, 3, ele3);
 
     // std::cout << ele4->type << std::endl;
     // std::cout << ele4->get_sub_class(2)->type << std::endl;

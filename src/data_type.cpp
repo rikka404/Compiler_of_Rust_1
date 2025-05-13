@@ -1,10 +1,10 @@
-#include "element_type.h"
+#include "data_type.h"
 #include <assert.h>
 
-std::shared_ptr<element_type> element_type::create(base_element_type b_type)
+std::shared_ptr<data_type> data_type::create(base_data_type b_type)
 {
     assert(b_type == I32_TYPE || b_type == BOOL_TYPE);
-    auto ptr = std::make_shared<element_type>();
+    auto ptr = std::make_shared<data_type>();
     ptr->type = b_type;
     switch (b_type)
     {
@@ -20,7 +20,7 @@ std::shared_ptr<element_type> element_type::create(base_element_type b_type)
     return ptr;
 }
 
-std::shared_ptr<element_type> element_type::create(base_element_type b_type, std::shared_ptr<element_type> e_type)
+std::shared_ptr<data_type> data_type::create(base_data_type b_type, std::shared_ptr<data_type> e_type)
 {
     assert(b_type == REFER_TYPE || b_type == MUT_REFER_TYPE);
     if(b_type == REFER_TYPE)
@@ -40,21 +40,21 @@ std::shared_ptr<element_type> element_type::create(base_element_type b_type, std
     }
 }
 
-std::shared_ptr<element_type> element_type::create(base_element_type b_type, int l, std::shared_ptr<element_type> e_type)
+std::shared_ptr<data_type> data_type::create(base_data_type b_type, int l, std::shared_ptr<data_type> e_type)
 {
     assert(b_type == ARRAY_TYPE);
     auto ptr = std::make_shared<array_type>(l, *e_type);
     return ptr;
 };
 
-std::shared_ptr<element_type> element_type::create(base_element_type b_type, int l, const std::vector<std::shared_ptr<element_type>> e_type)
+std::shared_ptr<data_type> data_type::create(base_data_type b_type, int l, const std::vector<std::shared_ptr<data_type>> e_type)
 {
     assert(b_type == TUPLE_TYPE);
     auto ptr = std::make_shared<tuple_type>(l, e_type);
     return ptr;
 }
 
-std::shared_ptr<element_type> element_type::create(const element_type& e_type)
+std::shared_ptr<data_type> data_type::create(const data_type& e_type)
 {
     if(e_type.type == REFER_TYPE)
     {
@@ -80,51 +80,51 @@ std::shared_ptr<element_type> element_type::create(const element_type& e_type)
     }
     else
     {
-        return element_type::create(e_type.type);
+        return data_type::create(e_type.type);
     }
 }
 
-element_type::element_type(const element_type& e_type)
+data_type::data_type(const data_type& e_type)
 {
     assert(0); //万策尽了，请不要使用复制构造函数，而是使用工厂函数create
 }
 
-element_type element_type::shallow_copy(const element_type &e_type)
+data_type data_type::shallow_copy(const data_type &e_type)
 {
     //写不动了，之后把这个补上吧
 }
 
-element_type & element_type::operator=(const element_type& e_type)
+data_type & data_type::operator=(const data_type& e_type)
 {
     assert(0);//万策尽2.0，请使用工厂函数create
 }
 
-refer_type::refer_type(const element_type& e_type)
+refer_type::refer_type(const data_type& e_type)
 {
     this->siz = 4;
     this->offset = 0;
     this->type = REFER_TYPE;
-    this->t_type = element_type::create(e_type);
+    this->t_type = data_type::create(e_type);
 }
 
-mut_refer_type::mut_refer_type(const element_type& e_type)
+mut_refer_type::mut_refer_type(const data_type& e_type)
 {
     this->siz = 4;
     this->offset = 0;
     this->type = MUT_REFER_TYPE;
-    this->t_type = element_type::create(e_type);
+    this->t_type = data_type::create(e_type);
 }
 
-array_type::array_type(int l, const element_type& e_type)
+array_type::array_type(int l, const data_type& e_type)
 {
     this->siz = l * e_type.siz;
     this->offset = 0;
     this->type = ARRAY_TYPE;
     this->len = l;
-    this->t_type = element_type::create(e_type);
+    this->t_type = data_type::create(e_type);
 }
 
-tuple_type::tuple_type(int l, const std::vector<std::shared_ptr<element_type>> e_type)
+tuple_type::tuple_type(int l, const std::vector<std::shared_ptr<data_type>> e_type)
 {
     this->siz = 0;
     for (auto et : e_type)
@@ -137,13 +137,13 @@ tuple_type::tuple_type(int l, const std::vector<std::shared_ptr<element_type>> e
     this->t_type.resize(e_type.size());
     for (int i = 0; i < (int)e_type.size(); i++)
     {
-        this->t_type[i] = element_type::create(*e_type[i]);
+        this->t_type[i] = data_type::create(*e_type[i]);
     }
 }
 
 /**--------------剪切线，上面是复制相关的---------------- */
 
-bool element_type::operator==(const element_type &e_type) const
+bool data_type::operator==(const data_type &e_type) const
 {
     if(this->type != e_type.type)
         return false;
@@ -186,12 +186,12 @@ bool element_type::operator==(const element_type &e_type) const
     }
 }
 
-bool element_type::operator!=(const element_type &e_type) const
+bool data_type::operator!=(const data_type &e_type) const
 {
     return !(*this == e_type);
 }
 
-std::shared_ptr<element_type> element_type::get_sub_class(int x) const
+std::shared_ptr<data_type> data_type::get_sub_class(int x) const
 {
     if(this->type == REFER_TYPE)
     {

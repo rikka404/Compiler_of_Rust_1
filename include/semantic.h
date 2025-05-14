@@ -1,7 +1,7 @@
+#pragma once
+
 #include <string>
-#include <vector>
 #include <map>
-#include <set>
 #include <stack>
 #include "data_type.h"
 
@@ -70,8 +70,8 @@ public:
     static std::vector<void (Semantic::*)(attribute &)> semanticTerminalActions;
 
     std::set<functionEntry> functionTable; // 函数表
-    std::map<std::string, symbolEntry> symbolTable;     // 符号表
-    std::stack<symbolEntry> symbolStack;
+    // std::map<std::string, symbolEntry> symbolTable;     // 符号表
+    std::vector<symbolEntry> symbolStack; // 符号栈
     std::stack<int> c_ebp; //不知道什么时候变，应该是读到{、}的时候？但是也不一定，比如函数传参
     int c_esp = 0; //其实目前不知道有什么用，因为好像只需要这个符号的名字就好了，不需要真的模拟它在内存中的位置
     std::vector<quaternary> codes;           // 中间代码

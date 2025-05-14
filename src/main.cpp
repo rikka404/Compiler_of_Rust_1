@@ -68,7 +68,7 @@ int main()
 
     rules.drawParserTree(std::cout, strList);
 
-    // // 第一组测试
+    // 第一组测试
     // auto ele1 = data_type::create(I32_TYPE);
     // auto ele2 = data_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<data_type>>{ele1, ele1, ele1});
     // auto ele3 = data_type::create(REFER_TYPE, ele2);
@@ -80,6 +80,8 @@ int main()
     // auto ele9 = data_type::create(REFER_TYPE, ele8);
 
     // std::cout << (*ele4 == *ele7) << std::endl;
+    // std::cout << *ele4 << std::endl;
+    // std::cout << *ele7 << std::endl;
     // std::cout << (ele5->siz) << std::endl;
     // std::cout << (ele6->siz) << std::endl;
     // std::cout << (ele7->siz) << std::endl;
@@ -87,6 +89,8 @@ int main()
 
     // std::cout << (ele9->siz) << std::endl;
     // std::cout << (*ele3 == *ele9) << std::endl;
+    // std::cout << *ele3 << std::endl;
+    // std::cout << *ele9 << std::endl;
 
     // // 第二组测试
     // auto ele1 = data_type::create(I32_TYPE);
@@ -111,10 +115,10 @@ int main()
     // auto ele3 = data_type::create(REFER_TYPE, ele2);
     // auto ele4 = data_type::create(ARRAY_TYPE, 3, ele3);
 
-    // std::cout << ele4->type << std::endl;
-    // std::cout << ele4->get_sub_class(2)->type << std::endl;
-    // std::cout << ele4->get_sub_class(2)->get_sub_class(0)->type << std::endl;
-    // std::cout << ele4->get_sub_class(2)->get_sub_class(0)->get_sub_class(0)->type << std::endl;
-    // std::cout << ele4->get_sub_class(2)->get_sub_class(0)->get_sub_class(1)->type << std::endl;
+    // std::cout << *ele4 << std::endl;
+    // std::cout << *ele4->get_sub_class(2) << std::endl;
+    // std::cout << *ele4->get_sub_class(2)->get_sub_class(0) << std::endl;
+    // std::cout << *ele4->get_sub_class(2)->get_sub_class(0)->get_sub_class(0) << std::endl;
+    // std::cout << *ele4->get_sub_class(2)->get_sub_class(0)->get_sub_class(1) << std::endl;
     return 0;
 }

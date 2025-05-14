@@ -218,3 +218,48 @@ std::shared_ptr<data_type> data_type::get_sub_class(int x) const
         assert(0);
     }
 }
+
+std::ostream &operator<<(std::ostream &out, const data_type &e_type)
+{
+    if (e_type.type == I32_TYPE)
+    {
+        out << "i32";
+    }
+    else if (e_type.type == BOOL_TYPE)
+    {
+        out << "bool";
+    }
+    else if (e_type.type == REFER_TYPE)
+    {
+        refer_type *eptr = (refer_type *)(&e_type);
+        out << "&" << *(eptr->t_type);
+    }
+    else if (e_type.type == MUT_REFER_TYPE)
+    {
+        mut_refer_type *eptr = (mut_refer_type *)(&e_type);
+        out << "mut&" << *(eptr->t_type);
+    }
+    else if (e_type.type == ARRAY_TYPE)
+    {
+        array_type *eptr = (array_type *)(&e_type);
+        out << "[" << *(eptr->t_type) << "," << eptr->len << "] ";
+    }
+    else if (e_type.type == TUPLE_TYPE)
+    {
+        tuple_type *eptr = (tuple_type *)(&e_type);
+        out << "(";
+        for (int i = 0; i < eptr->len; i++)
+        // for (int i = eptr->len - 1; i >= 0; i--)
+        {
+            out << *(eptr->t_type[i]);
+            if (i != eptr->len - 1 || i == 0)
+                out << ",";
+        }
+        out << ")";
+    }
+    else
+    {
+        assert(0);
+    }
+    return out;
+}

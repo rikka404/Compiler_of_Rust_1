@@ -82,4 +82,4 @@ public:
     tuple_type(int l, const std::vector<std::shared_ptr<data_type>> e_type);
 };
 
-
+std::ostream &operator<<(std::ostream &out, const data_type &e_type);

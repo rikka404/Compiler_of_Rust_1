@@ -724,6 +724,19 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
             parserTree.push_back({a, -1, {}, pos});
             semantic.attributes.push_back(attribute());
             (semantic.*Semantic::semanticTerminalActions[a.type])(semantic.attributes.back());
+            if(a.type == ID) //特判一下ID和数字吧
+            {
+                semantic.attributes.back()["name"] = a.val;
+            }
+            else if(a.type == INT)
+            {
+                semantic.attributes.back()["val"] = std::stoi(a.val);
+                semantic.attributes.back()["name"] = a.val;
+                element_type e_type;
+                e_type.dataType = data_type::create(I32_TYPE);
+                e_type.readType = LITERAL;
+                semantic.attributes.back()["elementType"] = e_type;
+            }
         }
         else if(act.type == REDUCE)
         {
@@ -750,7 +763,11 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
             parserTree.push_back({rules[act.rule_id].left, -1, vt, -1});
             semantic.attributes.push_back(attribute());
             if(ruleToSemantic[act.rule_id] != -1)
+            {
+                std::cerr << "act" << std::to_string(ruleToSemantic[act.rule_id]) << "_ begin" << std::endl;
                 (semantic.*Semantic::semanticActions[ruleToSemantic[act.rule_id]])(vt_attr, semantic.attributes.back());
+                std::cerr << "act" << std::to_string(ruleToSemantic[act.rule_id]) << "_ end" << std::endl;
+            }
             pos--;
         }
         else

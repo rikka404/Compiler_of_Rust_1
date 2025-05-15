@@ -15,6 +15,7 @@ enum base_data_type
     ARRAY_TYPE, 
     TUPLE_TYPE, 
 
+    VOID_TYPE,
     ERROR_TYPE
 };
 
@@ -38,14 +39,15 @@ public:
     static data_type shallow_copy(const data_type &e_type);
 
     int siz;
-    int offset; //备战未来
     base_data_type type;
+    
 
     data_type &operator=(const data_type& e_type);
     bool operator==(const data_type &e_type) const;
     bool operator!=(const data_type &e_type) const;
-    std::shared_ptr<data_type> get_sub_class(int x) const;
-    // int getoffset() const;
+    static int unused_offset;
+    std::shared_ptr<data_type> get_sub_class(int x, int& offset = unused_offset) const; //放弃了offset字段，在这里使用offset得到偏移量
+    //虽说这里能实现给定下标的偏移量计算，但是事实上更多的是表达式为下标，这时候就只能取儿子的大小再计算了
 };
 
 class refer_type :public data_type

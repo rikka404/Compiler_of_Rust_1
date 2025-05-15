@@ -1,9 +1,11 @@
 #include "data_type.h"
 #include <assert.h>
 
+int data_type::unused_offset = 0;
+
 std::shared_ptr<data_type> data_type::create(base_data_type b_type)
 {
-    assert(b_type == I32_TYPE || b_type == BOOL_TYPE);
+    assert(b_type == I32_TYPE || b_type == BOOL_TYPE || b_type == VOID_TYPE);
     auto ptr = std::make_shared<data_type>();
     ptr->type = b_type;
     switch (b_type)
@@ -102,7 +104,6 @@ data_type & data_type::operator=(const data_type& e_type)
 refer_type::refer_type(const data_type& e_type)
 {
     this->siz = 4;
-    this->offset = 0;
     this->type = REFER_TYPE;
     this->t_type = data_type::create(e_type);
 }
@@ -110,7 +111,6 @@ refer_type::refer_type(const data_type& e_type)
 mut_refer_type::mut_refer_type(const data_type& e_type)
 {
     this->siz = 4;
-    this->offset = 0;
     this->type = MUT_REFER_TYPE;
     this->t_type = data_type::create(e_type);
 }
@@ -118,7 +118,6 @@ mut_refer_type::mut_refer_type(const data_type& e_type)
 array_type::array_type(int l, const data_type& e_type)
 {
     this->siz = l * e_type.siz;
-    this->offset = 0;
     this->type = ARRAY_TYPE;
     this->len = l;
     this->t_type = data_type::create(e_type);
@@ -131,7 +130,6 @@ tuple_type::tuple_type(int l, const std::vector<std::shared_ptr<data_type>> e_ty
     {
         this->siz += et->siz;
     }
-    this->offset = 0;
     this->type = TUPLE_TYPE;
     this->len = l;
     this->t_type.resize(e_type.size());
@@ -191,26 +189,37 @@ bool data_type::operator!=(const data_type &e_type) const
     return !(*this == e_type);
 }
 
-std::shared_ptr<data_type> data_type::get_sub_class(int x) const
+std::shared_ptr<data_type> data_type::get_sub_class(int x, int& offset) const
 {
     if(this->type == REFER_TYPE)
     {
         assert(x == 0);
+        offset = -1; //如果要拿到引用的子类，那么就只是一个类，没有偏移量
         return ((refer_type *)this)->t_type;
     }
     else if(this->type == MUT_REFER_TYPE)
     {
         assert(x == 0);
+        offset = -1;
         return ((mut_refer_type *)this)->t_type;
     }
     else if(this->type == ARRAY_TYPE)
     {
         assert(x < ((array_type *)this)->len);
+        if(offset != -1)
+            offset += ((array_type *)this)->t_type->siz * x;
         return ((array_type *)this)->t_type;
     }
     else if(this->type == TUPLE_TYPE)
     {
         assert(x < ((tuple_type *)this)->len);
+        if(offset != -1)
+        {
+            for (int i = 0; i < x; i++)
+            {
+                offset += ((tuple_type *)this)->t_type[i]->siz;
+            }
+        }
         return ((tuple_type *)this)->t_type[x];
     }
     else

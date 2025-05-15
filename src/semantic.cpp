@@ -58,6 +58,25 @@ void Semantic::init()
     codes.resize(quad_num);
 }
 
+void Semantic::pushSymbol(symbolEntry sym)
+{
+    symbolIDTable[sym.name].push_back(symbolStack.size());
+    symbolStack.push_back(sym);
+}
+void Semantic::popSymbol()
+{
+    symbolIDTable[symbolStack.back().name].pop_back();
+    if(symbolIDTable[symbolStack.back().name].empty())
+        symbolIDTable.erase(symbolStack.back().name);
+    symbolStack.pop_back();
+}
+symbolEntry Semantic::getSymbol(const std::string &name) const
+{
+    if(!symbolIDTable.count(name))
+        return symbolEntry{"", element_type{}, 0};
+    return symbolStack[symbolIDTable.at(name).back()];
+}
+
 void Semantic::printCodes(std::ostream& out) const
 {
     for (int i = begin_quad_num; i < (int)codes.size(); i++)
@@ -137,15 +156,7 @@ void Semantic::act5_(std::vector<attribute> &args, attribute &result) {
         offset -= type.dataType->siz;
         symbolEntry sym{name, type, offset};
         para_sym_list.push_back(sym);
-        symbolTable[name] = sym;
-        symbolStack.push(sym);
-    }
-    for (int i = para_sym_list.size() - 1; i >= 0; i--)
-    {
-        symbolEntry sym = para_sym_list[i];
-        para_sym_list.push_back(sym);
-        symbolTable[sym.name] = sym;
-        symbolStack.push(sym);
+        pushSymbol(sym);
     }
     // 注意这里一定要指明functionEntry类型，不然insert不进去，不知道为什么
     functionTable.insert(functionEntry{quad_num, std::any_cast<std::string>(args[1]["name"]), para_sym_list, symbolEntry{"", ret_type, 0}});
@@ -206,20 +217,12 @@ void Semantic::act18_(std::vector<attribute> &args, attribute &result) {
         offset -= type.dataType->siz;
         symbolEntry sym{name, type, offset};
         para_sym_list.push_back(sym);
-        symbolTable[name] = sym;
-        symbolStack.push(sym);
+        pushSymbol(sym);
     }
     symbolEntry ret_sym{"", ret_type, 0};
     offset -= ret_type.dataType->siz;
     ret_sym.relativeAddress = offset;
     nowFunctionRetAddress = offset;
-    for (int i = para_sym_list.size() - 1; i >= 0; i--)
-    {
-        symbolEntry sym = para_sym_list[i];
-        para_sym_list.push_back(sym);
-        symbolTable[sym.name] = sym;
-        symbolStack.push(sym);
-    }
     // 注意这里一定要指明functionEntry类型，不然insert不进去，不知道为什么
     functionTable.insert(functionEntry{quad_num, std::any_cast<std::string>(args[1]["name"]), para_sym_list, ret_sym});
 }
@@ -236,8 +239,7 @@ void Semantic::act21_(std::vector<attribute> &args, attribute &result) {
     sym.name = name, sym.type = ele_type;
     sym.relativeAddress = c_esp;
     c_esp += ele_type.dataType->siz;
-    symbolTable[name] = sym;
-    symbolStack.push(sym);
+    pushSymbol(sym);
 }
 void Semantic::act22_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act23_(std::vector<attribute> &args, attribute &result) {}
@@ -370,8 +372,7 @@ void Semantic::act32_(std::vector<attribute> &args, attribute &result) {
     sym.name = name, sym.type = ele_type;
     sym.relativeAddress = c_esp;
     c_esp += ele_type.dataType->siz;
-    symbolTable[name] = sym;
-    symbolStack.push(sym);
+    pushSymbol(sym);
     //赋值
     if(*sym.type.dataType != *std::any_cast<element_type>(args[5]["elementType"]).dataType)//注意取*再比较
     {
@@ -398,8 +399,7 @@ void Semantic::act33_(std::vector<attribute> &args, attribute &result) {
     sym.name = name, sym.type = ele_type;
     sym.relativeAddress = c_esp;
     c_esp += ele_type.dataType->siz;
-    symbolTable[name] = sym;
-    symbolStack.push(sym);
+    pushSymbol(sym);
     if(std::any_cast<element_type>(args[3]["elementType"]).readType == LITERAL)
     {
         codes.push_back(quaternary(":=", Operand{Literal, std::any_cast<int>(args[3]["val"])}, Operand{Literal, sym.type.dataType->siz}, Operand{Address, sym.relativeAddress}));
@@ -432,12 +432,12 @@ void Semantic::act39_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act40_(std::vector<attribute> &args, attribute &result) {
     //元素 -> /id
-    if(!symbolTable.count(std::any_cast<std::string>(args[0]["name"])))
+    symbolEntry sym = getSymbol(std::any_cast<std::string>(args[0]["name"]));
+    if(sym.type.readType == NONETYPE)
     {
         std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not declared." << std::endl;
         return;
     }
-    symbolEntry sym = symbolTable[std::any_cast<std::string>(args[0]["name"])];
     result["name"] = sym.name;
     result["elementType"] = sym.type;
     result["address"] = sym.relativeAddress;

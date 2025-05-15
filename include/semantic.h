@@ -106,10 +106,8 @@ public:
     static std::vector<void (Semantic::*)(attribute &)> semanticTerminalActions;
 
     std::set<functionEntry> functionTable; // 函数表
-    std::map<std::string, symbolEntry> symbolTable;     // 符号表，我觉得可以每到一个新函数的时候clear这个表
-    // 这里用map有个问题：如果有变量重名，那么销毁一个变量就会全部销毁
-    std::stack<symbolEntry> symbolStack;                //模拟那个栈，从后面出站的时候要在符号表里面也删掉
-    std::stack<int> c_ebp; //不知道什么时候变，应该是读到{、}的时候？但是也不一定，比如函数传参，并不是ebp，只是表示作用域
+    std::map<std::string, std::vector<int>> symbolIDTable;     // 符号表，我觉得可以每到一个新函数的时候clear这个表
+    std::vector<symbolEntry> symbolStack;                //模拟那个栈，从后面出站的时候要在符号表里面也删掉
     int c_esp = 0; //有用了，需要模拟相对内存位置，是esp
     std::vector<quaternary> codes;           // 中间代码
     std::vector<attribute> attributes;      //把每个语法分析树节点的attr都存下来，与语法分析同步
@@ -120,6 +118,11 @@ public:
     bool have_error = 0;
 
     void init();
+
+    void pushSymbol(symbolEntry);
+    void popSymbol();
+    symbolEntry getSymbol(const std::string &name) const;
+
     void printCodes(std::ostream &out) const;
 
     // 可复用函数

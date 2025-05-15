@@ -8,7 +8,7 @@ int main()
 {
     /* 预处理 */
     // test是用来测试词法分析的，test2是用来测试语法分析的
-    std::string filename = "test/test2.rs";
+    std::string filename = "test/test4.rs";
     std::ifstream fin(filename);
     std::string s;
     if (!fin.is_open())
@@ -68,7 +68,9 @@ int main()
 
     rules.drawParserTree(std::cout, strList);
 
-    // 第一组测试
+    semantic.printCodes(std::cout);
+
+    // // 第一组测试
     // auto ele1 = data_type::create(I32_TYPE);
     // auto ele2 = data_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<data_type>>{ele1, ele1, ele1});
     // auto ele3 = data_type::create(REFER_TYPE, ele2);
@@ -111,10 +113,23 @@ int main()
     // // 第四组测试
     // auto ele0 = data_type::create(BOOL_TYPE);
     // auto ele1 = data_type::create(I32_TYPE);
-    // auto ele2 = data_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<data_type>>{ele0, ele1, ele1});
-    // auto ele3 = data_type::create(REFER_TYPE, ele2);
+    // auto ele2 = data_type::create(REFER_TYPE, ele1);
+    // auto ele3 = data_type::create(TUPLE_TYPE, 3, std::vector<std::shared_ptr<data_type>>{ele0, ele1, ele1});
     // auto ele4 = data_type::create(ARRAY_TYPE, 3, ele3);
 
+    // std::cout << ele4->type << std::endl;
+    // int offset = 0;
+    // std::cout << ele4->get_sub_class(2)->type << std::endl;
+    // std::cout << offset << std::endl;
+    // offset = 0;
+    // std::cout << ele4->get_sub_class(2, offset)->get_sub_class(0, offset)->type << std::endl;
+    // std::cout << offset << std::endl;
+    // offset = 0;
+    // std::cout << ele4->get_sub_class(2, offset)->get_sub_class(0, offset)->get_sub_class(0, offset)->type << std::endl;
+    // std::cout << offset << std::endl;
+    // offset = 0;
+    // std::cout << ele4->get_sub_class(2, offset)->get_sub_class(0, offset)->get_sub_class(0, offset)->type << std::endl;
+    // std::cout << offset << std::endl;
     // std::cout << *ele4 << std::endl;
     // std::cout << *ele4->get_sub_class(2) << std::endl;
     // std::cout << *ele4->get_sub_class(2)->get_sub_class(0) << std::endl;

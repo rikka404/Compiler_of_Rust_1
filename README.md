@@ -1,4 +1,4 @@
-# 编译原理大作业1——词法和语法分析
+# 编译原理大作业
 
 ## 1 词法分析
 
@@ -406,4 +406,4 @@ KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ 5 numTypeCheck 0 0 numType
 
 ## 小tip
 
-如果觉得未实现的函数报的warning太多，可以在编译语句里加上这一个参数` -Wno-unused-parameter `来屏蔽掉所有“没有使用某参数”的warning
+如果觉得未实现的函数报的warning太多，可以在编译语句里加上这一个参数`-Wno-unused-parameter`来屏蔽掉所有“没有使用某参数”的warning

@@ -1,8 +1,8 @@
 #pragma once
-
 #include <string>
 #include <map>
 #include <stack>
+#include <any>
 #include "data_type.h"
 
 enum read_type
@@ -20,19 +20,6 @@ public:
     enum read_type readType = NONETYPE;     // 读写类型
 };
 
-class functionEntry
-{
-public:
-    std::string name;                    // 函数名
-    std::vector<element_type> argsTypes; // 参数类型列表
-    element_type returnType;             // 返回值类型
-    
-    bool operator<(const functionEntry &f) const
-    {
-        return name < f.name;
-    }
-};
-
 class symbolEntry
 {
 public:
@@ -45,21 +32,68 @@ public:
     }
 };
 
-class attribute
+class functionEntry
 {
 public:
-    std::map<std::string, int> values;
-    element_type type; // 类型
+    int code_pos;                       //函数的四元式起始位置
+    std::string name;                    // 函数名
+    std::vector<symbolEntry> argsTypes; // 形参列表
+    symbolEntry returnType;             // 返回值类型
+    
+    bool operator<(const functionEntry &f) const
+    {
+        return name < f.name;
+    }
+};
+
+// class attribute
+// {
+// public:
+//     std::map<std::string, std::any> values;
+//     // element_type type; // 类型
+// };
+// attr.value["type"]
+using attribute = std::map<std::string, std::any>;
+
+enum arg_type
+{
+    Literal,    //立即数
+    Address,    //内存地址
+    Lable       //中间代码标号
+};
+struct Operand {
+    arg_type type;
+    int value;  // 地址偏移 or 立即数值 or label编号
 };
 
 class quaternary
 {
 public:
-    std::string op, arg1, arg2, result;
+    std::string op;
+    Operand arg1, arg2, result;
 
     quaternary(){};
-    quaternary(std::string a, std::string b, std::string c, std::string d) : op(a), arg1(b), arg2(c), result(d){};
+    quaternary(std::string a, Operand b, Operand c, Operand d) : op(a), arg1(b), arg2(c), result(d){};
 };
+
+/**
+ * 事已至此，写一下目前我想的四元式的定义吧
+ * 首先，放弃四个参数都是字符串的形式，因为我们既然有偏移量了，没有必要再用变量名了
+ * 然后就会有个问题：(+, 100, 200, 300)，这个300表示内存偏移是没有歧义的，但是前面的100,200，不知道是立即数还是内存偏移量，所以需要一个枚举来区分
+ * 输出的时候可以用100和[100]来区分
+ * 这样我们就实现了后三个参数都使用int来做了
+ * 
+ * 目前的四元式
+ * (:=, x, siz, a) //a:= x， 类型大小为x
+ * += -= *= /=只能对i32使用
+ * (+ / - / * / /, a, b, c)
+ * (j, 0, 0, to)
+ * (jt, a, 0, to) //我觉得不需要j<这类东西，因为实际上是由表达式规约出来的
+ * (push, a, siz, 0) //需要带大小的push
+ * (call, 0, 0, to) //带ebp esp的跳转
+ * (return, a, siz, 0) //把a地址开始，siz大小的内容放到返回值的地方
+ * (leave, 0, 0, 0) //退出call
+ */
 
 class Semantic
 {
@@ -70,16 +104,24 @@ public:
     static std::vector<void (Semantic::*)(attribute &)> semanticTerminalActions;
 
     std::set<functionEntry> functionTable; // 函数表
-    // std::map<std::string, symbolEntry> symbolTable;     // 符号表
-    std::vector<symbolEntry> symbolStack; // 符号栈
-    std::stack<int> c_ebp; //不知道什么时候变，应该是读到{、}的时候？但是也不一定，比如函数传参
-    int c_esp = 0; //其实目前不知道有什么用，因为好像只需要这个符号的名字就好了，不需要真的模拟它在内存中的位置
+    std::map<std::string, std::vector<int>> symbolIDTable;     // 符号表，我觉得可以每到一个新函数的时候clear这个表
+    std::vector<symbolEntry> symbolStack;                //模拟那个栈，从后面出站的时候要在符号表里面也删掉
+    int c_esp = 0; //有用了，需要模拟相对内存位置，是esp
     std::vector<quaternary> codes;           // 中间代码
     std::vector<attribute> attributes;      //把每个语法分析树节点的attr都存下来，与语法分析同步
     const int begin_quad_num = 100;
     int quad_num;
+    int nowFunctionRetAddress;
+
+    bool have_error = 0;
 
     void init();
+
+    void pushSymbol(symbolEntry);
+    void popSymbol();
+    symbolEntry getSymbol(const std::string &name) const;
+
+    void printCodes(std::ostream &out) const;
 
     // 可复用函数
 
@@ -135,6 +177,107 @@ public:
     void act48_(std::vector<attribute> &args, attribute &result);
     void act49_(std::vector<attribute> &args, attribute &result);
     void act50_(std::vector<attribute> &args, attribute &result);
+    void act51_(std::vector<attribute> &args, attribute &result);
+    void act52_(std::vector<attribute> &args, attribute &result);
+    void act53_(std::vector<attribute> &args, attribute &result);
+    void act54_(std::vector<attribute> &args, attribute &result);
+    void act55_(std::vector<attribute> &args, attribute &result);
+    void act56_(std::vector<attribute> &args, attribute &result);
+    void act57_(std::vector<attribute> &args, attribute &result);
+    void act58_(std::vector<attribute> &args, attribute &result);
+    void act59_(std::vector<attribute> &args, attribute &result);
+    void act60_(std::vector<attribute> &args, attribute &result);
+    void act61_(std::vector<attribute> &args, attribute &result);
+    void act62_(std::vector<attribute> &args, attribute &result);
+    void act63_(std::vector<attribute> &args, attribute &result);
+    void act64_(std::vector<attribute> &args, attribute &result);
+    void act65_(std::vector<attribute> &args, attribute &result);
+    void act66_(std::vector<attribute> &args, attribute &result);
+    void act67_(std::vector<attribute> &args, attribute &result);
+    void act68_(std::vector<attribute> &args, attribute &result);
+    void act69_(std::vector<attribute> &args, attribute &result);
+    void act70_(std::vector<attribute> &args, attribute &result);
+    void act71_(std::vector<attribute> &args, attribute &result);
+    void act72_(std::vector<attribute> &args, attribute &result);
+    void act73_(std::vector<attribute> &args, attribute &result);
+    void act74_(std::vector<attribute> &args, attribute &result);
+    void act75_(std::vector<attribute> &args, attribute &result);
+    void act76_(std::vector<attribute> &args, attribute &result);
+    void act77_(std::vector<attribute> &args, attribute &result);
+    void act78_(std::vector<attribute> &args, attribute &result);
+    void act79_(std::vector<attribute> &args, attribute &result);
+    void act80_(std::vector<attribute> &args, attribute &result);
+    void act81_(std::vector<attribute> &args, attribute &result);
+    void act82_(std::vector<attribute> &args, attribute &result);
+    void act83_(std::vector<attribute> &args, attribute &result);
+    void act84_(std::vector<attribute> &args, attribute &result);
+    void act85_(std::vector<attribute> &args, attribute &result);
+    void act86_(std::vector<attribute> &args, attribute &result);
+    void act87_(std::vector<attribute> &args, attribute &result);
+    void act88_(std::vector<attribute> &args, attribute &result);
+    void act89_(std::vector<attribute> &args, attribute &result);
+    void act90_(std::vector<attribute> &args, attribute &result);
+    void act91_(std::vector<attribute> &args, attribute &result);
+    void act92_(std::vector<attribute> &args, attribute &result);
+    void act93_(std::vector<attribute> &args, attribute &result);
+    void act94_(std::vector<attribute> &args, attribute &result);
+    void act95_(std::vector<attribute> &args, attribute &result);
+    void act96_(std::vector<attribute> &args, attribute &result);
+    void act97_(std::vector<attribute> &args, attribute &result);
+    void act98_(std::vector<attribute> &args, attribute &result);
+    void act99_(std::vector<attribute> &args, attribute &result);
+    void act100_(std::vector<attribute> &args, attribute &result);
+    void act101_(std::vector<attribute> &args, attribute &result);
+    void act102_(std::vector<attribute> &args, attribute &result);
+    void act103_(std::vector<attribute> &args, attribute &result);
+    void act104_(std::vector<attribute> &args, attribute &result);
+    void act105_(std::vector<attribute> &args, attribute &result);
+    void act106_(std::vector<attribute> &args, attribute &result);
+    void act107_(std::vector<attribute> &args, attribute &result);
+    void act108_(std::vector<attribute> &args, attribute &result);
+    void act109_(std::vector<attribute> &args, attribute &result);
+    void act110_(std::vector<attribute> &args, attribute &result);
+    void act111_(std::vector<attribute> &args, attribute &result);
+    void act112_(std::vector<attribute> &args, attribute &result);
+    void act113_(std::vector<attribute> &args, attribute &result);
+    void act114_(std::vector<attribute> &args, attribute &result);
+    void act115_(std::vector<attribute> &args, attribute &result);
+    void act116_(std::vector<attribute> &args, attribute &result);
+    void act117_(std::vector<attribute> &args, attribute &result);
+    void act118_(std::vector<attribute> &args, attribute &result);
+    void act119_(std::vector<attribute> &args, attribute &result);
+    void act120_(std::vector<attribute> &args, attribute &result);
+    void act121_(std::vector<attribute> &args, attribute &result);
+    void act122_(std::vector<attribute> &args, attribute &result);
+    void act123_(std::vector<attribute> &args, attribute &result);
+    void act124_(std::vector<attribute> &args, attribute &result);
+    void act125_(std::vector<attribute> &args, attribute &result);
+    void act126_(std::vector<attribute> &args, attribute &result);
+    void act127_(std::vector<attribute> &args, attribute &result);
+    void act128_(std::vector<attribute> &args, attribute &result);
+    void act129_(std::vector<attribute> &args, attribute &result);
+    void act130_(std::vector<attribute> &args, attribute &result);
+    void act131_(std::vector<attribute> &args, attribute &result);
+    void act132_(std::vector<attribute> &args, attribute &result);
+    void act133_(std::vector<attribute> &args, attribute &result);
+    void act134_(std::vector<attribute> &args, attribute &result);
+    void act135_(std::vector<attribute> &args, attribute &result);
+    void act136_(std::vector<attribute> &args, attribute &result);
+    void act137_(std::vector<attribute> &args, attribute &result);
+    void act138_(std::vector<attribute> &args, attribute &result);
+    void act139_(std::vector<attribute> &args, attribute &result);
+    void act140_(std::vector<attribute> &args, attribute &result);
+    void act141_(std::vector<attribute> &args, attribute &result);
+    void act142_(std::vector<attribute> &args, attribute &result);
+    void act143_(std::vector<attribute> &args, attribute &result);
+    void act144_(std::vector<attribute> &args, attribute &result);
+    void act145_(std::vector<attribute> &args, attribute &result);
+    void act146_(std::vector<attribute> &args, attribute &result);
+    void act147_(std::vector<attribute> &args, attribute &result);
+    void act148_(std::vector<attribute> &args, attribute &result);
+    void act149_(std::vector<attribute> &args, attribute &result);
+    void act150_(std::vector<attribute> &args, attribute &result);
+
 
     // 终结符动作函数
     void tact0_(attribute &result);

@@ -2,78 +2,78 @@ START -> PROGRAM [ -1 ] #
 #
 # 1.1 基础程序
 PROGRAM -> SHENG_MING_CHUAN [ 0 ] #
-SHENG_MING_CHUAN -> /zero [ -1 ] | SHENG_MING SHENG_MING_CHUAN [ -1 ] #
-SHENG_MING -> HAN_SHU_SHENG_MING [ -1 ] #
-HAN_SHU_SHENG_MING -> HAN_SHU_TOU_SHENG_MING YU_JU_KUAI [ 1 ] #
-HAN_SHU_TOU_SHENG_MING -> /fn /id /lpra XING_CAN_LIE_BIAO /rpra [ 2 ] #
-XING_CAN_LIE_BIAO -> /zero [ -1 ] #
-YU_JU_KUAI -> /lbra YU_JU_CHUAN /rbra [ 3 ] #
-YU_JU_CHUAN -> /zero [ 4 ] #
+SHENG_MING_CHUAN -> /zero [ 1 ] | SHENG_MING SHENG_MING_CHUAN [ 2 ] #
+SHENG_MING -> HAN_SHU_SHENG_MING [ 3 ] #
+HAN_SHU_SHENG_MING -> HAN_SHU_TOU_SHENG_MING YU_JU_KUAI [ 4 ] #
+HAN_SHU_TOU_SHENG_MING -> /fn /id /lpra XING_CAN_LIE_BIAO /rpra [ 5 ] #
+XING_CAN_LIE_BIAO -> /zero [ 6 ] #
+YU_JU_KUAI -> /lbra YU_JU_CHUAN /rbra [ 7 ] #
+YU_JU_CHUAN -> /zero [ 8 ] #
 #
 # 1.2 语句
-YU_JU_CHUAN -> YU_JU YU_JU_CHUAN [ 5 ] #
-YU_JU -> /semicolon [ 6 ] #
+YU_JU_CHUAN -> YU_JU YU_JU_CHUAN [ 9 ] #
+YU_JU -> /semicolon [ 10 ] #
 #
 # 1.3 返回语句
-YU_JU -> FAN_HUI_YU_JU [ 7 ] #
-FAN_HUI_YU_JU -> /return /semicolon [ -1 ] #
+YU_JU -> FAN_HUI_YU_JU [ 11 ] #
+FAN_HUI_YU_JU -> /return /semicolon [ 12 ] #
 #
 # 0.1 变量声明内部
-BIAN_LIANG_SHENG_MING_NEI_BU -> /mut /id [ 8 ] #
+BIAN_LIANG_SHENG_MING_NEI_BU -> /mut /id [ 13 ] #
 #
 # 0.2 类型
-LEI_XING -> /i32 [ -1 ] #
+LEI_XING -> /i32 [ 14 ] #
 #
 # 0.3 可赋值元素
 #
 # 1.4 函数输入
-XING_CAN_LIE_BIAO -> XING_CAN [ -1 ] | XING_CAN /comma XING_CAN_LIE_BIAO [ -1 ] #
-XING_CAN -> BIAN_LIANG_SHENG_MING_NEI_BU /colon LEI_XING [ -1 ] #
+XING_CAN_LIE_BIAO -> XING_CAN [ 15 ] | XING_CAN /comma XING_CAN_LIE_BIAO [ 16 ] #
+XING_CAN -> BIAN_LIANG_SHENG_MING_NEI_BU /colon LEI_XING [ 17 ] #
 #
 # 1.5 函数输出
-HAN_SHU_TOU_SHENG_MING -> /fn /id /lpra XING_CAN_LIE_BIAO /rpra /arrow LEI_XING [ 9 ] #
-FAN_HUI_YU_JU -> /return BIAO_DA_SHI /semicolon [ 10 ] #
+HAN_SHU_TOU_SHENG_MING -> /fn /id /lpra XING_CAN_LIE_BIAO /rpra /arrow LEI_XING [ 18 ] #
+FAN_HUI_YU_JU -> /return BIAO_DA_SHI /semicolon [ 19 ] #
 #
 # 2.1 变量声明语句
-YU_JU -> BIAN_LIANG_SHENG_MING_YU_JU [ 11 ] #
-BIAN_LIANG_SHENG_MING_YU_JU -> /let BIAN_LIANG_SHENG_MING_NEI_BU /colon LEI_XING /semicolon [ 12 ] #
-BIAN_LIANG_SHENG_MING_YU_JU -> /let BIAN_LIANG_SHENG_MING_NEI_BU /semicolon [ 13 ] #
+YU_JU -> BIAN_LIANG_SHENG_MING_YU_JU [ 20 ] #
+BIAN_LIANG_SHENG_MING_YU_JU -> /let BIAN_LIANG_SHENG_MING_NEI_BU /colon LEI_XING /semicolon [ 21 ] #
+BIAN_LIANG_SHENG_MING_YU_JU -> /let BIAN_LIANG_SHENG_MING_NEI_BU /semicolon [ 22 ] #
 #
 # 2.2 赋值语句
-YU_JU -> FU_ZHI_YU_JU [ 14 ] #
-FU_ZHI_YU_JU -> BIAO_DA_SHI FU_ZHI_YUN_SUAN_FU BIAO_DA_SHI /semicolon [ -1 ] #
-FU_ZHI_YUN_SUAN_FU -> /assign [ -1 ] | /addassign [ -1 ] | /subassign [ -1 ] | /mulassign [ -1 ] | /divassign [ -1 ] | /modassign [ -1 ] #
+YU_JU -> FU_ZHI_YU_JU [ 23 ] #
+FU_ZHI_YU_JU -> BIAO_DA_SHI FU_ZHI_YUN_SUAN_FU BIAO_DA_SHI /semicolon [ 24 ] #
+FU_ZHI_YUN_SUAN_FU -> /assign [ 25 ] | /addassign [ 26 ] | /subassign [ 27 ] | /mulassign [ 28 ] | /divassign [ 29 ] | /modassign [ 30 ] #
 #
 # 2.3 变量声明赋值语句
-YU_JU -> BIAN_LIANG_SHENG_MING_FU_ZHI_YU_JU [ 15 ] #
-BIAN_LIANG_SHENG_MING_FU_ZHI_YU_JU -> /let BIAN_LIANG_SHENG_MING_NEI_BU /colon LEI_XING /assign BIAO_DA_SHI /semicolon [ 16 ] #
-BIAN_LIANG_SHENG_MING_FU_ZHI_YU_JU -> /let BIAN_LIANG_SHENG_MING_NEI_BU /assign BIAO_DA_SHI /semicolon [ 17 ] #
+YU_JU -> BIAN_LIANG_SHENG_MING_FU_ZHI_YU_JU [ 31 ] #
+BIAN_LIANG_SHENG_MING_FU_ZHI_YU_JU -> /let BIAN_LIANG_SHENG_MING_NEI_BU /colon LEI_XING /assign BIAO_DA_SHI /semicolon [ 32 ] #
+BIAN_LIANG_SHENG_MING_FU_ZHI_YU_JU -> /let BIAN_LIANG_SHENG_MING_NEI_BU /assign BIAO_DA_SHI /semicolon [ 33 ] #
 #
 # 3.1 基本表达式
-YU_JU -> BIAO_DA_SHI /semicolon [ 18 ] #
-BIAO_DA_SHI -> OR_BIAO_DA_SHI [ -1 ] #
-OR_BIAO_DA_SHI -> AND_BIAO_DA_SHI [ -1 ] #
-AND_BIAO_DA_SHI -> JIA_FA_BIAO_DA_SHI [ -1 ] #
-JIA_FA_BIAO_DA_SHI -> XIANG [ -1 ] #
-XIANG -> YIN_ZI [ -1 ] #
-YIN_ZI -> YUAN_SU [ -1 ] #
-YUAN_SU -> /int [ -1 ] | /id [ 18 ] | /lpra BIAO_DA_SHI /rpra [ -1 ] #
+YU_JU -> BIAO_DA_SHI /semicolon [ 34 ] #
+BIAO_DA_SHI -> OR_BIAO_DA_SHI [ 35 ] #
+OR_BIAO_DA_SHI -> AND_BIAO_DA_SHI [ 36 ] #
+AND_BIAO_DA_SHI -> JIA_FA_BIAO_DA_SHI [ 37 ] #
+JIA_FA_BIAO_DA_SHI -> XIANG [ 38 ] #
+XIANG -> YIN_ZI [ 39 ] #
+YIN_ZI -> YUAN_SU [ 40 ] #
+YUAN_SU -> /int [ 41 ] | /id [ 42 ] | /lpra BIAO_DA_SHI /rpra [ 43 ] #
 #
 # 3.2 表达式计算与比较
-BIAO_DA_SHI -> BIAO_DA_SHI /or OR_BIAO_DA_SHI [ -1 ] #
-OR_BIAO_DA_SHI -> OR_BIAO_DA_SHI /and AND_BIAO_DA_SHI [ -1 ] #
-AND_BIAO_DA_SHI -> AND_BIAO_DA_SHI BI_JIAO_YUN_SUAN_FU JIA_FA_BIAO_DA_SHI [ -1 ] #
-JIA_FA_BIAO_DA_SHI -> JIA_FA_BIAO_DA_SHI JIA_JIAN_YUN_SUAN_FU XIANG [ -1 ] #
-XIANG -> XIANG CHENG_CHU_YUN_SUAN_FU YIN_ZI [ -1 ] #
-BI_JIAO_YUN_SUAN_FU -> /lt [ -1 ] | /le [ -1 ] | /gt [ -1 ] | /ge [ -1 ] | /equ [ -1 ] | /ne [ -1 ] #
-JIA_JIAN_YUN_SUAN_FU -> /add [ -1 ] | /sub [ -1 ] #
-CHENG_CHU_YUN_SUAN_FU -> /mul [ -1 ] | /div [ -1 ] | /mod [ -1 ] #
+BIAO_DA_SHI -> BIAO_DA_SHI /or OR_BIAO_DA_SHI [ 44 ] #
+OR_BIAO_DA_SHI -> OR_BIAO_DA_SHI /and AND_BIAO_DA_SHI [ 45 ] #
+AND_BIAO_DA_SHI -> AND_BIAO_DA_SHI BI_JIAO_YUN_SUAN_FU JIA_FA_BIAO_DA_SHI [ 46 ] #
+JIA_FA_BIAO_DA_SHI -> JIA_FA_BIAO_DA_SHI JIA_JIAN_YUN_SUAN_FU XIANG [ 47 ] #
+XIANG -> XIANG CHENG_CHU_YUN_SUAN_FU YIN_ZI [ 48 ] #
+BI_JIAO_YUN_SUAN_FU -> /lt [ 49 ] | /le [ 50 ] | /gt [ 51 ] | /ge [ 52 ] | /equ [ 53 ] | /ne [ 54 ] #
+JIA_JIAN_YUN_SUAN_FU -> /add [ 55 ] | /sub [ 56 ] #
+CHENG_CHU_YUN_SUAN_FU -> /mul [ 57 ] | /div [ 58 ] | /mod [ 59 ] #
 #
-YIN_ZI -> /sub YIN_ZI [ -1 ] | /not YIN_ZI [ -1 ] #
+YIN_ZI -> /sub YIN_ZI [ 60 ] | /not YIN_ZI [ 61 ] #
 #
 # 3.3 函数调用
-YUAN_SU -> /id /lpra SHI_CAN_LIE_BIAO /rpra [ 19 ] #
-SHI_CAN_LIE_BIAO -> /zero [ -1 ] | BIAO_DA_SHI [ -1 ] | BIAO_DA_SHI /comma SHI_CAN_LIE_BIAO [ -1 ] #
+YUAN_SU -> /id /lpra SHI_CAN_LIE_BIAO /rpra [ 62 ] #
+SHI_CAN_LIE_BIAO -> /zero [ 63 ] | BIAO_DA_SHI [ 64 ] | BIAO_DA_SHI /comma SHI_CAN_LIE_BIAO [ 65 ] #
 #
 # 4.1 选择结构
 YU_JU -> IF_YU_JU [ 20 ] #

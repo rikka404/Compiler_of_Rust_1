@@ -13,6 +13,7 @@ YU_JU_CHUAN -> /zero [ 8 ] #
 # 1.2 语句
 YU_JU_CHUAN -> YU_JU YU_JU_CHUAN [ 9 ] #
 YU_JU -> /semicolon [ 10 ] #
+YU_JU -> YU_JU_KUAI [ -1 ] #
 #
 # 1.3 返回语句
 YU_JU -> FAN_HUI_YU_JU [ 11 ] #

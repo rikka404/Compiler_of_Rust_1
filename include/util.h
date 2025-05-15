@@ -57,7 +57,11 @@ enum lexical_type
 
     ID,
     INT,
-    AND,
+    
+    REFER, // &
+    AND, // &&
+    OR,  // ||
+    NOT, // !
 
     END // 结束符
 };

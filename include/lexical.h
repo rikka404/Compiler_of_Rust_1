@@ -59,7 +59,11 @@ const std::vector<lexical> key_symbol = {
     {"->", ARROW},
     {".", DOT},
     {"..", DDOT},
-    {"&", AND}
+    
+    {"&", REFER},
+    {"&&", AND},
+    {"||", OR},
+    {"!", NOT}
 };
 
 const int MAXCHAR = 128;

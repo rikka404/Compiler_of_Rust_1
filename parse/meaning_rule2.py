@@ -51,19 +51,25 @@ BIAN_LIANG_SHENG_MING_FU_ZHI_YU_JU -> /let BIAN_LIANG_SHENG_MING_NEI_BU /assign 
 #
 # 3.1 基本表达式
 YU_JU -> BIAO_DA_SHI /semicolon [ 18 ] #
-BIAO_DA_SHI -> JIA_FA_BIAO_DA_SHI [ -1 ] #
+BIAO_DA_SHI -> OR_BIAO_DA_SHI [ -1 ] #
+OR_BIAO_DA_SHI -> AND_BIAO_DA_SHI [ -1 ] #
+AND_BIAO_DA_SHI -> JIA_FA_BIAO_DA_SHI [ -1 ] #
 JIA_FA_BIAO_DA_SHI -> XIANG [ -1 ] #
 XIANG -> YIN_ZI [ -1 ] #
 YIN_ZI -> YUAN_SU [ -1 ] #
 YUAN_SU -> /int [ -1 ] | /id [ 18 ] | /lpra BIAO_DA_SHI /rpra [ -1 ] #
 #
 # 3.2 表达式计算与比较
-BIAO_DA_SHI -> BIAO_DA_SHI BI_JIAO_YUN_SUAN_FU JIA_FA_BIAO_DA_SHI [ -1 ] #
+BIAO_DA_SHI -> BIAO_DA_SHI /or OR_BIAO_DA_SHI [ -1 ] #
+OR_BIAO_DA_SHI -> OR_BIAO_DA_SHI /and AND_BIAO_DA_SHI [ -1 ] #
+AND_BIAO_DA_SHI -> AND_BIAO_DA_SHI BI_JIAO_YUN_SUAN_FU JIA_FA_BIAO_DA_SHI [ -1 ] #
 JIA_FA_BIAO_DA_SHI -> JIA_FA_BIAO_DA_SHI JIA_JIAN_YUN_SUAN_FU XIANG [ -1 ] #
 XIANG -> XIANG CHENG_CHU_YUN_SUAN_FU YIN_ZI [ -1 ] #
 BI_JIAO_YUN_SUAN_FU -> /lt [ -1 ] | /le [ -1 ] | /gt [ -1 ] | /ge [ -1 ] | /equ [ -1 ] | /ne [ -1 ] #
 JIA_JIAN_YUN_SUAN_FU -> /add [ -1 ] | /sub [ -1 ] #
 CHENG_CHU_YUN_SUAN_FU -> /mul [ -1 ] | /div [ -1 ] | /mod [ -1 ] #
+#
+YIN_ZI -> /sub YIN_ZI [ -1 ] | /not YIN_ZI [ -1 ] #
 #
 # 3.3 函数调用
 YUAN_SU -> /id /lpra SHI_CAN_LIE_BIAO /rpra [ 19 ] #

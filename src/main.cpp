@@ -50,7 +50,7 @@ int main()
 
     /* 语法分析 + 语义分析 */
     // 初始化分析表
-    Rules::init(false, true);
+    Rules::init(true, true);
     Semantic semantic;
     semantic.init();
 
@@ -82,6 +82,8 @@ int main()
     // auto ele9 = data_type::create(REFER_TYPE, ele8);
 
     // std::cout << (*ele4 == *ele7) << std::endl;
+    // std::cout << *ele4 << std::endl;
+    // std::cout << *ele7 << std::endl;
     // std::cout << (ele5->siz) << std::endl;
     // std::cout << (ele6->siz) << std::endl;
     // std::cout << (ele7->siz) << std::endl;
@@ -89,6 +91,8 @@ int main()
 
     // std::cout << (ele9->siz) << std::endl;
     // std::cout << (*ele3 == *ele9) << std::endl;
+    // std::cout << *ele3 << std::endl;
+    // std::cout << *ele9 << std::endl;
 
     // // 第二组测试
     // auto ele1 = data_type::create(I32_TYPE);
@@ -126,5 +130,10 @@ int main()
     // offset = 0;
     // std::cout << ele4->get_sub_class(2, offset)->get_sub_class(0, offset)->get_sub_class(0, offset)->type << std::endl;
     // std::cout << offset << std::endl;
+    // std::cout << *ele4 << std::endl;
+    // std::cout << *ele4->get_sub_class(2) << std::endl;
+    // std::cout << *ele4->get_sub_class(2)->get_sub_class(0) << std::endl;
+    // std::cout << *ele4->get_sub_class(2)->get_sub_class(0)->get_sub_class(0) << std::endl;
+    // std::cout << *ele4->get_sub_class(2)->get_sub_class(0)->get_sub_class(1) << std::endl;
     return 0;
 }

@@ -91,6 +91,7 @@ public:
 
     std::set<functionEntry> functionTable; // 函数表
     std::map<std::string, std::vector<int>> symbolIDTable;     // 符号表
+    std::vector<symbolEntry> tempSymbolIDTable;               // 临时变量表，话说这个好像没用，不过写都写了
     std::vector<symbolEntry> symbolStack;                //模拟那个栈，从后面出站的时候要在符号表里面也删掉
     int c_esp = 0; //有用了，需要模拟相对内存位置，是esp
     std::vector<quaternary> codes;           // 中间代码
@@ -104,6 +105,7 @@ public:
     void init();
 
     void pushSymbol(symbolEntry);
+    void pushTempSymbol(symbolEntry);
     void popSymbol();
     symbolEntry getSymbol(const std::string &name) const;
 

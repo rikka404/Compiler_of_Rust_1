@@ -14,5 +14,6 @@ fn main(mut c:i32, mut d:i32) -> i32 {
     let mut b:i32;
     b = 1;
     c += 1;
+    b = (c + 1) * a - b;
     return c;
 }

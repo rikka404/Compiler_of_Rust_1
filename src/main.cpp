@@ -50,7 +50,7 @@ int main()
 
     /* 语法分析 + 语义分析 */
     // 初始化分析表
-    Rules::init(false, true);
+    Rules::init(true, true);
     Semantic semantic;
     semantic.init();
 

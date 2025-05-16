@@ -238,6 +238,14 @@ std::ostream &operator<<(std::ostream &out, const data_type &e_type)
     {
         out << "bool";
     }
+    else if (e_type.type == VOID_TYPE)
+    {
+        out << "void";
+    }
+    else if (e_type.type == ERROR_TYPE)
+    {
+        out << "error_type";
+    }
     else if (e_type.type == REFER_TYPE)
     {
         refer_type *eptr = (refer_type *)(&e_type);

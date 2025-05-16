@@ -10,7 +10,8 @@ enum read_type
     NONETYPE,
     VARIABLE,
     CONSTANT,
-    LITERAL
+    LITERAL,
+    TEMPORARY,
 };
 
 class element_type
@@ -58,7 +59,8 @@ using attribute = std::map<std::string, std::any>;
 enum arg_type
 {
     Literal,    //立即数
-    Address,    //内存地址
+    Offset,    //相对ebp地址
+    Address,    //绝对地址
     Lable       //中间代码标号
 };
 struct Operand {
@@ -76,25 +78,6 @@ public:
     quaternary(std::string a, Operand b, Operand c, Operand d) : op(a), arg1(b), arg2(c), result(d){};
 };
 
-/**
- * 事已至此，写一下目前我想的四元式的定义吧
- * 首先，放弃四个参数都是字符串的形式，因为我们既然有偏移量了，没有必要再用变量名了
- * 然后就会有个问题：(+, 100, 200, 300)，这个300表示内存偏移是没有歧义的，但是前面的100,200，不知道是立即数还是内存偏移量，所以需要一个枚举来区分
- * 输出的时候可以用100和[100]来区分
- * 这样我们就实现了后三个参数都使用int来做了
- * 
- * 目前的四元式
- * (:=, x, siz, a) //a:= x， 类型大小为x
- * += -= *= /=只能对i32使用
- * (+ / - / * / /, a, b, c)
- * (j, 0, 0, to)
- * (jt, a, 0, to) //我觉得不需要j<这类东西，因为实际上是由表达式规约出来的
- * (push, a, siz, 0) //需要带大小的push
- * (call, 0, 0, to) //带ebp esp的跳转
- * (return, a, siz, 0) //把a地址开始，siz大小的内容放到返回值的地方
- * (leave, 0, 0, 0) //退出call
- */
-
 class Semantic
 {
 public:
@@ -103,8 +86,11 @@ public:
     // 终结符动作函数指针
     static std::vector<void (Semantic::*)(attribute &)> semanticTerminalActions;
 
+    static int EIPoffset; // 返回eip偏移量
+    static int EBPoffset; // 返回ebp偏移量
+
     std::set<functionEntry> functionTable; // 函数表
-    std::map<std::string, std::vector<int>> symbolIDTable;     // 符号表，我觉得可以每到一个新函数的时候clear这个表
+    std::map<std::string, std::vector<int>> symbolIDTable;     // 符号表
     std::vector<symbolEntry> symbolStack;                //模拟那个栈，从后面出站的时候要在符号表里面也删掉
     int c_esp = 0; //有用了，需要模拟相对内存位置，是esp
     std::vector<quaternary> codes;           // 中间代码

@@ -607,7 +607,7 @@ void Semantic::act149_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act150_(std::vector<attribute> &args, attribute &result) {}
 
 
-
+// 可能，不需要了
 void Semantic::tact0_(attribute &result) {}
 void Semantic::tact1_(attribute &result) {}
 void Semantic::tact2_(attribute &result) {}
@@ -652,9 +652,7 @@ void Semantic::tact40_(attribute &result) {}
 void Semantic::tact41_(attribute &result) {}
 void Semantic::tact42_(attribute &result) {}
 void Semantic::tact43_(attribute &result) {}
-void Semantic::tact44_(attribute &result) {
-    // ID
-}
+void Semantic::tact44_(attribute &result) {}
 void Semantic::tact45_(attribute &result) {}
 void Semantic::tact46_(attribute &result) {}
 void Semantic::tact47_(attribute &result) {}

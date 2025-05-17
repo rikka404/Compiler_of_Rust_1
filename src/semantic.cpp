@@ -106,6 +106,7 @@ void Semantic::printCodes(std::ostream& out) const
 {
     for (int i = begin_quad_num; i < (int)codes.size(); i++)
     {
+        out << "L" << i << ": ";
         out << codes[i].op << ", ";
         if(codes[i].arg1.type == Offset)
         {
@@ -145,11 +146,11 @@ void Semantic::printCodes(std::ostream& out) const
         }
         else if (codes[i].result.type == Address)
         {
-            out << '*' << codes[i].result.value << ", ";
+            out << '*' << codes[i].result.value;
         }
         else if (codes[i].result.type == Lable)
         {
-            out << 'L' << codes[i].result.value << ", ";
+            out << 'L' << codes[i].result.value;
         }
         else
         {
@@ -164,25 +165,12 @@ void Semantic::act0_(std::vector<attribute> &args, attribute &result)
     // PROGRAM -> SHENG_MING_CHUAN
     
     // 检查是否含有main函数
-    if (!this->functionTable.count(functionEntry{0, "main", {}, {}}))
+    auto func = functionTable.find(functionEntry{0, "main", {}, {}});
+    if (func == functionTable.end())
     {
         std::cout << "[ERROR] [SEMANTIC] No main function" << std::endl;
         exit(0);
     }
-    // bool havemain = 0;
-    // for (auto f : functionTable)
-    // {
-    //     if(f.name == "main")
-    //     {
-    //         havemain = 1;
-    //         break;
-    //     }
-    // }
-    // if(!havemain)
-    // {
-    //     std::cout << "[ERROR] [SEMANTIC] No main function" << std::endl;
-    //     exit(0);
-    // }
     
     // 输出中间代码
     const std::string filename = "parse/intermediate.code";
@@ -193,9 +181,13 @@ void Semantic::act0_(std::vector<attribute> &args, attribute &result)
         exit(0);
     }
 
-    // 1 调用main函数 (栈压入返回值空间、函数返回地址、函数参数空间)
-    // fout << "push" << std::endl;
-    // 2
+    // 调用main函数 (没有参数和返回值)
+    begin_quad_num -= 1;
+    codes[begin_quad_num] = quaternary("call", 
+        Operand{Literal, 0}, 
+        Operand{Literal, 0}, 
+        Operand{Lable, func->code_pos});
+        
     this->printCodes(fout);
 
     this->functionTable.clear(); // 清空函数表
@@ -244,6 +236,12 @@ void Semantic::act5_(std::vector<attribute> &args, attribute &result) {
     // 原本是倒过来的
     std::reverse(para_list.begin(), para_list.end());
     std::vector<symbolEntry> para_sym_list;
+    // 检查main函数不能有参数
+    if (std::any_cast<std::string>(args[1]["name"]) == "main" && !para_list.empty())
+    {
+        std::cout << "[ERROR] [SEMANTIC] main function can not have parameters" << std::endl;
+        exit(0);
+    }
     // 从前往后地址不断靠前，实际上要倒着压栈，事实上大部分编译器确实是这么做的
     int offset = EIPoffset;
     for (auto [type, name] : para_list)
@@ -364,7 +362,15 @@ void Semantic::act18_(std::vector<attribute> &args, attribute &result) {
     element_type ret_type;
     ret_type.dataType = std::any_cast<std::shared_ptr<data_type>>(args[6]["dataType"]);
     auto para_list = std::any_cast<std::vector<std::pair<element_type, std::string>>>(args[3]["formalParameter"]);
+    // 原本是倒过来的
+    std::reverse(para_list.begin(), para_list.end());
     std::vector<symbolEntry> para_sym_list;
+    // 检查main函数不能有返回值
+    if (std::any_cast<std::string>(args[1]["name"]) == "main")
+    {
+        std::cout << "[ERROR] [SEMANTIC] main function can not have return type" << std::endl;
+        exit(0);
+    }
     // 从前往后地址不断靠前，实际上要倒着压栈，事实上大部分编译器确实是这么做的
     int offset = EIPoffset;
     for (auto [type, name] : para_list)
@@ -836,7 +842,8 @@ void Semantic::act62_(std::vector<attribute> &args, attribute &result) {
     result["name"] = sym.name;
     result["elementType"] = sym.type;
     result["address"] = sym.relativeAddress;
-    result["symbolNum"] = 1;
+    // 实参列表也可能有临时变量计数
+    result["symbolNum"] = std::any_cast<int>(args[2]["symbolNum"]) + 1;
 
     // 检查参数个数类型匹配
     auto para_list = std::any_cast<std::vector<std::pair<element_type, int>>>(args[2]["actualParameter"]);
@@ -878,6 +885,7 @@ void Semantic::act63_(std::vector<attribute> &args, attribute &result) {
     // 实参列表 -> 空
     std::vector<std::pair<element_type, int>> para_list; // int 是字面量的值或偏移量
     result["actualParameter"] = para_list;
+    result["symbolNum"] = 0;
 }
 void Semantic::act64_(std::vector<attribute> &args, attribute &result) {
     // 实参列表 -> 表达式
@@ -891,6 +899,14 @@ void Semantic::act64_(std::vector<attribute> &args, attribute &result) {
         para_list.push_back(std::make_pair(std::any_cast<element_type>(args[0]["elementType"]), std::any_cast<int>(args[0]["address"])));
     }
     result["actualParameter"] = para_list;
+    if (args[0].count("symbolNum"))
+    {
+        result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]);
+    }
+    else
+    {
+        result["symbolNum"] = 0;
+    }
 }
 void Semantic::act65_(std::vector<attribute> &args, attribute &result) {
     // 实参列表 -> 表达式 /, 实参列表
@@ -904,6 +920,14 @@ void Semantic::act65_(std::vector<attribute> &args, attribute &result) {
         n_para_list.push_back(std::make_pair(std::any_cast<element_type>(args[0]["elementType"]), std::any_cast<int>(args[0]["address"])));
     }
     result["actualParameter"] = n_para_list; // 倒着插入的
+    if (args[0].count("symbolNum"))
+    {
+        result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[2]["symbolNum"]);
+    }
+    else
+    {
+        result["symbolNum"] = std::any_cast<int>(args[2]["symbolNum"]);
+    }
 }
 void Semantic::act66_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act67_(std::vector<attribute> &args, attribute &result) {}

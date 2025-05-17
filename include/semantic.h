@@ -96,7 +96,7 @@ public:
     int c_esp = Semantic::EBPoffset + 4; //有用了，需要模拟相对内存位置，是esp
     std::vector<quaternary> codes;           // 中间代码
     std::vector<attribute> attributes;      //把每个语法分析树节点的attr都存下来，与语法分析同步
-    const int begin_quad_num = 100;
+    int begin_quad_num = 100;
     // int quad_num;
     int nowFunctionRetAddress;
 

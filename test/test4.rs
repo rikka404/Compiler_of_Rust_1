@@ -23,10 +23,9 @@ fn sum(mut a: i32, mut b: i32) -> i32 {
 }
 
 fn main() {
-    let mut a:i32;
+    let mut a:i32 = 5;
     {
-        a = sum(1, 2) * 2;
+        a = sum(1, 2 + a);
     }
     let mut b:i32 = 4;
-    
 }

@@ -93,11 +93,11 @@ public:
     std::map<std::string, std::vector<int>> symbolIDTable;     // 符号表
     std::vector<symbolEntry> tempSymbolIDTable;               // 临时变量表，话说这个好像没用，不过写都写了
     std::vector<symbolEntry> symbolStack;                //模拟那个栈，从后面出站的时候要在符号表里面也删掉
-    int c_esp = 0; //有用了，需要模拟相对内存位置，是esp
+    int c_esp = Semantic::EBPoffset + 4; //有用了，需要模拟相对内存位置，是esp
     std::vector<quaternary> codes;           // 中间代码
     std::vector<attribute> attributes;      //把每个语法分析树节点的attr都存下来，与语法分析同步
     const int begin_quad_num = 100;
-    int quad_num;
+    // int quad_num;
     int nowFunctionRetAddress;
 
     bool have_error = 0;

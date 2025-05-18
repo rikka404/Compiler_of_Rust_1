@@ -271,7 +271,6 @@ void Semantic::act6_(std::vector<attribute> &args, attribute &result) {
 void Semantic::act7_(std::vector<attribute> &args, attribute &result) {
     // 语句块 -> { 语句串 }
     int num = std::any_cast<int>(args[1]["symbolNum"]);
-    std::cerr << num << std::endl;
     std::set<std::string> symName;
     int sizesum = 0;
     for (int i = 0; i < num; i++)
@@ -293,10 +292,14 @@ void Semantic::act7_(std::vector<attribute> &args, attribute &result) {
     {
         result["returnType"] = args[1]["returnType"];
     }
+    result["breakList"] = std::any_cast<int>(args[1]["breakList"]);
+    result["continueList"] = std::any_cast<int>(args[1]["continueList"]);
 }
 void Semantic::act8_(std::vector<attribute> &args, attribute &result) {
     // 语句串 -> /zero
     result["symbolNum"] = 0;
+    result["breakList"] = 0;
+    result["continueList"] = 0;
 }
 void Semantic::act9_(std::vector<attribute> &args, attribute &result) {
     // 语句串 -> 语句 语句串
@@ -321,10 +324,24 @@ void Semantic::act9_(std::vector<attribute> &args, attribute &result) {
     }
     else if (args[1].count("returnType"))
     {
-        
         result["returnType"] = args[1]["returnType"];
     }
-
+    result["breakList"] = args[1]["breakList"];
+    result["continueList"] = args[1]["continueList"];
+    if(args[0].count("breakList"))
+    {
+        int l1 = std::any_cast<int>(args[0]["breakList"]);
+        int l2 = std::any_cast<int>(args[1]["breakList"]);
+        codes[l1].result.value = l2;
+        result["breakList"] = l1;
+    }
+    if(args[0].count("continueList"))
+    {
+        int l1 = std::any_cast<int>(args[0]["continueList"]);
+        int l2 = std::any_cast<int>(args[1]["continueList"]);
+        codes[l1].result.value = l2;
+        result["continueList"] = l1;
+    }
 }
 void Semantic::act10_(std::vector<attribute> &args, attribute &result) {
     // 语句 -> 语句块
@@ -661,6 +678,7 @@ void Semantic::act33_(std::vector<attribute> &args, attribute &result) {
     codes.push_back(quat);
     // 可能有临时变量计数 + 声明变量
     result["symbolNum"] = std::any_cast<int>(args[3]["symbolNum"]) + 1;
+    // TODO: 如果右边是临时变量，可以直接使用这个临时变量作为变量的地址，改一下readtype
 }
 void Semantic::act34_(std::vector<attribute> &args, attribute &result) 
 {
@@ -726,9 +744,245 @@ void Semantic::act43_(std::vector<attribute> &args, attribute &result) {
     // 元素 -> ( 表达式 )
     result = args[1];
 }
-void Semantic::act44_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act45_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act46_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act44_(std::vector<attribute> &args, attribute &result) {
+    // 表达式 -> 表达式 or M OR表达式
+    /**
+     * code a
+     * code M :
+     *      jnz a - L1
+     * code b
+     * 这以上的都是规约之前就做好的
+     * jz  b - L2
+     * L1
+     * := 1 1 c
+     * j - - L3
+     * L2
+     * := 0 1 c
+     * L3
+     * null
+     * 
+     * M需要的属性：它自己的四元式的地址
+     * 没有采用truelist的方法，是因为那样会导致所有表达式都有这个字段，维护起来就麻烦一点
+     */
+    int a_offset = std::any_cast<int>(args[0]["address"]);
+    int b_offset = std::any_cast<int>(args[3]["address"]);
+    codes[std::any_cast<int>(args[2]["codeID"])].arg1.value = a_offset;
+    int L1, L2, L3;
+    std::vector<int> toaddL1, toaddL2, toaddL3;
+    toaddL1.push_back(std::any_cast<int>(args[2]["codeID"]));
+    toaddL2.push_back(codes.size());
+    codes.push_back(quaternary{"jz", Operand{Offset, b_offset}, Operand{Literal, 0}, Operand{Lable, 0}});
+    L1 = codes.size();
+    // 声明临时变量
+    symbolEntry sym;
+    // 优化：如果两个中有一个是临时变量，并且是bool，结果直接用临时变量的地址
+    if (std::any_cast<element_type>(args[0]["elementType"]).readType == TEMPORARY && std::any_cast<element_type>(args[0]["elementType"]).dataType->type == BOOL_TYPE)
+    {
+        sym.name = std::any_cast<std::string>(args[0]["name"]);
+        sym.type = std::any_cast<element_type>(args[0]["elementType"]);
+        sym.relativeAddress = std::any_cast<int>(args[0]["address"]);
+        result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[3]["symbolNum"]);
+    }
+    else if (std::any_cast<element_type>(args[3]["elementType"]).readType == TEMPORARY && std::any_cast<element_type>(args[3]["elementType"]).dataType->type == BOOL_TYPE)
+    {
+        sym.name = std::any_cast<std::string>(args[3]["name"]);
+        sym.type = std::any_cast<element_type>(args[3]["elementType"]);
+        sym.relativeAddress = std::any_cast<int>(args[3]["address"]);
+        result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[3]["symbolNum"]);
+    }
+    else
+    {
+        // 声明临时变量
+        sym.name = "TEMP" + std::to_string(tempSymbolIDTable.size());
+        sym.type.dataType = data_type::create(BOOL_TYPE);
+        sym.type.readType = TEMPORARY;
+        sym.relativeAddress = c_esp;
+        codes.push_back(quaternary("push", Operand{Literal, 0}, Operand{Literal, sym.type.dataType->siz}, Operand{Literal, 0}));
+        c_esp += 1;
+        pushTempSymbol(sym);
+        result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[3]["symbolNum"]) + 1;
+    }
+    result["name"] = sym.name;
+    result["elementType"] = sym.type;
+    result["address"] = sym.relativeAddress;
+    codes.push_back(quaternary{":=", Operand{Literal, 1}, Operand{Literal, 1}, Operand{Offset, sym.relativeAddress}});
+    toaddL3.push_back(codes.size());
+    codes.push_back(quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, 0}});
+    L2 = codes.size();
+    codes.push_back(quaternary{":=", Operand{Literal, 0}, Operand{Literal, 1}, Operand{Offset, sym.relativeAddress}});
+    L3 = codes.size();
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+    for (int id : toaddL1)
+    {
+        codes[id].result.value = L1;
+    }
+    for (int id : toaddL2)
+    {
+        codes[id].result.value = L2;
+    }
+    for (int id : toaddL3)
+    {
+        codes[id].result.value = L3;
+    }
+}
+void Semantic::act45_(std::vector<attribute> &args, attribute &result) {
+    // OR表达式 -> OR表达式 and M AND表达式
+    /**
+     * code a
+     * code M :
+     *      jz a - L2
+     * code b
+     * 这以上的都是规约之前就做好的
+     * jz  b - L2
+     * L1
+     * := 1 1 c
+     * j - - L3
+     * L2
+     * := 0 1 c
+     * L3
+     * null
+     * 
+     * M需要的属性：它自己的四元式的地址
+     */
+    int a_offset = std::any_cast<int>(args[0]["address"]);
+    int b_offset = std::any_cast<int>(args[3]["address"]);
+    codes[std::any_cast<int>(args[2]["codeID"])].arg1.value = a_offset;
+    int L1, L2, L3;
+    std::vector<int> toaddL1, toaddL2, toaddL3;
+    toaddL2.push_back(std::any_cast<int>(args[2]["codeID"]));
+    toaddL2.push_back(codes.size());
+    codes.push_back(quaternary{"jz", Operand{Offset, b_offset}, Operand{Literal, 0}, Operand{Lable, 0}});
+    L1 = codes.size();
+    // 声明临时变量
+    symbolEntry sym;
+    // 优化：如果两个中有一个是临时变量，并且是bool，结果直接用临时变量的地址
+    if (std::any_cast<element_type>(args[0]["elementType"]).readType == TEMPORARY && std::any_cast<element_type>(args[0]["elementType"]).dataType->type == BOOL_TYPE)
+    {
+        sym.name = std::any_cast<std::string>(args[0]["name"]);
+        sym.type = std::any_cast<element_type>(args[0]["elementType"]);
+        sym.relativeAddress = std::any_cast<int>(args[0]["address"]);
+        result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[3]["symbolNum"]);
+    }
+    else if (std::any_cast<element_type>(args[3]["elementType"]).readType == TEMPORARY && std::any_cast<element_type>(args[3]["elementType"]).dataType->type == BOOL_TYPE)
+    {
+        sym.name = std::any_cast<std::string>(args[3]["name"]);
+        sym.type = std::any_cast<element_type>(args[3]["elementType"]);
+        sym.relativeAddress = std::any_cast<int>(args[3]["address"]);
+        result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[3]["symbolNum"]);
+    }
+    else
+    {
+        // 声明临时变量
+        sym.name = "TEMP" + std::to_string(tempSymbolIDTable.size());
+        sym.type.dataType = data_type::create(BOOL_TYPE);
+        sym.type.readType = TEMPORARY;
+        sym.relativeAddress = c_esp;
+        codes.push_back(quaternary("push", Operand{Literal, 0}, Operand{Literal, sym.type.dataType->siz}, Operand{Literal, 0}));
+        c_esp += 1;
+        pushTempSymbol(sym);
+        result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[3]["symbolNum"]) + 1;
+    }
+    result["name"] = sym.name;
+    result["elementType"] = sym.type;
+    result["address"] = sym.relativeAddress;
+    codes.push_back(quaternary{":=", Operand{Literal, 1}, Operand{Literal, 1}, Operand{Offset, sym.relativeAddress}});
+    toaddL3.push_back(codes.size());
+    codes.push_back(quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, 0}});
+    L2 = codes.size();
+    codes.push_back(quaternary{":=", Operand{Literal, 0}, Operand{Literal, 1}, Operand{Offset, sym.relativeAddress}});
+    L3 = codes.size();
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+    for (int id : toaddL1)
+    {
+        codes[id].result.value = L1;
+    }
+    for (int id : toaddL2)
+    {
+        codes[id].result.value = L2;
+    }
+    for (int id : toaddL3)
+    {
+        codes[id].result.value = L3;
+    }
+}
+void Semantic::act46_(std::vector<attribute> &args, attribute &result) {
+    // AND表达式 -> AND表达式 比较运算符 加法表达式
+    // TODO: 这是之后的事情，第一版可以不实现，这里同时记录原始的式子，在规约到上层的时候可以尝试归于成jeq, j<之类的
+    std::string op = std::any_cast<std::string>(args[1]["opSymbol"]);
+    if(op == "==" || op == "!=")
+    {
+        if(std::any_cast<element_type>(args[0]["elementType"]).dataType->type != I32_TYPE || 
+            std::any_cast<element_type>(args[0]["elementType"]).dataType->type != BOOL_TYPE)
+        {
+            std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a int or a bool." << std::endl;
+            exit(0);
+        }
+        if(std::any_cast<element_type>(args[2]["elementType"]).dataType->type != I32_TYPE || 
+            std::any_cast<element_type>(args[2]["elementType"]).dataType->type != BOOL_TYPE)
+        {
+            std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[2]["name"]) << "\" is not a int or a bool." << std::endl;
+            exit(0);
+        }
+    }
+    else
+    {
+        if(std::any_cast<element_type>(args[0]["elementType"]).dataType->type != I32_TYPE)
+        {
+            std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a int." << std::endl;
+            exit(0);
+        }
+        if(std::any_cast<element_type>(args[2]["elementType"]).dataType->type != I32_TYPE)
+        {
+            std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[2]["name"]) << "\" is not a int." << std::endl;
+            exit(0);
+        }
+    }
+    // 声明临时变量
+    symbolEntry sym;
+    // 优化：如果两个中有一个是临时变量，并且是bool，结果直接用临时变量的地址
+    if (std::any_cast<element_type>(args[0]["elementType"]).readType == TEMPORARY && std::any_cast<element_type>(args[0]["elementType"]).dataType->type == BOOL_TYPE)
+    {
+        sym.name = std::any_cast<std::string>(args[0]["name"]);
+        sym.type = std::any_cast<element_type>(args[0]["elementType"]);
+        sym.relativeAddress = std::any_cast<int>(args[0]["address"]);
+        result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[2]["symbolNum"]);
+    }
+    else if (std::any_cast<element_type>(args[2]["elementType"]).readType == TEMPORARY && std::any_cast<element_type>(args[2]["elementType"]).dataType->type == BOOL_TYPE)
+    {
+        sym.name = std::any_cast<std::string>(args[2]["name"]);
+        sym.type = std::any_cast<element_type>(args[2]["elementType"]);
+        sym.relativeAddress = std::any_cast<int>(args[2]["address"]);
+        result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[2]["symbolNum"]);
+    }
+    else
+    {
+        // 声明临时变量
+        sym.name = "TEMP" + std::to_string(tempSymbolIDTable.size());
+        sym.type.dataType = data_type::create(BOOL_TYPE);
+        sym.type.readType = TEMPORARY;
+        sym.relativeAddress = c_esp;
+        codes.push_back(quaternary("push", Operand{Literal, 0}, Operand{Literal, sym.type.dataType->siz}, Operand{Literal, 0}));
+        c_esp += 1;
+        pushTempSymbol(sym);
+        result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[2]["symbolNum"]) + 1;
+    }
+    result["name"] = sym.name;
+    result["elementType"] = sym.type;
+    result["address"] = sym.relativeAddress;
+    // 运算四元式
+    quaternary quat;
+    quat.op = std::any_cast<std::string>(args[1]["opSymbol"]);
+    if(std::any_cast<element_type>(args[0]["elementType"]).readType == LITERAL)
+        quat.arg1 = Operand{Literal, std::any_cast<int>(args[0]["val"])};
+    else
+        quat.arg1 = Operand{Offset, std::any_cast<int>(args[0]["address"])};
+    if(std::any_cast<element_type>(args[2]["elementType"]).readType == LITERAL)
+        quat.arg2 = Operand{Literal, std::any_cast<int>(args[2]["val"])};
+    else
+        quat.arg2 = Operand{Offset, std::any_cast<int>(args[2]["address"])};
+    quat.result = Operand{Offset, sym.relativeAddress};
+    codes.push_back(quat);
+}
 void Semantic::act47_(std::vector<attribute> &args, attribute &result) {
     // 加法表达式 -> 加法表达式 +/- 项
     if(std::any_cast<element_type>(args[0]["elementType"]).dataType->type != I32_TYPE)
@@ -853,12 +1107,30 @@ void Semantic::act48_(std::vector<attribute> &args, attribute &result) {
     quat.result = Operand{Offset, sym.relativeAddress};
     codes.push_back(quat);
 }
-void Semantic::act49_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act50_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act51_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act52_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act53_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act54_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act49_(std::vector<attribute> &args, attribute &result) {
+    // 比较运算符 -> <
+    result["opSymbol"] = (std::string)"<";
+}
+void Semantic::act50_(std::vector<attribute> &args, attribute &result) {
+    // 比较运算符 -> <=
+    result["opSymbol"] = (std::string)"<=";
+}
+void Semantic::act51_(std::vector<attribute> &args, attribute &result) {
+    // 比较运算符 -> >
+    result["opSymbol"] = (std::string)">";
+}
+void Semantic::act52_(std::vector<attribute> &args, attribute &result) {
+    // 比较运算符 -> >=
+    result["opSymbol"] = (std::string)">=";
+}
+void Semantic::act53_(std::vector<attribute> &args, attribute &result) {
+    // 比较运算符 -> ==
+    result["opSymbol"] = (std::string)"==";
+}
+void Semantic::act54_(std::vector<attribute> &args, attribute &result) {
+    // 比较运算符 -> !=
+    result["opSymbol"] = (std::string)"!=";
+}
 void Semantic::act55_(std::vector<attribute> &args, attribute &result) {
     //+/- -> +
     result["opSymbol"] = (std::string)"+";
@@ -924,8 +1196,60 @@ void Semantic::act60_(std::vector<attribute> &args, attribute &result) {
     quat.result = Operand{Offset, sym.relativeAddress};
     codes.push_back(quat);
 }
-void Semantic::act61_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act61_(std::vector<attribute> &args, attribute &result) {
+    // 因子 -> not 因子
+    // 默认只能对bool类型取not？
+    if(std::any_cast<element_type>(args[1]["elementType"]).dataType->type != BOOL_TYPE)
+    {
+        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is not a bool." << std::endl;
+        exit(0);
+    }
+    symbolEntry sym;
+    // 优化：如果原来是临时变量，结果直接用临时变量的地址
+    if (std::any_cast<element_type>(args[1]["elementType"]).readType == TEMPORARY)
+    {
+        sym.name = std::any_cast<std::string>(args[1]["name"]);
+        sym.type = std::any_cast<element_type>(args[1]["elementType"]);
+        sym.relativeAddress = std::any_cast<int>(args[1]["address"]);
+        result["symbolNum"] = std::any_cast<int>(args[1]["symbolNum"]);
+    }
+    else
+    {
+        // 声明临时变量
+        sym.name = "TEMP" + std::to_string(tempSymbolIDTable.size());
+        sym.type.dataType = data_type::create(BOOL_TYPE);
+        sym.type.readType = TEMPORARY;
+        sym.relativeAddress = c_esp;
+        codes.push_back(quaternary("push", Operand{Literal, 0}, Operand{Literal, sym.type.dataType->siz}, Operand{Literal, 0}));
+        c_esp += 1;
+        pushTempSymbol(sym);
+        result["symbolNum"] = std::any_cast<int>(args[1]["symbolNum"]) + 1;
+    }
+    result["name"] = sym.name;
+    result["elementType"] = sym.type;
+    result["address"] = sym.relativeAddress;
+    // 运算四元式
+    quaternary quat;
+    quat.op = "not";
+    if(std::any_cast<element_type>(args[1]["elementType"]).readType == LITERAL)
+        quat.arg1 = Operand{Literal, std::any_cast<int>(args[1]["val"])}; //但是我们好像没有true false 关键字
+    else
+        quat.arg1 = Operand{Offset, std::any_cast<int>(args[1]["address"])};
+    quat.arg2 = Operand{Literal, 0};
+    quat.result = Operand{Offset, sym.relativeAddress};
+    codes.push_back(quat);
+}
 void Semantic::act62_(std::vector<attribute> &args, attribute &result) {
+    // M_OR -> \zero
+    result["codeID"] = (int)codes.size();
+    codes.push_back(quaternary{"jnz", Operand{Offset, 0}, Operand{Literal, 0}, Operand{Lable, 0}});
+}
+void Semantic::act63_(std::vector<attribute> &args, attribute &result) {
+    // M_AND -> \zero
+    result["codeID"] = (int)codes.size();
+    codes.push_back(quaternary{"jz", Operand{Offset, 0}, Operand{Literal, 0}, Operand{Lable, 0}});
+}
+void Semantic::act64_(std::vector<attribute> &args, attribute &result) {
     // 元素->/id /( 实参列表 /)
     
     if (std::any_cast<std::string>(args[0]["name"]) == "main")
@@ -996,13 +1320,13 @@ void Semantic::act62_(std::vector<attribute> &args, attribute &result) {
     }
     
 }
-void Semantic::act63_(std::vector<attribute> &args, attribute &result) {
+void Semantic::act65_(std::vector<attribute> &args, attribute &result) {
     // 实参列表 -> 空
     std::vector<std::pair<element_type, std::pair<bool, int>>> para_list; // bool 是否为绝对地址 int 是字面量的值或偏移量
     result["actualParameter"] = para_list;
     result["symbolNum"] = 0;
 }
-void Semantic::act64_(std::vector<attribute> &args, attribute &result) {
+void Semantic::act66_(std::vector<attribute> &args, attribute &result) {
     // 实参列表 -> 表达式
     std::vector<std::pair<element_type, std::pair<bool, int>>> para_list; // bool 是否为绝对地址 int 是字面量的值或偏移量
     if (std::any_cast<element_type>(args[0]["elementType"]).readType == LITERAL)
@@ -1023,7 +1347,7 @@ void Semantic::act64_(std::vector<attribute> &args, attribute &result) {
     result["actualParameter"] = para_list;
     result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]);
 }
-void Semantic::act65_(std::vector<attribute> &args, attribute &result) {
+void Semantic::act67_(std::vector<attribute> &args, attribute &result) {
     // 实参列表 -> 表达式 /, 实参列表
     auto n_para_list = std::any_cast<std::vector<std::pair<element_type, std::pair<bool, int>>>>(args[2]["actualParameter"]);
     if (std::any_cast<element_type>(args[0]["elementType"]).readType == LITERAL)
@@ -1044,24 +1368,233 @@ void Semantic::act65_(std::vector<attribute> &args, attribute &result) {
     result["actualParameter"] = n_para_list; // 倒着插入的
     result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[2]["symbolNum"]);
 }
-void Semantic::act66_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act67_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act68_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act68_(std::vector<attribute> &args, attribute &result) {
+    // M -> /zero
+    result["codeID"] = (int)codes.size();
+    codes.push_back(quaternary{"jnz", Operand{Offset, 0}, Operand{Literal, 0}, Operand{Lable, 0}});
+    // 通过先插入M的方式解决“需要规约到上层才知道要往里面加入语句”的问题和需要回填的问题
+}
 void Semantic::act69_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act70_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act71_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act70_(std::vector<attribute> &args, attribute &result) {
+    // IF语句 -> if 表达式 M 语句块 M else部分
+    /**
+     * 表达式code
+     * M1code jz 表达式 M2 + 1
+     * M1 + 1 : 语句块code
+     * M2code j L
+     * M2 + 1 : else部分code
+     * L 
+     * 
+     * 诶好像不需要加新的语句了
+     */
+    int M1 = std::any_cast<int>(args[2]["codeID"]), M2 = std::any_cast<int>(args[4]["codeID"]);
+    int L = codes.size();
+    if(std::any_cast<element_type>(args[1]["elementType"]).readType == LITERAL)
+        codes[M1] = quaternary{"jz", Operand{Literal, std::any_cast<int>(args[1]["val"])}, Operand{Literal, 0}, Operand{Lable, M2 + 1}};
+    else
+        codes[M1] = quaternary{"jz", Operand{Offset, std::any_cast<int>(args[1]["address"])}, Operand{Literal, 0}, Operand{Lable, M2 + 1}};
+    codes[M2] = quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, L + 1}};
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+}
+void Semantic::act71_(std::vector<attribute> &args, attribute &result) {
+    // /else /if 表达式 M 语句块 M else部分
+    int M1 = std::any_cast<int>(args[3]["codeID"]), M2 = std::any_cast<int>(args[5]["codeID"]);
+    int L = codes.size();
+    if(std::any_cast<element_type>(args[2]["elementType"]).readType == LITERAL)
+        codes[M1] = quaternary{"jz", Operand{Literal, std::any_cast<int>(args[2]["val"])}, Operand{Literal, 0}, Operand{Lable, M2 + 1}};
+    else
+        codes[M1] = quaternary{"jz", Operand{Offset, std::any_cast<int>(args[2]["address"])}, Operand{Literal, 0}, Operand{Lable, M2 + 1}};
+    codes[M2] = quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, L + 1}};
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+}
 void Semantic::act72_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act73_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act74_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act75_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act76_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act76_(std::vector<attribute> &args, attribute &result) {
+    // WHILE语句 -> while M 表达式 M 语句块
+    /**
+     * M1 : null
+     * 表达式code
+     * M2code : jz 表达式 L
+     * 语句块code
+     * j M1
+     * L
+     */
+    int M1 = std::any_cast<int>(args[1]["codeID"]), M2 = std::any_cast<int>(args[3]["codeID"]);
+    codes.push_back(quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, M1}});
+    int L = codes.size();
+    codes[M1] = quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}};
+    if(std::any_cast<element_type>(args[2]["elementType"]).readType == LITERAL)
+        codes[M2] = quaternary{"jz", Operand{Literal, std::any_cast<int>(args[2]["val"])}, Operand{Literal, 0}, Operand{Lable, L}};
+    else
+        codes[M2] = quaternary{"jz", Operand{Offset, std::any_cast<int>(args[2]["address"])}, Operand{Literal, 0}, Operand{Lable, L}};
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+    // 回填breakList和continueList
+    int breakList = std::any_cast<int>(args[4]["breakList"]);
+    while (breakList)
+    {
+        int nxt = codes[breakList].result.value;
+        codes[breakList].result.value = L;
+        breakList = nxt;
+    }
+    int continueList = std::any_cast<int>(args[4]["continueList"]);
+    while (continueList)
+    {
+        int nxt = codes[continueList].result.value;
+        codes[continueList].result.value = M1;
+        continueList = nxt;
+    }
+}
 void Semantic::act77_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act78_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act79_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act80_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act78_(std::vector<attribute> &args, attribute &result) {
+    // FOR语句 -> FOR语句声明 M 语句块
+    /**
+     * FOR语句声明code
+     * M : j>= endrange - L
+     * 语句块code
+     * i++
+     * j M
+     * L pop所有变量
+     * 语句块内的变量已经释放掉了，无需再次释放
+     */
+    int M = std::any_cast<int>(args[1]["codeID"]);
+    int address1 = std::any_cast<int>(args[0]["address"]);
+    codes.push_back(quaternary{"+", Operand{Offset, address1}, Operand{Literal, 1}, Operand{Offset, address1}});
+    codes.push_back(quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, M}});
+    int L = codes.size();
+    if(std::any_cast<element_type>(args[0]["rangeEndElementType"]).readType == LITERAL)
+        codes[M] = quaternary{"j>=", Operand{Offset, address1}, Operand{Literal, std::any_cast<int>(args[0]["rangeEndVal"])}, Operand{Lable, L}};
+    else
+        codes[M] = quaternary{"j>=", Operand{Offset, address1}, Operand{Offset, std::any_cast<int>(args[0]["rangeEndAddress"])}, Operand{Lable, L}};
+    
+    int num = std::any_cast<int>(args[0]["symbolNum"]);
+    std::set<std::string> symName;
+    int sizesum = 0;
+    for (int i = 0; i < num; i++)
+    {
+        if(symName.count(symbolStack.back().name))
+        {
+            std::cout << "[WARN] [SEMANTIC] \"" << symbolStack.back().name << "\" is redeclared" << std::endl;
+            // exit(0);
+        }
+        symName.insert(symbolStack.back().name);
+        sizesum += symbolStack.back().type.dataType->siz;
+        popSymbol();
+    }
+    // 生成pop四元式
+    if (sizesum > 0)
+        codes.push_back(quaternary("pop", Operand{Literal, 0}, Operand{Literal, sizesum}, Operand{Literal, 0}));
+    // 回填breakList和continueList
+    int breakList = std::any_cast<int>(args[2]["breakList"]);
+    while (breakList)
+    {
+        int nxt = codes[breakList].result.value;
+        codes[breakList].result.value = L;
+        breakList = nxt;
+    }
+    int continueList = std::any_cast<int>(args[2]["continueList"]);
+    while (continueList)
+    {
+        int nxt = codes[continueList].result.value;
+        codes[continueList].result.value = M;
+        continueList = nxt;
+    }
+    
+}
+void Semantic::act79_(std::vector<attribute> &args, attribute &result) {
+    // FOR语句声明 -> for 变量声明内部 in 可迭代结构
+    result = args[3];
+
+    element_type ele_type;
+    ele_type.dataType = std::any_cast<element_type>(args[3]["rangeBeginElementType"]).dataType;
+    ele_type.readType = std::any_cast<read_type>(args[1]["readType"]);
+    std::string name = std::any_cast<std::string>(args[1]["name"]);
+    //声明一个变量
+    symbolEntry sym;
+    sym.name = name, sym.type = ele_type;
+    sym.relativeAddress = c_esp;
+    c_esp += ele_type.dataType->siz;
+    pushSymbol(sym);
+
+    codes.push_back(quaternary("push", Operand{Literal, 0}, Operand{Literal, ele_type.dataType->siz}, Operand{Literal, 0}));
+    
+    if(std::any_cast<element_type>(args[3]["rangeBeginElementType"]).readType == LITERAL)
+    {
+        codes.push_back(quaternary(":=", Operand{Literal, std::any_cast<int>(args[3]["rangeBeginVal"])}, Operand{Literal, sym.type.dataType->siz}, Operand{Offset, sym.relativeAddress}));
+    }
+    else 
+    {
+        codes.push_back(quaternary(":=", Operand{Offset, std::any_cast<int>(args[3]["rangeBeginAddress"])}, Operand{Literal, sym.type.dataType->siz}, Operand{Offset, sym.relativeAddress}));
+    }
+    // 可能有临时变量计数 + 声明变量
+    result["address"] = sym.relativeAddress;
+    result["symbolNum"] = std::any_cast<int>(result["symbolNum"]) + 1;
+    // TODO: 如果右边是临时变量，可以直接使用这个临时变量作为变量的地址，改一下readtype
+}
+void Semantic::act80_(std::vector<attribute> &args, attribute &result) {
+    // 可迭代结构 -> 表达式 , 表达式
+    result["rangeBeginElementType"] = args[0]["elementType"];
+    if(std::any_cast<element_type>(args[0]["elementType"]).readType == LITERAL)
+        result["rangeBeginVal"] = args[0]["val"];
+    else
+        result["rangeBeginAddress"] = args[0]["address"];
+    result["rangeEndElementType"] = args[2]["elementType"];
+    if(std::any_cast<element_type>(args[2]["elementType"]).readType == LITERAL)
+        result["rangeEndVal"] = args[2]["val"];
+    else
+        result["rangeEndAddress"] = args[2]["address"];
+    if(*std::any_cast<element_type>(args[0]["elementType"]).dataType != *std::any_cast<element_type>(args[2]["elementType"]).dataType)
+    {
+        std::cout << "[ERROR] [SEMANTIC] " << std::any_cast<std::string>(args[0]["name"]) << " and " << std::any_cast<std::string>(args[2]["name"]) << " are not same type" << std::endl;
+        exit(0);
+    }
+    result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[2]["symbolNum"]);
+}
 void Semantic::act81_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act82_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act82_(std::vector<attribute> &args, attribute &result) {
+    // LOOP语句 -> loop M 语句块
+    /**
+     * M: null
+     * 语句块code
+     * j M
+     * L
+     */
+    int M = std::any_cast<int>(args[1]["codeID"]);
+    codes.push_back(quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, M}});
+    int L = codes.size();
+    codes[M] = quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}};
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+    // 回填breakList和continueList
+    int breakList = std::any_cast<int>(args[2]["breakList"]);
+    while (breakList)
+    {
+        int nxt = codes[breakList].result.value;
+        codes[breakList].result.value = L;
+        breakList = nxt;
+    }
+    int continueList = std::any_cast<int>(args[2]["continueList"]);
+    while (continueList)
+    {
+        int nxt = codes[continueList].result.value;
+        codes[continueList].result.value = M;
+        continueList = nxt;
+    }
+}
 void Semantic::act83_(std::vector<attribute> &args, attribute &result) {
+    // 语句 -> break;
+    int L = codes.size();
+    codes.push_back(quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, 0}});
+    result["breakList"] = L;
+}
+void Semantic::act84_(std::vector<attribute> &args, attribute &result) {
+    // 语句 -> continue;
+    int L = codes.size();
+    codes.push_back(quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, 0}});
+    result["continueList"] = L;
+}
+void Semantic::act85_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act86_(std::vector<attribute> &args, attribute &result) {
     // 因子 -> /* 因子
     // 检查是否可以解引用
     if (std::any_cast<element_type>(args[1]["elementType"]).dataType->type != REFER_TYPE
@@ -1116,7 +1649,7 @@ void Semantic::act83_(std::vector<attribute> &args, attribute &result) {
         codes.push_back(quat);
     }
 }
-void Semantic::act84_(std::vector<attribute> &args, attribute &result) {
+void Semantic::act87_(std::vector<attribute> &args, attribute &result) {
     // 因子 -> /& /mut 因子
     // 检查是否可以可变引用
     if (std::any_cast<element_type>(args[2]["elementType"]).readType != VARIABLE 
@@ -1157,7 +1690,7 @@ void Semantic::act84_(std::vector<attribute> &args, attribute &result) {
         
     codes.push_back(quat);
 }
-void Semantic::act85_(std::vector<attribute> &args, attribute &result) {
+void Semantic::act88_(std::vector<attribute> &args, attribute &result) {
     // 因子 -> /& 因子
     // 检查是否可以引用
     if (std::any_cast<element_type>(args[1]["elementType"]).readType != VARIABLE &&
@@ -1199,18 +1732,15 @@ void Semantic::act85_(std::vector<attribute> &args, attribute &result) {
 
     codes.push_back(quat);
 }
-void Semantic::act86_(std::vector<attribute> &args, attribute &result)
+void Semantic::act89_(std::vector<attribute> &args, attribute &result)
 {
     // 类型 -> /& /mut 类型
     result["dataType"] = data_type::create(MUT_REFER_TYPE, std::any_cast<std::shared_ptr<data_type>>(args[2]["dataType"]));
 }
-void Semantic::act87_(std::vector<attribute> &args, attribute &result) {
+void Semantic::act90_(std::vector<attribute> &args, attribute &result) {
     // 类型 -> /& 类型
     result["dataType"] = data_type::create(REFER_TYPE, std::any_cast<std::shared_ptr<data_type>>(args[1]["dataType"]));
 }
-void Semantic::act88_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act89_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act90_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act91_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act92_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act93_(std::vector<attribute> &args, attribute &result) {}

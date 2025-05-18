@@ -61,8 +61,8 @@ YIN_ZI -> YUAN_SU [ 40 ] #
 YUAN_SU -> /int [ 41 ] | /id [ 42 ] | /lpra BIAO_DA_SHI /rpra [ 43 ] #
 #
 # 3.2 表达式计算与比较
-BIAO_DA_SHI -> BIAO_DA_SHI /or OR_BIAO_DA_SHI [ 44 ] #
-OR_BIAO_DA_SHI -> OR_BIAO_DA_SHI /and AND_BIAO_DA_SHI [ 45 ] #
+BIAO_DA_SHI -> BIAO_DA_SHI /or M_OR OR_BIAO_DA_SHI [ 44 ] #
+OR_BIAO_DA_SHI -> OR_BIAO_DA_SHI /and M_AND AND_BIAO_DA_SHI [ 45 ] #
 AND_BIAO_DA_SHI -> AND_BIAO_DA_SHI BI_JIAO_YUN_SUAN_FU JIA_FA_BIAO_DA_SHI [ 46 ] #
 JIA_FA_BIAO_DA_SHI -> JIA_FA_BIAO_DA_SHI JIA_JIAN_YUN_SUAN_FU XIANG [ 47 ] #
 XIANG -> XIANG CHENG_CHU_YUN_SUAN_FU YIN_ZI [ 48 ] #
@@ -72,35 +72,38 @@ CHENG_CHU_YUN_SUAN_FU -> /mul [ 57 ] | /div [ 58 ] | /mod [ 59 ] #
 #
 YIN_ZI -> /sub YIN_ZI [ 60 ] | /not YIN_ZI [ 61 ] #
 #
+M_OR -> /zero [ 62 ] #
+M_AND -> /zero [ 63 ] #
+#
 # 3.3 函数调用
-YUAN_SU -> /id /lpra SHI_CAN_LIE_BIAO /rpra [ 62 ] #
-SHI_CAN_LIE_BIAO -> /zero [ 63 ] | BIAO_DA_SHI [ 64 ] | BIAO_DA_SHI /comma SHI_CAN_LIE_BIAO [ 65 ] #
+YUAN_SU -> /id /lpra SHI_CAN_LIE_BIAO /rpra [ 64 ] #
+SHI_CAN_LIE_BIAO -> /zero [ 65 ] | BIAO_DA_SHI [ 66 ] | BIAO_DA_SHI /comma SHI_CAN_LIE_BIAO [ 67 ] #
 #
 # 4.1 选择结构
-YU_JU -> IF_YU_JU [ 20 ] #
-IF_YU_JU -> /if BIAO_DA_SHI YU_JU_KUAI ELSE_BU_FEN [ -1 ] #
+YU_JU -> IF_YU_JU [ 68 ] #
+IF_YU_JU -> /if BIAO_DA_SHI YU_JU_KUAI ELSE_BU_FEN [ 69 ] #
 # ELSE_BU_FEN -> /zero | /else YU_JU_KUAI #
 #
 # 4.2 增加 else if
-ELSE_BU_FEN -> /else /if BIAO_DA_SHI YU_JU_KUAI ELSE_BU_FEN [ -1 ] | /else YU_JU_KUAI [ -1 ] | /zero [ -1 ] #
+ELSE_BU_FEN -> /else /if BIAO_DA_SHI YU_JU_KUAI ELSE_BU_FEN [ 70 ] | /else YU_JU_KUAI [ 71 ] | /zero [ 72 ] #
 #
 # 5.1 while循环结构
-YU_JU -> XUN_HUAN_YU_JU [ 21 ] #
-XUN_HUAN_YU_JU -> WHILE_YU_JU [ -1 ] #
-WHILE_YU_JU -> /while BIAO_DA_SHI YU_JU_KUAI [ -1 ] #
+YU_JU -> XUN_HUAN_YU_JU [ 73 ] #
+XUN_HUAN_YU_JU -> WHILE_YU_JU [ 74 ] #
+WHILE_YU_JU -> /while BIAO_DA_SHI YU_JU_KUAI [ 75 ] #
 #
 # 5.2 for循环结构
-XUN_HUAN_YU_JU -> FOR_YU_JU [ -1 ] #
-FOR_YU_JU -> FOR_YU_JU_SHENG_MING YU_JU_KUAI [ -1 ] #
-FOR_YU_JU_SHENG_MING -> /for BIAN_LIANG_SHENG_MING_NEI_BU /in KE_DIE_DAI_JIE_GOU [ -1 ] #
-KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ -1 ] #
+XUN_HUAN_YU_JU -> FOR_YU_JU [ 74 ] #
+FOR_YU_JU -> FOR_YU_JU_SHENG_MING YU_JU_KUAI [ 75 ] #
+FOR_YU_JU_SHENG_MING -> /for BIAN_LIANG_SHENG_MING_NEI_BU /in KE_DIE_DAI_JIE_GOU [ 76 ] #
+KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ 77 ] #
 #
 # 5.3 loop循环结构
-XUN_HUAN_YU_JU -> LOOP_YU_JU [ -1 ] #
-LOOP_YU_JU -> /loop YU_JU_KUAI [ -1 ] #
+XUN_HUAN_YU_JU -> LOOP_YU_JU [ 78 ] #
+LOOP_YU_JU -> /loop YU_JU_KUAI [ 79 ] #
 #
 # 5.4 break和continue语句
-YU_JU -> /break /semicolon [ 22 ] | /continue /semicolon [ 23 ] #
+YU_JU -> /break /semicolon [ 80 ] | /continue /semicolon [ 81 ] #
 #
 # 6.1 声明不可变变量
 BIAN_LIANG_SHENG_MING_NEI_BU -> /id [ 24 ] #

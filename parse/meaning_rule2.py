@@ -80,30 +80,31 @@ YUAN_SU -> /id /lpra SHI_CAN_LIE_BIAO /rpra [ 64 ] #
 SHI_CAN_LIE_BIAO -> /zero [ 65 ] | BIAO_DA_SHI [ 66 ] | BIAO_DA_SHI /comma SHI_CAN_LIE_BIAO [ 67 ] #
 #
 # 4.1 选择结构
-YU_JU -> IF_YU_JU [ 68 ] #
-IF_YU_JU -> /if BIAO_DA_SHI YU_JU_KUAI ELSE_BU_FEN [ 69 ] #
+M -> /zero [ 68 ] # 之后就都用这个M吧
+YU_JU -> IF_YU_JU [ 69 ] #
+IF_YU_JU -> /if BIAO_DA_SHI M YU_JU_KUAI M ELSE_BU_FEN [ 70 ] #
 # ELSE_BU_FEN -> /zero | /else YU_JU_KUAI #
 #
 # 4.2 增加 else if
-ELSE_BU_FEN -> /else /if BIAO_DA_SHI YU_JU_KUAI ELSE_BU_FEN [ 70 ] | /else YU_JU_KUAI [ 71 ] | /zero [ 72 ] #
+ELSE_BU_FEN -> /else /if BIAO_DA_SHI M YU_JU_KUAI M ELSE_BU_FEN [ 71 ] | /else YU_JU_KUAI [ 72 ] | /zero [ 73 ] #
 #
 # 5.1 while循环结构
-YU_JU -> XUN_HUAN_YU_JU [ 73 ] #
-XUN_HUAN_YU_JU -> WHILE_YU_JU [ 74 ] #
-WHILE_YU_JU -> /while BIAO_DA_SHI YU_JU_KUAI [ 75 ] #
+YU_JU -> XUN_HUAN_YU_JU [ 74 ] #
+XUN_HUAN_YU_JU -> WHILE_YU_JU [ 75 ] #
+WHILE_YU_JU -> /while M BIAO_DA_SHI M YU_JU_KUAI [ 76 ] #
 #
 # 5.2 for循环结构
-XUN_HUAN_YU_JU -> FOR_YU_JU [ 74 ] #
-FOR_YU_JU -> FOR_YU_JU_SHENG_MING YU_JU_KUAI [ 75 ] #
-FOR_YU_JU_SHENG_MING -> /for BIAN_LIANG_SHENG_MING_NEI_BU /in KE_DIE_DAI_JIE_GOU [ 76 ] #
-KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ 77 ] #
+XUN_HUAN_YU_JU -> FOR_YU_JU [ 77 ] #
+FOR_YU_JU -> FOR_YU_JU_SHENG_MING YU_JU_KUAI [ 78 ] #
+FOR_YU_JU_SHENG_MING -> /for BIAN_LIANG_SHENG_MING_NEI_BU /in KE_DIE_DAI_JIE_GOU [ 79 ] #
+KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ 80 ] #
 #
 # 5.3 loop循环结构
-XUN_HUAN_YU_JU -> LOOP_YU_JU [ 78 ] #
-LOOP_YU_JU -> /loop YU_JU_KUAI [ 79 ] #
+XUN_HUAN_YU_JU -> LOOP_YU_JU [ 81 ] #
+LOOP_YU_JU -> /loop M YU_JU_KUAI [ 82 ] #
 #
 # 5.4 break和continue语句
-YU_JU -> /break /semicolon [ 80 ] | /continue /semicolon [ 81 ] #
+YU_JU -> /break /semicolon [ 83 ] | /continue /semicolon [ 84 ] #
 #
 # 6.1 声明不可变变量
 BIAN_LIANG_SHENG_MING_NEI_BU -> /id [ 24 ] #
@@ -122,7 +123,7 @@ HAN_SHU_SHENG_MING -> HAN_SHU_TOU_SHENG_MING HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI [ 27
 #
 # 7.3 选择表达式
 BIAO_DA_SHI -> XUAN_ZE_BIAO_DA_SHI [ -1 ] #
-XUAN_ZE_BIAO_DA_SHI -> /if BIAO_DA_SHI HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI /else HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI [ -1 ] #
+XUAN_ZE_BIAO_DA_SHI -> /if BIAO_DA_SHI M HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI M /else HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI [ -1 ] #
 #
 # 7.4 循环表达式
 # BIAO_DA_SHI -> XUN_HUAN_BIAO_DA_SHI #

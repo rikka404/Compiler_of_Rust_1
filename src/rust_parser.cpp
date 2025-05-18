@@ -709,11 +709,13 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
     for (int pos = 0; pos < (int)lexSymbols.size(); pos++)
     {
         symbol a = lexSymbols[pos];
+        // std::cerr << "state=" << state.back() << std::endl;
+        // std::cerr << "next=" << a.type << ' ' << Util::terminalStr[a.type] << std::endl;
         // 必须含有此项
         if (!actionTable[state.back()].count(a))
         {
-            // std::cerr << "state=" << state.back() << std::endl;
-            // std::cerr << "next=" << a.type << ' ' << Util::terminalStr[a.type] << std::endl;
+            std::cerr << "state=" << state.back() << std::endl;
+            std::cerr << "next=" << a.type << ' ' << Util::terminalStr[a.type] << std::endl;
             std::cout << "[ERROR] [RULES] " << "parser analysis not accepted at pos " << pos << std::endl;
             exit(0);
         }
@@ -767,9 +769,9 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
             semantic.attributes.push_back(attribute());
             if(ruleToSemantic[act.rule_id] != -1)
             {
-                std::cerr << "act" << std::to_string(ruleToSemantic[act.rule_id]) << "_ begin" << std::endl;
+                // std::cerr << "act" << std::to_string(ruleToSemantic[act.rule_id]) << "_ begin" << std::endl;
                 (semantic.*Semantic::semanticActions[ruleToSemantic[act.rule_id]])(vt_attr, semantic.attributes.back());
-                std::cerr << "act" << std::to_string(ruleToSemantic[act.rule_id]) << "_ end" << std::endl;
+                // std::cerr << "act" << std::to_string(ruleToSemantic[act.rule_id]) << "_ end" << std::endl;
             }
             pos--;
         }

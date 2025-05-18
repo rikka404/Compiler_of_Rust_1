@@ -705,6 +705,7 @@ void Semantic::act44_(std::vector<attribute> &args, attribute &result) {
      * null
      * 
      * M需要的属性：它自己的四元式的地址
+     * 没有采用truelist的方法，是因为那样会导致所有表达式都有这个字段，维护起来就麻烦一点
      */
     int a_offset = std::any_cast<int>(args[0]["address"]);
     int b_offset = std::any_cast<int>(args[3]["address"]);
@@ -1240,21 +1241,79 @@ void Semantic::act67_(std::vector<attribute> &args, attribute &result) {
     result["actualParameter"] = n_para_list; // 倒着插入的
     result["symbolNum"] = std::any_cast<int>(args[0]["symbolNum"]) + std::any_cast<int>(args[2]["symbolNum"]);
 }
-void Semantic::act68_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act68_(std::vector<attribute> &args, attribute &result) {
+    // M -> /zero
+    result["codeID"] = (int)codes.size();
+    codes.push_back(quaternary{"jnz", Operand{Offset, 0}, Operand{Literal, 0}, Operand{Lable, 0}});
+    // 通过先插入M的方式解决“需要规约到上层才知道要往里面加入语句”的问题和需要回填的问题
+}
 void Semantic::act69_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act70_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act71_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act70_(std::vector<attribute> &args, attribute &result) {
+    // IF语句 -> if 表达式 M 语句块 M else部分
+    /**
+     * 表达式code
+     * M1code jz 表达式 M2 + 1
+     * M1 + 1 : 语句块code
+     * M2code j L
+     * M2 + 1 : else部分code
+     * L 
+     * 
+     * 诶好像不需要加新的语句了
+     */
+    int M1 = std::any_cast<int>(args[2]["codeID"]), M2 = std::any_cast<int>(args[4]["codeID"]);
+    int L = codes.size();
+    codes[M1] = quaternary{"jz", Operand{Offset, std::any_cast<int>(args[1]["address"])}, Operand{Literal, 0}, Operand{Lable, M2 + 1}};
+    codes[M2] = quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, L + 1}};
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+}
+void Semantic::act71_(std::vector<attribute> &args, attribute &result) {
+    // /else /if 表达式 M 语句块 M else部分
+    int M1 = std::any_cast<int>(args[3]["codeID"]), M2 = std::any_cast<int>(args[5]["codeID"]);
+    int L = codes.size();
+    codes[M1] = quaternary{"jz", Operand{Offset, std::any_cast<int>(args[2]["address"])}, Operand{Literal, 0}, Operand{Lable, M2 + 1}};
+    codes[M2] = quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, L + 1}};
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+}
 void Semantic::act72_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act73_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act74_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act75_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act76_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act76_(std::vector<attribute> &args, attribute &result) {
+    // WHILE语句 -> while M 表达式 M 语句块
+    /**
+     * M1 : null
+     * 表达式code
+     * M2code : jz 表达式 L
+     * 语句块code
+     * j M1
+     * L
+     */
+    int M1 = std::any_cast<int>(args[1]["codeID"]), M2 = std::any_cast<int>(args[3]["codeID"]);
+    codes.push_back(quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, M1}});
+    int L = codes.size();
+    codes[M1] = quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}};
+    codes[M2] = quaternary{"jz", Operand{Offset, std::any_cast<int>(args[2]["address"])}, Operand{Literal, 0}, Operand{Lable, L}};
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+}
 void Semantic::act77_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act78_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act79_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act80_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act81_(std::vector<attribute> &args, attribute &result) {}
-void Semantic::act82_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act82_(std::vector<attribute> &args, attribute &result) {
+    // LOOP语句 -> loop M 语句块
+    /**
+     * M: null
+     * 语句块code
+     * j M
+     * L??
+     */
+    int M = std::any_cast<int>(args[1]["codeID"]);
+    codes.push_back(quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, M}});
+    int L = codes.size();
+    codes[M] = quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}};
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+}
 void Semantic::act83_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act84_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act85_(std::vector<attribute> &args, attribute &result) {}

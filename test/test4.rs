@@ -29,5 +29,8 @@ fn main() {
         a = sum(4 / 2, 2 + a * 2);
     }
     let mut b:i32 = 4;
-    !(a > b) && a < b + 1;
+    loop
+    {
+        a = a - 1;
+    }
 }

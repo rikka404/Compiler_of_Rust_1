@@ -253,12 +253,12 @@ std::ostream &operator<<(std::ostream &out, const data_type &e_type)
     else if (e_type.type == REFER_TYPE)
     {
         refer_type *eptr = (refer_type *)(&e_type);
-        out << "&" << *(eptr->t_type);
+        out << "& " << *(eptr->t_type);
     }
     else if (e_type.type == MUT_REFER_TYPE)
     {
         mut_refer_type *eptr = (mut_refer_type *)(&e_type);
-        out << "mut&" << *(eptr->t_type);
+        out << "&mut " << *(eptr->t_type);
     }
     else if (e_type.type == ARRAY_TYPE)
     {

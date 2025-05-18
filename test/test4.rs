@@ -18,15 +18,48 @@
 //     return c;
 // }
 
-fn sum(mut a: i32, mut b: i32) -> i32 {
-    return a + b;
+// fn sum(mut a: i32, mut b: i32) -> i32 {
+//     return a + b;
+// }
+
+// fn main() {
+//     let mut a:i32 = 5;
+//     {
+//         let mut b:i32;
+//         a = -sum(4 / 2, 2 + a * 2);
+//     }
+//     let mut b:i32 = 4;
+// }
+
+// fn main() {
+//     let mut c:i32 = 5;
+//     let mut a:& & i32 = & & *&c;
+//     let mut b:&i32 = *a;
+// }
+
+// fn main() {
+//     let mut c:i32 = 5;
+//     let mut d:i32 = 6;
+//     let mut a:&mut i32;
+//     a = &mut c;
+//     a = &mut d;
+//     *a = 10;
+// }
+
+// fn main() {
+//     let mut c:i32 = 5;
+//     let mut a:&mut &mut i32 = &mut &mut *&mut c;
+//     **a = 9 + **a;
+// }
+
+
+fn sum(mut a: &mut i32, mut b: i32) -> i32 {
+    *a += 1;
+    return *a + b;
 }
 
 fn main() {
     let mut a:i32 = 5;
-    {
-        let mut b:i32;
-        a = sum(4 / 2, 2 + a * 2);
-    }
-    let mut b:i32 = 4;
+    let mut b:i32 = 10;
+    sum(&mut a, b);
 }

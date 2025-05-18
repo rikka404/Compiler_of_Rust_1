@@ -436,6 +436,8 @@ KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ 5 numTypeCheck 0 0 numType
 |`(call, 0, 0, to)`|`(push, eip+1, 4, 0)`,`ebp=esp`,然后`(push, ebp, 4, 0)`,`eip=to`|
 |`(return, a, siz, r)`|把a地址开始，siz大小的内容放到返回值的地方`r`,和`:=`相同|
 |`(leave, 0, 0, 0)`|退出call,即`esp=ebp-4,ebp=[0],eip=*esp`|
+|`(end, 0, 0, 0)`|标识程序结束|
+|`(sea, x, 0, a)`|计算绝对地址，即x+ebp，存储到a开始的四字节中|
 
 ## 3.4 函数栈帧
 
@@ -479,6 +481,52 @@ call之后
 |      |
 --------
 ```
+
+# 3.5 临时变量、类型推断与指针
+
+目前，临时变量和普通变量作用域相同，需要在语句块外弹出（包括汇编和四元式）。
+最开始思考类型推断时，想要一次扫描完成，即在变量声明时先记下名字，等待到变量被赋值时才确定变量类型，给变量分配对应空间。
+但是这种方法会和作用域弹出对应数量变量的规则冲突，这本质上是因为，我们会在一个新的作用域内分配外部作用域下的变量的空间，这会导致顺序乱掉，无法弹出。
+所以目前不能支持类型推断。如果需要支持类型推断，至少要预扫描一次，先把没有类型的变量类型推断出来，然后才可以在正确的位置分配变量空间。
+
+接下来是引用(指针)的思想
+引用类型大小为4字节，存储被引用变量的绝对地址(ebp+offset)。我们需要一个指令计算并存下ebp+offset。
+语义规则中辅助存下它所引用的变量名。但是变量名可能重名，我们还需要一个唯一的引用标志int来比对是否是引用和被引用的关系。
+
+我们可以通过引用看出rust的临时变量如何释放：
+```rust
+fn main() {
+    let mut a:i32 = 5;
+    let mut c:&&i32 = &&a;
+    println!("{}", **c)
+}
+```
+
+**正常输出5！！！**
+
+```rust
+fn main() {
+    let mut a:i32 = 5;
+    let mut c:&&i32;
+    c = &&a;
+    println!("{}", **c)
+}
+```
+
+```
+error[E0716]: temporary value dropped while borrowed
+ --> src/main.rs:4:10
+  |
+4 |     c = &&a;
+  |          ^^- temporary value is freed at the end of this statement
+  |          |
+  |          creates a temporary value which is freed while still in use
+5 |     println!("{}", **c)
+  |                    --- borrow later used here
+```
+
+我们会发现，除了特殊语句，比如声明赋值语句的临时变量（这里是取了一次引用的临时变量）会保留，其他的会在语句结束后就释放，导致的错误。
+
 
 ## 小tip
 

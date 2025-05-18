@@ -423,7 +423,7 @@ KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ 5 numTypeCheck 0 0 numType
  
 **目前的四元式**
 
-| 泛式 | 说明 |
+| 范式 | 说明 |
 | --- | --- |
 |`(:=, x, siz, a)`|a:=x,直接复制大小为siz的区域|
 |`(+=, x, 0, a)`|符号有`+= -= *= /= %=`,只能对i32使用|
@@ -433,15 +433,15 @@ KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ 5 numTypeCheck 0 0 numType
 |`(push, a, siz, 0)`|`(:=, a, siz, *esp)`,然后`esp+=siz`|
 |`(pop, 0, siz, 0)`|`esp-=siz`|
 |`(popa, 0, siz, a)`|`(:=, a, siz, *(esp-siz)),esp-=siz`|
-|`(call, 0, 0, to)`|`(push, eip+1, 4, 0)`,`(push, ebp, 4, 0)`,然后`ebp=esp`,`eip=to`|
+|`(call, 0, 0, to)`|`(push, eip+1, 4, 0)`,`ebp=esp`,然后`(push, ebp, 4, 0)`,`eip=to`|
 |`(return, a, siz, r)`|把a地址开始，siz大小的内容放到返回值的地方`r`,和`:=`相同|
-|`(leave, 0, 0, 0)`|退出call,即`esp=ebp-8,ebp=[-4],eip=*esp`|
+|`(leave, 0, 0, 0)`|退出call,即`esp=ebp-4,ebp=[0],eip=*esp`|
 
 ## 3.4 函数栈帧
 
 无论是数组还是什么复杂类型，均采用复制实参传值，也不考虑rust的所有权。
 
-函数调用相当于声明实参个数+1(返回值)个变量，返回到主函数后移除实参个数个变量。
+函数调用相当于声明一个临时变量用来存返回值，然后push实参，返回到主函数后pop实参。
 
 ```rust
 fn sum(a:i32, b:i32, c:i32) -> i32 {
@@ -454,25 +454,30 @@ fn main() -> i32 {
 ```
 
 ```
-sum:
-    (+, [-20], [-16], T1)  //(+, b, c, T1)
-    (+, T1, [-12], T2)  //(+, T1, a, T2)
-    (return, a, 4, [-24])
-    (leave, 0, 0, 0)
-main:
-    (push, 0, 4, [0]) // a变量内存0
-    (push, 0, 4, 0) // 返回值
-    
-    (push, 4, 4, 0)
-    (push, 3, 4, 0)
-    (push, 2, 4, 0)
-    (call, 0, 0, sum)
-    (pop, 0, 4, 0)
-    (pop, 0, 4, 0)
-    (pop, 0, 4, 0)
-    
-    (:=, [4], 4, [0])  // a变量内存0 
-    (pop, 0, 4, 0)  // 表达式规约成任何语句时，汇编pop对应含有返回值(临时变量)数量
+call之前
+|      |
+|      |
+|      | <-esp
+|  2   | 参数1
+|  3   | 参数2
+|  4   | 参数3
+|  T1  | 临时变量,返回值
+|  a   |
+|      | <-ebp
+|      |
+--------
+call之后
+|      |
+| ebp' | <-ebp <-esp
+|  eip |
+|  2   | 参数1
+|  3   | 参数2
+|  4   | 参数3
+|  T1  | 临时变量,返回值
+|  a   |
+|      | <-ebp'
+|      |
+--------
 ```
 
 ## 小tip

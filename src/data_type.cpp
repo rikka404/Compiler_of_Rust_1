@@ -5,7 +5,7 @@ int data_type::unused_offset = 0;
 
 std::shared_ptr<data_type> data_type::create(base_data_type b_type)
 {
-    assert(b_type == I32_TYPE || b_type == BOOL_TYPE || b_type == VOID_TYPE);
+    assert(b_type == I32_TYPE || b_type == BOOL_TYPE || b_type == VOID_TYPE || b_type == FUN_TYPE);
     auto ptr = std::make_shared<data_type>();
     ptr->type = b_type;
     switch (b_type)
@@ -241,6 +241,10 @@ std::ostream &operator<<(std::ostream &out, const data_type &e_type)
     else if (e_type.type == VOID_TYPE)
     {
         out << "void";
+    }
+    else if (e_type.type == FUN_TYPE)
+    {
+        out << "fun";
     }
     else if (e_type.type == ERROR_TYPE)
     {

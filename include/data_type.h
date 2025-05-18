@@ -16,6 +16,7 @@ enum base_data_type
     TUPLE_TYPE, 
 
     VOID_TYPE,
+    FUN_TYPE,
     ERROR_TYPE
 };
 

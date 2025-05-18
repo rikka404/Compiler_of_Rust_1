@@ -32,5 +32,9 @@ fn main() {
     loop
     {
         a = a - 1;
+        break;
+        break;
+        continue;
+        continue;
     }
 }

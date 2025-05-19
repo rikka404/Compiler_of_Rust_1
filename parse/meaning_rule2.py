@@ -114,7 +114,7 @@ YIN_ZI -> /mul YIN_ZI [ 86 ] | /refer /mut YIN_ZI [ 87 ] | /refer YIN_ZI [ 88 ] 
 LEI_XING -> /refer /mut LEI_XING [ 89 ] | /refer LEI_XING [ 90 ] #
 #
 # 7.1 函数表达式块
-BIAO_DA_SHI -> M_HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI [ -1 ] #
+BIAO_DA_SHI -> HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI [ -1 ] #
 HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI -> /lbra HAN_SHU_BIAO_DA_SHI_YU_JU_CHUAN /rbra [ -1 ] #
 HAN_SHU_BIAO_DA_SHI_YU_JU_CHUAN -> BIAO_DA_SHI [ -1 ] | YU_JU HAN_SHU_BIAO_DA_SHI_YU_JU_CHUAN [ -1 ] #
 M_HAN_SHU_BIAO_DA_SHI_YU_JU_KUAI -> /zero [ -1 ] #
@@ -138,21 +138,21 @@ BIAO_DA_SHI -> LOOP_YU_JU [ -1 ] #
 YU_JU -> /break BIAO_DA_SHI /semicolon [ -1 ] #
 #
 # 8.1 数组
-LEI_XING -> /lsqb LEI_XING /semicolon /int /rsqb [ -1 ] #
-YUAN_SU -> /lsqb SHU_ZU_YUAN_SU_LIE_BIAO /rsqb [ -1 ] #
-SHU_ZU_YUAN_SU_LIE_BIAO -> /zero [ -1 ] | BIAO_DA_SHI [ -1 ] | BIAO_DA_SHI /comma SHU_ZU_YUAN_SU_LIE_BIAO [ -1 ] #
+LEI_XING -> /lsqb LEI_XING /semicolon /int /rsqb [ 102 ] #
+YUAN_SU -> /lsqb SHU_ZU_YUAN_SU_LIE_BIAO /rsqb [ 103 ] #
+SHU_ZU_YUAN_SU_LIE_BIAO -> /zero [ 104 ] | BIAO_DA_SHI [ 105 ] | BIAO_DA_SHI /comma SHU_ZU_YUAN_SU_LIE_BIAO [ 106 ] #
 
 # 8.2 数组元素
-YUAN_SU -> YUAN_SU /lsqb BIAO_DA_SHI /rsqb [ -1 ] #
-KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI [ -1 ] #
+YUAN_SU -> YUAN_SU /lsqb BIAO_DA_SHI /rsqb [ 107 ] #
+KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI [ 108 ] #
 
 # 9.1 元组
-LEI_XING -> /lpra YUAN_ZU_LEI_XING_NEI_BU /rpra [ -1 ] #
-YUAN_ZU_LEI_XING_NEI_BU -> /zero [ -1 ] | LEI_XING /comma LEI_XING_LIE_BIAO [ -1 ] #
-LEI_XING_LIE_BIAO -> /zero [ -1 ] | LEI_XING [ -1 ] | LEI_XING /comma LEI_XING_LIE_BIAO [ -1 ] #
-YUAN_SU -> /lpra YUAN_ZU_FU_ZHI_NEI_BU /rpra [ -1 ] #
-YUAN_ZU_FU_ZHI_NEI_BU -> /zero [ -1 ] | BIAO_DA_SHI /comma YUAN_ZU_YUAN_SU_LIE_BIAO [ -1 ] #
-YUAN_ZU_YUAN_SU_LIE_BIAO -> /zero [ -1 ] | BIAO_DA_SHI [ -1 ] | BIAO_DA_SHI /comma YUAN_ZU_YUAN_SU_LIE_BIAO [ -1 ] #
+LEI_XING -> /lpra YUAN_ZU_LEI_XING_NEI_BU /rpra [ 109 ] #
+YUAN_ZU_LEI_XING_NEI_BU -> LEI_XING /comma LEI_XING_LIE_BIAO [ 110 ] #
+LEI_XING_LIE_BIAO -> /zero [ 111 ] | LEI_XING [ 112 ] | LEI_XING /comma LEI_XING_LIE_BIAO [ 113 ] #
+YUAN_SU -> /lpra YUAN_ZU_FU_ZHI_NEI_BU /rpra [ 114 ] #
+YUAN_ZU_FU_ZHI_NEI_BU -> BIAO_DA_SHI /comma YUAN_ZU_YUAN_SU_LIE_BIAO [ 115 ] #
+YUAN_ZU_YUAN_SU_LIE_BIAO -> /zero [ 116 ] | BIAO_DA_SHI [ 117 ] | BIAO_DA_SHI /comma YUAN_ZU_YUAN_SU_LIE_BIAO [ 118 ] #
 
 # 9.2 元组元素
-YUAN_SU -> YUAN_SU /dot /int [ -1 ] #
+YUAN_SU -> YUAN_SU /dot /int [ 119 ] #

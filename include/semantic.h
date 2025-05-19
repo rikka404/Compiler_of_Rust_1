@@ -56,12 +56,21 @@ public:
 // attr.value["type"]
 using attribute = std::map<std::string, std::any>;
 
+enum Regs
+{
+    EBP, 
+    ESP, 
+    EIP, 
+    EAX
+};
+
 enum arg_type
 {
     Literal, // 立即数
     Offset,  // 相对ebp地址
     Address, // 相对ebp取绝对地址
-    Lable    // 中间代码标号
+    Lable,   // 中间代码标号
+    Register // 寄存器
 };
 struct Operand {
     arg_type type;

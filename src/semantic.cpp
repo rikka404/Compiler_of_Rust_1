@@ -256,6 +256,12 @@ void Semantic::act5_(std::vector<attribute> &args, attribute &result) {
         para_sym_list.push_back(sym);
         pushSymbol(sym);
     }
+    // 检查函数重定义
+    if (functionTable.count(functionEntry{0, std::any_cast<std::string>(args[1]["name"]), {}, {}}))
+    {
+        std::cout << "[ERROR] [SEMANTIC] function \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is redefined" << std::endl;
+        exit(0);
+    }
     // 注意这里一定要指明functionEntry类型，不然insert不进去，不知道为什么
     functionTable.insert(functionEntry{(int)this->codes.size(), std::any_cast<std::string>(args[1]["name"]), para_sym_list, symbolEntry{"", ret_type, 0}});
     result["returnType"] = ret_type.dataType;
@@ -412,6 +418,12 @@ void Semantic::act18_(std::vector<attribute> &args, attribute &result) {
     offset -= ret_type.dataType->siz;
     ret_sym.relativeAddress = offset;
     nowFunctionRetAddress = offset;
+    // 检查函数重定义
+    if (functionTable.count(functionEntry{0, std::any_cast<std::string>(args[1]["name"]), {}, {}}))
+    {
+        std::cout << "[ERROR] [SEMANTIC] function \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is redefined" << std::endl;
+        exit(0);
+    }
     // 注意这里一定要指明functionEntry类型，不然insert不进去，不知道为什么
     functionTable.insert(functionEntry{(int)this->codes.size(), std::any_cast<std::string>(args[1]["name"]), para_sym_list, ret_sym});
     result["returnType"] = ret_type.dataType;

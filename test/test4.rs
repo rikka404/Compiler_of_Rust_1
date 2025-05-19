@@ -53,10 +53,10 @@
 // }
 
 
-fn sum(mut a: &mut &mut i32, mut b: i32) -> i32 {
-    **a += 1;
-    return **a + b;
-}
+// fn sum(mut a: &mut &mut i32, mut b: i32) -> i32 {
+//     **a += 1;
+//     return **a + b;
+// }
 
 // fn sum2(mut a:i32, mut b:i32)->i32{
 //     if a > 1{
@@ -140,14 +140,14 @@ fn main() {
 //     a.1[1] += b.1.0;
 // }
 
-fn sum(mut b:&mut (i32, [i32; 2])) {
-    (*b).1[0] = (*b).0 + 1;
-}
+// fn sum(mut b:&mut (i32, [i32; 2])) {
+//     (*b).1[0] = (*b).0 + 1;
+// }
 
-fn main() {
-    let mut a:(i32, [i32; 2]);
-    {
-        a = (3, [1, 2]);
-    }
-    sum(&mut a);
-}
+// fn main() {
+//     let mut a:(i32, [i32; 2]);
+//     {
+//         a = (3, [1, 2]);
+//     }
+//     sum(&mut a);
+// }

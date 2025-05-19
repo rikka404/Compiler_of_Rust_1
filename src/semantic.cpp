@@ -1317,7 +1317,7 @@ void Semantic::act64_(std::vector<attribute> &args, attribute &result) {
     }
     
     auto func = this->functionTable.find(functionEntry{0, std::any_cast<std::string>(args[0]["name"]), {}, {}});
-    if (!func->returnType.type.dataType->type == VOID_TYPE)
+    if (func->returnType.type.dataType->type != VOID_TYPE)
     {
         // 为返回值申请临时变量
         symbolEntry sym;
@@ -1544,6 +1544,7 @@ void Semantic::act76_(std::vector<attribute> &args, attribute &result) {
      */
     int M1 = std::any_cast<int>(args[1]["codeID"]), M2 = std::any_cast<int>(args[3]["codeID"]);
     int a_offset = std::any_cast<int>(args[2]["address"]);
+    // TODO: 所有的jz jnz之类的，寻址方式有三种
     codes[M1] = quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}};
     codes[M2] = quaternary{"jz", Operand{Offset, a_offset}, Operand{Literal, 0}, Operand{Lable, 0}};
     int a_symbolNum = std::any_cast<int>(args[2]["symbolNum"]);
@@ -1575,7 +1576,7 @@ void Semantic::act76_(std::vector<attribute> &args, attribute &result) {
         continueList = nxt;
     }
     // 计数临时变量
-    result["symbolNum"] = std::any_cast<int>(args[2]["symbolNum"]);
+    result["symbolNum"] = 0;
 }
 void Semantic::act77_(std::vector<attribute> &args, attribute &result) {
     // 循环语句 -> FOR语句

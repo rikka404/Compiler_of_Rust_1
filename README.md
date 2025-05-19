@@ -438,6 +438,7 @@ KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ 5 numTypeCheck 0 0 numType
 |`(leave, 0, 0, 0)`|退出call,即`esp=ebp-4,ebp=[0],eip=*esp`|
 |`(end, 0, 0, 0)`|标识程序结束|
 |`(sea, x, 0, a)`|计算绝对地址，即x+ebp，存储到a开始的四字节中|
+|`(null, 0, 0, 0)`|空语句|
 
 ## 3.4 函数栈帧
 

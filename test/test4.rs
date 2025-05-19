@@ -53,16 +53,16 @@
 // }
 
 
-fn sum(mut a: &mut i32, mut b: i32) -> i32 {
-    *a += 1;
-    return *a + b;
-}
+// fn sum(mut a: &mut i32, mut b: i32) -> i32 {
+//     *a += 1;
+//     return *a + b;
+// }
 
-fn main() {
-    let mut a:i32 = 5;
-    let mut b:i32 = 10;
-    sum(&mut a, b);
-}
+// fn main() {
+//     let mut a:i32 = 5;
+//     let mut b:i32 = 10;
+//     sum(&mut a, b);
+// }
 
 // fn main() {
 //     loop
@@ -74,3 +74,18 @@ fn main() {
 //         continue;
 //     }
 // }
+
+fn main() {
+    let mut a:i32 = 5;
+    let b:&i32 = &a;
+    // while a == *b {
+    //     a += 1;
+    //     break;
+    // }
+    for i in 0..*b {
+        if (a > 10 || a < 0) {
+            break;
+        }
+        a += 1;
+    }
+}

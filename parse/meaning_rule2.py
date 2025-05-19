@@ -61,8 +61,8 @@ YIN_ZI -> YUAN_SU [ 40 ] #
 YUAN_SU -> /int [ 41 ] | /id [ 42 ] | /lpra BIAO_DA_SHI /rpra [ 43 ] #
 #
 # 3.2 表达式计算与比较
-BIAO_DA_SHI -> BIAO_DA_SHI /or M_OR OR_BIAO_DA_SHI [ 44 ] #
-OR_BIAO_DA_SHI -> OR_BIAO_DA_SHI /and M_AND AND_BIAO_DA_SHI [ 45 ] #
+BIAO_DA_SHI -> BIAO_DA_SHI /or M OR_BIAO_DA_SHI [ 44 ] #
+OR_BIAO_DA_SHI -> OR_BIAO_DA_SHI /and M AND_BIAO_DA_SHI [ 45 ] #
 AND_BIAO_DA_SHI -> AND_BIAO_DA_SHI BI_JIAO_YUN_SUAN_FU JIA_FA_BIAO_DA_SHI [ 46 ] #
 JIA_FA_BIAO_DA_SHI -> JIA_FA_BIAO_DA_SHI JIA_JIAN_YUN_SUAN_FU XIANG [ 47 ] #
 XIANG -> XIANG CHENG_CHU_YUN_SUAN_FU YIN_ZI [ 48 ] #
@@ -72,8 +72,8 @@ CHENG_CHU_YUN_SUAN_FU -> /mul [ 57 ] | /div [ 58 ] | /mod [ 59 ] #
 #
 YIN_ZI -> /sub YIN_ZI [ 60 ] | /not YIN_ZI [ 61 ] #
 #
-M_OR -> /zero [ 62 ] #
-M_AND -> /zero [ 63 ] #
+# M_OR -> /zero [ 62 ] #
+# M_AND -> /zero [ 63 ] #
 #
 # 3.3 函数调用
 YUAN_SU -> /id /lpra SHI_CAN_LIE_BIAO /rpra [ 64 ] #
@@ -107,7 +107,7 @@ LOOP_YU_JU -> /loop M YU_JU_KUAI [ 82 ] #
 YU_JU -> /break /semicolon [ 83 ] | /continue /semicolon [ 84 ] #
 #
 # 6.1 声明不可变变量
-BIAN_LIANG_SHENG_MING_NEI_BU -> /id [ -1 ] #
+BIAN_LIANG_SHENG_MING_NEI_BU -> /id [ 85 ] #
 #
 # 6.2 借用和引用
 YIN_ZI -> /mul YIN_ZI [ 86 ] | /refer /mut YIN_ZI [ 87 ] | /refer YIN_ZI [ 88 ] #

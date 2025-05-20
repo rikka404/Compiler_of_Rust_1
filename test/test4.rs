@@ -65,6 +65,7 @@
 //         }
 //         else {
 //             let mut c = 1;
+//             let mut d = 2;
 //         }
 //         1
 //     }
@@ -76,10 +77,17 @@
 fn main() {
     let mut a:i32 = 5;
     let mut b:i32 = 10;
-    while a > 1
-    {
-        a = a - 1;
-    }
+    let mut c:i32 = loop{
+        let mut c = 1;
+        if c > 1
+        {
+            break 1;
+        }
+        else
+        {
+            break 0;
+        }
+    };
     // sum(&mut &mut a, b);
     // let mut d = sum2(a, b);
     // let mut c = {

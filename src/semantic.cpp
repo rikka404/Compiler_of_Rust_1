@@ -777,8 +777,6 @@ void Semantic::act44_(std::vector<attribute> &args, attribute &result) {
         std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[3]["name"]) << "\" is not a BOOL " << std::endl;
         exit(0);
     }
-    int a_offset = std::any_cast<int>(args[0]["address"]);
-    int b_offset = std::any_cast<int>(args[3]["address"]);
     int a_symbolNum = std::any_cast<int>(args[0]["symbolNum"]);
     int b_symbolNum = std::any_cast<int>(args[3]["symbolNum"]);
     int a_siz = 0, b_siz = 0;
@@ -804,10 +802,38 @@ void Semantic::act44_(std::vector<attribute> &args, attribute &result) {
     int M = std::any_cast<int>(args[2]["codeID"]);
     std::vector<int> AT_list, BT_list, T_list, next_list;
     int AT, BT, T, next;
-    codes[M] = quaternary{"jnz", Operand{Offset, a_offset}, Operand{Literal, 0}, Operand{Lable, 0}};
+    if(args[0].count("address"))
+    {
+        int a_offset = std::any_cast<int>(args[0]["address"]);
+        codes[M] = quaternary{"jnz", Operand{Offset, a_offset}, Operand{Literal, 0}, Operand{Lable, 0}};
+    }
+    else if(args[0].count("absoluteAddress"))
+    {
+        int a_address = std::any_cast<int>(args[0]["absoluteAddress"]);
+        codes[M] = quaternary{"jnz", Operand{Address, a_address}, Operand{Literal, 0}, Operand{Lable, 0}};
+    }
+    else
+    {
+        int a_val = std::any_cast<int>(args[0]["val"]);
+        codes[M] = quaternary{"jnz", Operand{Literal, a_val}, Operand{Literal, 0}, Operand{Lable, 0}};
+    }
     AT_list.push_back(M);
     BT_list.push_back(codes.size());
-    codes.push_back(quaternary{"jnz", Operand{Offset, b_offset}, Operand{Literal, 0}, Operand{Lable, 0}});
+    if(args[3].count("address"))
+    {
+        int b_offset = std::any_cast<int>(args[3]["address"]);
+        codes.push_back(quaternary{"jnz", Operand{Offset, b_offset}, Operand{Literal, 0}, Operand{Lable, 0}});
+    }
+    else if(args[3].count("absoluteAddress"))
+    {
+        int b_address = std::any_cast<int>(args[3]["absoluteAddress"]);
+        codes.push_back(quaternary{"jnz", Operand{Address, b_address}, Operand{Literal, 0}, Operand{Lable, 0}});
+    }
+    else
+    {
+        int b_val = std::any_cast<int>(args[3]["val"]);
+        codes.push_back(quaternary{"jnz", Operand{Literal, b_val}, Operand{Literal, 0}, Operand{Lable, 0}});
+    }
     codes.push_back(quaternary{"pop", Operand{Literal, 0}, Operand{Literal, b_siz + a_siz}, Operand{Literal, 0}});
     codes.push_back(quaternary{"push", Operand{Literal, 0}, Operand{Literal, 1}, Operand{Literal, 0}});
     codes.push_back(quaternary{":=", Operand{Literal, 0}, Operand{Literal, 1}, Operand{Offset, sym.relativeAddress}});
@@ -851,16 +877,16 @@ void Semantic::act45_(std::vector<attribute> &args, attribute &result) {
     /**
      * code a
      * code M :
-     *      jnz A - AF
+     *      jz A - AF
      * code b
      * 这以上的都是规约之前就做好的
-     * jnz B BF
+     * jz B BF
      * pop B + A
      * push c
      * c := 1
      * j next
      * AF: pop A
-     * j T
+     * j F
      * BF: pop B + A
      * F: push c
      * c := 0
@@ -877,8 +903,6 @@ void Semantic::act45_(std::vector<attribute> &args, attribute &result) {
         std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[3]["name"]) << "\" is not a BOOL " << std::endl;
         exit(0);
     }
-    int a_offset = std::any_cast<int>(args[0]["address"]);
-    int b_offset = std::any_cast<int>(args[3]["address"]);
     int a_symbolNum = std::any_cast<int>(args[0]["symbolNum"]);
     int b_symbolNum = std::any_cast<int>(args[3]["symbolNum"]);
     int a_siz = 0, b_siz = 0;
@@ -904,10 +928,38 @@ void Semantic::act45_(std::vector<attribute> &args, attribute &result) {
     int M = std::any_cast<int>(args[2]["codeID"]);
     std::vector<int> AF_list, BF_list, F_list, next_list;
     int AF, BF, F, next;
-    codes[M] = quaternary{"jz", Operand{Offset, a_offset}, Operand{Literal, 0}, Operand{Lable, 0}};
+    if(args[0].count("address"))
+    {
+        int a_offset = std::any_cast<int>(args[0]["address"]);
+        codes[M] = quaternary{"jz", Operand{Offset, a_offset}, Operand{Literal, 0}, Operand{Lable, 0}};
+    }
+    else if(args[0].count("absoluteAddress"))
+    {
+        int a_address = std::any_cast<int>(args[0]["absoluteAddress"]);
+        codes[M] = quaternary{"jz", Operand{Address, a_address}, Operand{Literal, 0}, Operand{Lable, 0}};
+    }
+    else
+    {
+        int a_val = std::any_cast<int>(args[0]["val"]);
+        codes[M] = quaternary{"jz", Operand{Literal, a_val}, Operand{Literal, 0}, Operand{Lable, 0}};
+    }
     AF_list.push_back(M);
     BF_list.push_back(codes.size());
-    codes.push_back(quaternary{"jz", Operand{Offset, b_offset}, Operand{Literal, 0}, Operand{Lable, 0}});
+    if(args[3].count("address"))
+    {
+        int b_offset = std::any_cast<int>(args[3]["address"]);
+        codes.push_back(quaternary{"jz", Operand{Offset, b_offset}, Operand{Literal, 0}, Operand{Lable, 0}});
+    }
+    else if(args[3].count("absoluteAddress"))
+    {
+        int b_address = std::any_cast<int>(args[3]["absoluteAddress"]);
+        codes.push_back(quaternary{"jz", Operand{Address, b_address}, Operand{Literal, 0}, Operand{Lable, 0}});
+    }
+    else
+    {
+        int b_val = std::any_cast<int>(args[3]["val"]);
+        codes.push_back(quaternary{"jz", Operand{Literal, b_val}, Operand{Literal, 0}, Operand{Lable, 0}});
+    }
     codes.push_back(quaternary{"pop", Operand{Literal, 0}, Operand{Literal, b_siz + a_siz}, Operand{Literal, 0}});
     codes.push_back(quaternary{"push", Operand{Literal, 0}, Operand{Literal, 1}, Operand{Literal, 0}});
     codes.push_back(quaternary{":=", Operand{Literal, 1}, Operand{Literal, 1}, Operand{Offset, sym.relativeAddress}});
@@ -1543,10 +1595,23 @@ void Semantic::act76_(std::vector<attribute> &args, attribute &result) {
      * 
      */
     int M1 = std::any_cast<int>(args[1]["codeID"]), M2 = std::any_cast<int>(args[3]["codeID"]);
-    int a_offset = std::any_cast<int>(args[2]["address"]);
     // TODO: 所有的jz jnz之类的，寻址方式有三种
     codes[M1] = quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}};
-    codes[M2] = quaternary{"jz", Operand{Offset, a_offset}, Operand{Literal, 0}, Operand{Lable, 0}};
+    if(args[2].count("address"))
+    {
+        int a_offset = std::any_cast<int>(args[2]["address"]);
+        codes[M2] = quaternary{"jz", Operand{Offset, a_offset}, Operand{Literal, 0}, Operand{Lable, 0}};
+    }
+    else if(args[2].count("absoluteAddress"))
+    {
+        int a_address = std::any_cast<int>(args[2]["absoluteAddress"]);
+        codes[M2] = quaternary{"jz", Operand{Address, a_address}, Operand{Literal, 0}, Operand{Lable, 0}};
+    }
+    else
+    {
+        int a_val = std::any_cast<int>(args[2]["val"]);
+        codes[M2] = quaternary{"jz", Operand{Literal, a_val}, Operand{Literal, 0}, Operand{Lable, 0}};
+    }
     int a_symbolNum = std::any_cast<int>(args[2]["symbolNum"]);
     int a_siz = 0;
     for (int i = 0; i < a_symbolNum; i++)

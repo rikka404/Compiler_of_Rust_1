@@ -74,7 +74,7 @@
 //     }
 // }
 
-fn main() {
+fn main1() {
     let mut a:i32 = 5;
     let mut b:i32 = 10;
     let mut c:i32 = loop{

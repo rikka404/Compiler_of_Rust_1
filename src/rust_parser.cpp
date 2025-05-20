@@ -714,8 +714,8 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
         // 必须含有此项
         if (!actionTable[state.back()].count(a))
         {
-            std::cerr << "state=" << state.back() << std::endl;
-            std::cerr << "next=" << a.type << ' ' << Util::terminalStr[a.type] << std::endl;
+            // std::cerr << "state=" << state.back() << std::endl;
+            // std::cerr << "next=" << a.type << ' ' << Util::terminalStr[a.type] << std::endl;
             std::cout << "[ERROR] [RULES] " << "parser analysis not accepted at pos " << pos << std::endl;
             exit(0);
         }

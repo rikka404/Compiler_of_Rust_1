@@ -205,14 +205,24 @@ std::shared_ptr<data_type> data_type::get_sub_class(int x, int& offset) const
     }
     else if(this->type == ARRAY_TYPE)
     {
-        assert(x < ((array_type *)this)->len);
+        // assert(x < ((array_type *)this)->len && x >= 0);
+        if (x >= ((array_type *)this)->len || x < 0)
+        {
+            std::cout << "[ERROR] [DATA_TYPE] array index out of range" << std::endl;
+            exit(0);
+        }
         if(offset != -1)
             offset += ((array_type *)this)->t_type->siz * x;
         return ((array_type *)this)->t_type;
     }
     else if(this->type == TUPLE_TYPE)
     {
-        assert(x < ((tuple_type *)this)->len);
+        // assert(x < ((tuple_type *)this)->len && x >= 0);
+        if (x >= ((tuple_type *)this)->len || x < 0)
+        {
+            std::cout << "[ERROR] [DATA_TYPE] tuple index out of range" << std::endl;
+            exit(0);
+        }
         if(offset != -1)
         {
             for (int i = 0; i < x; i++)
@@ -253,17 +263,17 @@ std::ostream &operator<<(std::ostream &out, const data_type &e_type)
     else if (e_type.type == REFER_TYPE)
     {
         refer_type *eptr = (refer_type *)(&e_type);
-        out << "&" << *(eptr->t_type);
+        out << "& " << *(eptr->t_type);
     }
     else if (e_type.type == MUT_REFER_TYPE)
     {
         mut_refer_type *eptr = (mut_refer_type *)(&e_type);
-        out << "mut&" << *(eptr->t_type);
+        out << "&mut " << *(eptr->t_type);
     }
     else if (e_type.type == ARRAY_TYPE)
     {
         array_type *eptr = (array_type *)(&e_type);
-        out << "[" << *(eptr->t_type) << "," << eptr->len << "] ";
+        out << "[" << *(eptr->t_type) << ";" << eptr->len << "] ";
     }
     else if (e_type.type == TUPLE_TYPE)
     {

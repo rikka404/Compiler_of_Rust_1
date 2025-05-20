@@ -56,12 +56,21 @@ public:
 // attr.value["type"]
 using attribute = std::map<std::string, std::any>;
 
+enum Regs
+{
+    EBP, 
+    ESP, 
+    EIP, 
+    EAX
+};
+
 enum arg_type
 {
-    Literal,    //立即数
-    Offset,    //相对ebp地址
-    Address,    //绝对地址
-    Lable       //中间代码标号
+    Literal, // 立即数
+    Offset,  // 相对ebp地址
+    Address, // 相对ebp取绝对地址
+    Lable,   // 中间代码标号
+    Register // 寄存器
 };
 struct Operand {
     arg_type type;
@@ -99,19 +108,21 @@ public:
     int begin_quad_num = 100;
     // int quad_num;
     int nowFunctionRetAddress;
+    int maxReferenceNo = 0;
 
     bool have_error = 0;
 
     void init();
 
+    // 可复用函数
     void pushSymbol(symbolEntry);
     void pushTempSymbol(symbolEntry);
     void popSymbol();
     symbolEntry getSymbol(const std::string &name) const;
 
-    void printCodes(std::ostream &out) const;
+    void sentenceInherit(attribute &arg1, attribute &arg2, attribute &result);
 
-    // 可复用函数
+    void printCodes(std::ostream &out) const;
 
     // 语义动作函数
     void act0_(std::vector<attribute> &args, attribute &result);

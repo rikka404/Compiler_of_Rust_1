@@ -18,6 +18,8 @@ std::map<std::string, enum lexical_type> Util::terminalType =
         {"loop", LOOP},
         {"break", BREAK},
         {"continue", CONTINUE},
+        {"false", FALSE},
+        {"true", TRUE},
 
         {"assign", ASSIGN},
         {"add", ADD},

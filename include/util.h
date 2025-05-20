@@ -21,6 +21,8 @@ enum lexical_type
     LOOP,
     BREAK,
     CONTINUE,
+    FALSE,
+    TRUE,
 
     ASSIGN,
     ADD,

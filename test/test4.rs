@@ -78,8 +78,8 @@ fn main1() {
     let mut a:i32 = 5;
     let mut b:i32 = 10;
     let mut c:i32 = loop{
-        let mut c = 1;
-        if c > 1
+        let mut c = false;
+        if true && false
         {
             break 1;
         }

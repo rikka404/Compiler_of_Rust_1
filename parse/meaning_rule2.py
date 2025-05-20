@@ -72,8 +72,8 @@ CHENG_CHU_YUN_SUAN_FU -> /mul [ 57 ] | /div [ 58 ] | /mod [ 59 ] #
 #
 YIN_ZI -> /sub YIN_ZI [ 60 ] | /not YIN_ZI [ 61 ] #
 #
-# M_OR -> /zero [ 62 ] #
-# M_AND -> /zero [ 63 ] #
+YIN_ZI -> /false [ 62 ] #
+YIN_ZI -> /true [ 63 ] #
 #
 # 3.3 函数调用
 YUAN_SU -> /id /lpra SHI_CAN_LIE_BIAO /rpra [ 64 ] #
@@ -95,9 +95,10 @@ WHILE_YU_JU -> /while M BIAO_DA_SHI M YU_JU_KUAI [ 76 ] #
 #
 # 5.2 for循环结构
 XUN_HUAN_YU_JU -> FOR_YU_JU [ 77 ] #
-FOR_YU_JU -> FOR_YU_JU_SHENG_MING M YU_JU_KUAI [ 78 ] #
+FOR_YU_JU -> FOR_YU_JU_SHENG_MING M_FOR YU_JU_KUAI [ 78 ] #
 FOR_YU_JU_SHENG_MING -> /for BIAN_LIANG_SHENG_MING_NEI_BU /in KE_DIE_DAI_JIE_GOU [ 79 ] #
 KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ 80 ] #
+M_FOR -> /zero [ 101 ] #
 #
 # 5.3 loop循环结构
 XUN_HUAN_YU_JU -> LOOP_YU_JU [ 81 ] #

@@ -709,14 +709,13 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
     for (int pos = 0; pos < (int)lexSymbols.size(); pos++)
     {
         symbol a = lexSymbols[pos];
-        // std::cerr << "pos=" << pos << std::endl;
         // std::cerr << "state=" << state.back() << std::endl;
         // std::cerr << "next=" << a.type << ' ' << Util::terminalStr[a.type] << std::endl;
         // 必须含有此项
         if (!actionTable[state.back()].count(a))
         {
-            std::cerr << "state=" << state.back() << std::endl;
-            std::cerr << "next=" << a.type << ' ' << Util::terminalStr[a.type] << std::endl;
+            // std::cerr << "state=" << state.back() << std::endl;
+            // std::cerr << "next=" << a.type << ' ' << Util::terminalStr[a.type] << std::endl;
             std::cout << "[ERROR] [RULES] " << "parser analysis not accepted at pos " << pos << std::endl;
             exit(0);
         }

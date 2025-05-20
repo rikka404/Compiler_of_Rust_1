@@ -137,14 +137,8 @@ fn main() {
 // }
 
 // fn main() {
-//     let mut a:(i32, [i32; 2]);
-//     {
-//         a = (3, [1, 2]);
-//     }
-//     let mut b:(i32, (i32, i32));
-//     {
-//         b  = (6, (4, 5));
-//     }
+//     let mut a:(i32, [i32; 2]) = (3, [1, 2]);
+//     let mut b= (6, (4, 5));
 //     a.1[1] += b.1.0;
 // }
 
@@ -159,3 +153,32 @@ fn main() {
 //     }
 //     sum(&mut a);
 // }
+
+// fn main() {
+//     let mut a:[i32;4] = [0,1,2,3];
+//     // for i in *&a {
+//     //     if (i == 1)
+//     //     {
+//     //         continue;
+//     //     }
+//     // }
+//     for mut i in 0..4 {
+//         a[i] += 1;
+//     }
+// }
+
+// fn main(){
+//     let mut a:i32 = 5;
+//     if true {
+//         a = 6;
+//     }
+//     if false {
+//         a = 7;
+//     }
+// }
+
+fn main() {
+    let mut a = 5/2+3*2;
+    let b = &a;
+    let mut c = 3 + *b * 2;
+}

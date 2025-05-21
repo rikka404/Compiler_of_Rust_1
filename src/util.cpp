@@ -63,6 +63,8 @@ std::map<std::string, enum lexical_type> Util::terminalType =
         {"or", OR},
         {"not", NOT},
         
+        {"out", OUT},
+
         {"end", END} // 结束符
 };
 

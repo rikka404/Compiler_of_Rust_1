@@ -3,6 +3,9 @@
 #include "lexical.h"
 #include "rust_parser.h"
 #include "data_type.h"
+#include "test.h"
+
+const std::vector<quaternary> *codes;
 
 int main()
 {
@@ -69,6 +72,9 @@ int main()
     rules.drawParserTree(std::cout, strList);
 
     semantic.printCodes(std::cout);
+
+    codes = &(semantic.codes);
+    test();
 
     // // 第一组测试
     // auto ele1 = data_type::create(I32_TYPE);

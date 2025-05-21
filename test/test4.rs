@@ -183,29 +183,52 @@
 // }
 
 fn main() {
-    let mut d:bool = true;
-    let mut a:i32 = 5;
-    let mut e = &a;
-    // let mut c = if d && a == 5 {
-    //     a = 6;
-    //     1
-    // } else {
-    //     a = 7+4*5;
-    //     *e
-    // };
-    // let mut c = loop {
+    // let mut d:bool = true;
+    // let mut a:i32 = 5;
+    // let mut e = &a;
+    // // let mut c = if d && a == 5 {
+    // //     a = 6;
+    // //     1
+    // // } else {
+    // //     a = 7+4*5;
+    // //     *e
+    // // };
+    // // let mut c = loop {
         
-    //     if d && a == 5 {
-    //         a = 6;
-    //         break a;
-    //     } else if true {
-    //         a = 7 + 4 * 5;
-    //         break *e;
-    //     }
-    // };
-    while d && *e == 5 {
-        a += 1;
-        break;
+    // //     if d && a == 5 {
+    // //         a = 6;
+    // //         break a;
+    // //     } else if true {
+    // //         a = 7 + 4 * 5;
+    // //         break *e;
+    // //     }
+    // // };
+    // while d && *e == 5 {
+    //     a += 1;
+    //     break;
+    // }
+    let mut a:[i32; 10];
+    a[0] = 1;
+    a[1] = 1;
+    out a[0];
+    out a[1];
+    for i in 2..9{
+        a[i] - a[i - 1] + a[i - 2];
+        out a[i];
+    }
+    let mut b = 5;
+    let mut c = 1;
+    while b + 1 > b - 2 || b - 3 < b + 4{
+        out b;
+        c = c + 1;
+        if c > 10
+        {
+            break;
+        }
+        else
+        {
+            continue;
+        }
     }
 }
 

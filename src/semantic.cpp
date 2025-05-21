@@ -3135,7 +3135,7 @@ void Semantic::act137_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act138_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act139_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act140_(std::vector<attribute> &args, attribute &result) {
-    // 语句 -> out id ;
+    // 语句 -> out 表达式 ;
     if(args[1].count("address"))
         codes.push_back(quaternary{"out", Operand{Offset, std::any_cast<int>(args[1]["address"])}, Operand{Literal, 0}, Operand{Literal, 0}});
     else if(args[1].count("absoluteAddress"))

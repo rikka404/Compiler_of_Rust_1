@@ -119,6 +119,8 @@ public:
     symbolEntry getSymbol(const std::string &name) const;
 
     void sentenceInherit(attribute &arg1, attribute &arg2, attribute &result);
+    void sentenceReturn(attribute &arg1, attribute &result);
+    void sentenceReturn(attribute &arg1, attribute &arg2, attribute &result);
 
     void printCodes(std::ostream &out) const;
 

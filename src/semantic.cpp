@@ -197,9 +197,42 @@ void Semantic::sentenceInherit(attribute &arg1, attribute &arg2, attribute &resu
             result["breakAssignList"] = l1;
         }
     }
+
+    
 }
 
-void Semantic::printCodes(std::ostream& out) const
+void Semantic::sentenceReturn(attribute &arg1, attribute &arg2, attribute &result)
+{
+    // 判断返回类型
+    if (arg1.count("returnType"))
+    {
+        if (arg2.count("returnType"))
+        {
+            if (*std::any_cast<std::shared_ptr<data_type>>(arg1["returnType"]) != *std::any_cast<std::shared_ptr<data_type>>(arg2["returnType"]))
+            {
+                std::cout << "[ERROR] [SEMANTIC] return type \"" << *std::any_cast<std::shared_ptr<data_type>>(arg1["returnType"])
+                          << "\" and \"" << *std::any_cast<std::shared_ptr<data_type>>(arg2["returnType"]) << "\" not match" << std::endl;
+                exit(0);
+            }
+        }
+        result["returnType"] = arg1["returnType"];
+    }
+    else if (arg2.count("returnType"))
+    {
+        result["returnType"] = arg2["returnType"];
+    }
+}
+
+void Semantic::sentenceReturn(attribute &arg1, attribute &result)
+{
+    // 判断返回类型
+    if (arg1.count("returnType"))
+    {
+        result["returnType"] = arg1["returnType"];
+    }
+}
+
+void Semantic::printCodes(std::ostream &out) const
 {
     for (int i = begin_quad_num; i < (int)codes.size(); i++)
     {
@@ -437,25 +470,9 @@ void Semantic::act9_(std::vector<attribute> &args, attribute &result) {
         num += std::any_cast<int>(args[0]["symbolNum"]);
     num += std::any_cast<int>(args[1]["symbolNum"]);
     result["symbolNum"] = num;
-    // 判断返回类型
-    if(args[0].count("returnType"))
-    {
-        if (args[1].count("returnType"))
-        {
-            if (*std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"]) != *std::any_cast<std::shared_ptr<data_type>>(args[1]["returnType"]))
-            {
-                std::cout << "[ERROR] [SEMANTIC] return type \"" << *std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"])
-                          << "\" and \"" << *std::any_cast<std::shared_ptr<data_type>>(args[1]["returnType"]) << "\" not match" << std::endl;
-                exit(0);
-            }
-        }
-        result["returnType"] = args[0]["returnType"];
-    }
-    else if (args[1].count("returnType"))
-    {
-        result["returnType"] = args[1]["returnType"];
-    }
+    
     sentenceInherit(args[0], args[1], result);
+    sentenceReturn(args[0], args[1], result);
 }
 void Semantic::act10_(std::vector<attribute> &args, attribute &result) {
     // 语句 -> 语句块
@@ -889,7 +906,7 @@ void Semantic::act42_(std::vector<attribute> &args, attribute &result) {
     if (sym.type.readType == NONETYPE)
     {
         // 检查是否是函数名
-        if (!this->functionTable.count(functionEntry{0, std::any_cast<std::string>(args[0]["name"]), {}, {}}))
+        if (this->functionTable.count(functionEntry{0, std::any_cast<std::string>(args[0]["name"]), {}, {}}))
         {
             result["name"] = args[0]["name"];
             result["elementType"] = element_type{data_type::create(FUN_TYPE), NONETYPE};
@@ -1717,6 +1734,7 @@ void Semantic::act70_(std::vector<attribute> &args, attribute &result) {
     result["symbolNum"] = std::any_cast<int>(args[1]["symbolNum"]) + std::any_cast<int>(args[5]["symbolNum"]);
 
     sentenceInherit(args[3], args[5], result);
+    sentenceReturn(args[3], args[5], result);
 }
 void Semantic::act71_(std::vector<attribute> &args, attribute &result) {
     // /else /if 表达式 M 语句块 M else部分
@@ -1734,6 +1752,7 @@ void Semantic::act71_(std::vector<attribute> &args, attribute &result) {
     result["symbolNum"] = std::any_cast<int>(args[2]["symbolNum"]) + std::any_cast<int>(args[6]["symbolNum"]);
 
     sentenceInherit(args[4], args[6], result);
+    sentenceReturn(args[4], args[6], result);
 }
 void Semantic::act72_(std::vector<attribute> &args, attribute &result) {
     // else部分 -> else 语句块
@@ -1836,9 +1855,11 @@ void Semantic::act76_(std::vector<attribute> &args, attribute &result) {
     }
     // 计数临时变量
     result["symbolNum"] = 0;
+    sentenceReturn(args[4], result);
 }
 void Semantic::act77_(std::vector<attribute> &args, attribute &result) {
     // 循环语句 -> FOR语句
+    result = args[0];
 }
 void Semantic::act78_(std::vector<attribute> &args, attribute &result) {
     // FOR语句 -> FOR语句声明 M_FOR 语句块
@@ -1940,6 +1961,7 @@ void Semantic::act78_(std::vector<attribute> &args, attribute &result) {
         std::cout << "[ERROR] [SEMANTIC]" << "break expression is not allowed in for statement." << std::endl;
         exit(0);
     }
+    sentenceReturn(args[2], result);
 }
 void Semantic::act79_(std::vector<attribute> &args, attribute &result) {
     // FOR语句声明 -> for 变量声明内部 in 可迭代结构
@@ -2105,6 +2127,7 @@ void Semantic::act80_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act81_(std::vector<attribute> &args, attribute &result) {
     // 循环语句 -> LOOP语句
+    result = args[0];
 }
 void Semantic::act82_(std::vector<attribute> &args, attribute &result) {
     // LOOP语句 -> loop M 语句块
@@ -2171,6 +2194,7 @@ void Semantic::act82_(std::vector<attribute> &args, attribute &result) {
         result["address"] = sym.relativeAddress;
         result["elementType"] = elementType;
     }
+    sentenceReturn(args[2], result);
 }
 void Semantic::act83_(std::vector<attribute> &args, attribute &result) {
     // 语句 -> break;
@@ -2402,6 +2426,8 @@ void Semantic::act92_(std::vector<attribute> &args, attribute &result) {
     result["retAddress"] = sym.relativeAddress;
     result["retElementType"] = retElementType;
     result["retName"] = sym.name;
+
+    sentenceReturn(args[2], result);
 }
 void Semantic::act93_(std::vector<attribute> &args, attribute &result) {
     // 函数表达式语句串 -> 表达式
@@ -2472,6 +2498,7 @@ void Semantic::act94_(std::vector<attribute> &args, attribute &result) {
     }
     result["returnExpAddress"] = std::any_cast<int>(args[1]["returnExpAddress"]);
     result["returnExpElementType"] = std::any_cast<element_type>(args[1]["returnExpElementType"]);
+    sentenceReturn(args[0], args[1], result);
 }
 void Semantic::act95_(std::vector<attribute> &args, attribute &result) {
     // M -> /zero
@@ -2495,6 +2522,12 @@ void Semantic::act96_(std::vector<attribute> &args, attribute &result) {
     // result["symbolNum"] = 1; //这一个返回值
     // result["retAddress"] = sym.relativeAddress;
     // result["retElementType"] = retElementType;
+    // 此处不能含有return语句
+    if (args[1].count("returnType"))
+    {
+        std::cout << "[ERROR] [SEMANTIC] return statement is not allowed in function expression." << std::endl;
+        exit(0);
+    }
     // 检查返回类型
     if (!args[1].count("retElementType")){ // 必须有返回类型
         std::cout << "[ERROR] [SEMANTIC] return type \"" << *std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"]) << "\" and \"void\" not match" << std::endl;
@@ -2606,6 +2639,8 @@ void Semantic::act98_(std::vector<attribute> &args, attribute &result) {
         codes[M1] = quaternary{"jz", Operand{Literal, a_val}, Operand{Literal, 0}, Operand{Lable, F}};
     }
     codes[M2] = quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, L}};
+
+    sentenceReturn(args[3], args[6], result);
 }
 void Semantic::act99_(std::vector<attribute> &args, attribute &result) {
     // M2 -> /zero
@@ -3136,12 +3171,20 @@ void Semantic::act138_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act139_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act140_(std::vector<attribute> &args, attribute &result) {
     // 语句 -> out 表达式 ;
+    // 只有4字节可以out
+    if (std::any_cast<element_type>(args[1]["elementType"]).dataType->siz != 4)
+    {
+        std::cout << "[ERROR] [SEMANTIC] out only support 4 bytes." << std::endl;
+        exit(0);
+    }
     if(args[1].count("address"))
         codes.push_back(quaternary{"out", Operand{Offset, std::any_cast<int>(args[1]["address"])}, Operand{Literal, 0}, Operand{Literal, 0}});
     else if(args[1].count("absoluteAddress"))
         codes.push_back(quaternary{"out", Operand{Address, std::any_cast<int>(args[1]["absoluteAddress"])}, Operand{Literal, 0}, Operand{Literal, 0}});
     else
         codes.push_back(quaternary{"out", Operand{Literal, std::any_cast<int>(args[1]["val"])}, Operand{Literal, 0}, Operand{Literal, 0}});
+
+    result["symbolNum"] = std::any_cast<int>(args[1]["symbolNum"]);
 }
 void Semantic::act141_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act142_(std::vector<attribute> &args, attribute &result) {}

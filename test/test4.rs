@@ -161,15 +161,11 @@
 //         {
 //             continue;
 //         }
+//         a[i] += 1;
 //     }
-//     // for mut i in 0..a[3]+1 {
-//     //     a[i] += 1;
-//     //     if (a[i] == 1)
-//     //     {
-//     //         continue;
-//     //     }
-//     //     break;
-//     // }
+//     for mut i in 0..4 {
+//         out a[i];
+//     }
 // }
 
 // fn main(){
@@ -182,7 +178,7 @@
 //     }
 // }
 
-fn main() {
+// fn main() {
     // let mut d:bool = true;
     // let mut a:i32 = 5;
     // let mut e = &a;
@@ -230,7 +226,7 @@ fn main() {
     //         continue;
     //     }
     // }
-}
+// }
 
 // // bad pointer
 // fn main2() -> &mut i32 {

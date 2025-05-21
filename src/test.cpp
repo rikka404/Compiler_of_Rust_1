@@ -1,6 +1,6 @@
 #include <test.h>
 
-static char mem[1000];
+static char mem[100000];
 
 int test()
 {
@@ -9,7 +9,7 @@ int test()
     const std::vector<quaternary> &code = *codes;
     while (code[eip].op != "end")
     {
-        std::cerr << eip << std::endl;
+        // std::cerr << eip << std::endl;
         // std::cerr << eip << std::endl;
         auto [op, arg1, arg2, result] = code[eip];
         if(op == "call")
@@ -23,6 +23,16 @@ int test()
         }
         else if(op == "push")
         {
+            void *dst = esp;
+            if (arg1.type == Literal)
+            {
+                *(int *)(dst) = arg1.value;
+            }
+            else
+            {
+                void *src = arg1.type == Offset ? ebp + arg1.value : mem + *(int *)(ebp + arg1.value);
+                memcpy(dst, src, arg2.value);
+            }
             esp += arg2.value;
             eip++;
         }
@@ -85,11 +95,45 @@ int test()
                 *(int *)(mem + *(int*)(ebp + result.value)) = c;
             eip++;
         }
+        else if (op == "+=" || op == "-=" || op == "*=" || op == "/=" || op == "%=")
+        {
+            int b = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp + arg1.value) : *(int *)(mem + *(int*)(ebp + arg1.value));
+            int a = result.type == Literal ? result.value : result.type == Offset ? *(int *)(ebp + result.value) : *(int *)(mem + *(int*)(ebp + result.value));
+            int c;
+            if(op == "+=")
+                c = a + b;
+            else if(op == "-=")
+                c = a - b;
+            else if(op == "*=")
+                c = a * b;
+            else if(op == "/=")
+                c = a / b;
+            else if(op == "%=")
+                c = a % b;
+            if(result.type == Offset)
+                *(int *)(ebp + result.value) = c;
+            else if(result.type == Address)
+                *(int *)(mem + *(int*)(ebp + result.value)) = c;
+            eip++;
+        }
         else if(op == "j")
         {
             eip = result.value;
         }
-        else if(op == "jnz" || op == "jz" || op == "j>=")
+        else if (op == "jnz" || op == "jz")
+        {
+            int a = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp + arg1.value) : *(int *)(mem + *(int*)(ebp + arg1.value));
+            int c;
+            if(op == "jnz")
+                c = a;
+            else if(op == "jz")
+                c = !a;
+            if(c)
+                eip = result.value;
+            else
+                eip++;
+        }
+        else if(op == "j>=" || op == "j<=" || op == "j<" || op == "j>")
         {
             int a = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp + arg1.value) : *(int *)(mem + *(int*)(ebp + arg1.value));
             int b = arg2.type == Literal ? arg2.value : arg2.type == Offset ? *(int *)(ebp + arg2.value) : *(int *)(mem + *(int*)(ebp + arg2.value));
@@ -100,6 +144,12 @@ int test()
                 c = !a;
             else if(op == "j>=")
                 c = a >= b;
+            else if(op == "j<=")
+                c = a <= b;
+            else if(op == "j<")
+                c = a < b;
+            else if(op == "j>")
+                c = a > b;
             if(c)
                 eip = result.value;
             else
@@ -113,7 +163,7 @@ int test()
             if(result.type == Offset)
                 *(int *)(ebp + result.value) = a + (char*)ebp - mem;
             else if(result.type == Address)
-                *(int *)(mem + result.value) = a + (char*)ebp - mem;
+                *(int *)(mem + *(int *)(ebp + result.value)) = a + (char *)ebp - mem;
             eip++;
         }
         else if(op == "null")
@@ -131,5 +181,5 @@ int test()
             eip++;
         }
     }
-    
+    return 0;
 }

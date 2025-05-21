@@ -11,7 +11,7 @@ int main()
 {
     /* 预处理 */
     // test是用来测试词法分析的，test2是用来测试语法分析的
-    std::string filename = "test/test4.rs";
+    std::string filename = "test/test5.rs";
     std::ifstream fin(filename);
     std::string s;
     if (!fin.is_open())
@@ -53,7 +53,7 @@ int main()
 
     /* 语法分析 + 语义分析 */
     // 初始化分析表
-    Rules::init(false, true);
+    Rules::init(true, true);
     Semantic semantic;
     semantic.init();
 

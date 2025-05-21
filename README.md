@@ -432,7 +432,6 @@ KE_DIE_DAI_JIE_GOU -> BIAO_DA_SHI /ddot BIAO_DA_SHI [ 5 numTypeCheck 0 0 numType
 |`(jt, a, 0, to)`|不需要j<这类东西，因为实际上是由表达式规约出布尔量a来的|
 |`(push, a, siz, 0)`|`(:=, a, siz, *esp)`,然后`esp+=siz`|
 |`(pop, 0, siz, 0)`|`esp-=siz`|
-|`(popa, 0, siz, a)`|`(:=, a, siz, *(esp-siz)),esp-=siz`|
 |`(call, 0, 0, to)`|`(push, eip+1, 4, 0)`,`ebp=esp`,然后`(push, ebp, 4, 0)`,`eip=to`|
 |`(return, a, siz, r)`|把a地址开始，siz大小的内容放到返回值的地方`r`,和`:=`相同|
 |`(leave, 0, 0, 0)`|退出call,即`esp=ebp-4,ebp=[0],eip=*esp`|

@@ -118,6 +118,8 @@ public:
     void popSymbol();
     symbolEntry getSymbol(const std::string &name) const;
 
+    void sentenceInherit(attribute &arg1, attribute &arg2, attribute &result);
+
     void printCodes(std::ostream &out) const;
 
     // 语义动作函数

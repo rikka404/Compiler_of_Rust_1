@@ -74,28 +74,28 @@
 //     }
 // }
 
-fn main1() {
-    let mut a:i32 = 5;
-    let mut b:i32 = 10;
-    let mut c:i32 = loop{
-        let mut c = 1;
-        if c > 1
-        {
-            break 1;
-        }
-        else
-        {
-            break 0;
-        }
-    };
-    // sum(&mut &mut a, b);
-    // let mut d = sum2(a, b);
-    // let mut c = {
-    //     let mut d:i32 = 2;
-    //     let mut e = 1;
-    //     d + e
-    // };
-}
+// fn main1() {
+//     let mut a:i32 = 5;
+//     let mut b:i32 = 10;
+//     let mut c:i32 = loop{
+//         let mut c = 1;
+//         if c > 1
+//         {
+//             break 1;
+//         }
+//         else
+//         {
+//             break 0;
+//         }
+//     };
+//     // sum(&mut &mut a, b);
+//     // let mut d = sum2(a, b);
+//     // let mut c = {
+//     //     let mut d:i32 = 2;
+//     //     let mut e = 1;
+//     //     d + e
+//     // };
+// }
 
 // fn main() {
 //     loop
@@ -156,15 +156,20 @@ fn main1() {
 
 // fn main() {
 //     let mut a:[i32;4] = [0,1,2,3];
-//     // for i in *&a {
-//     //     if (i == 1)
+//     for i in *&a {
+//         if (i == 1)
+//         {
+//             continue;
+//         }
+//     }
+//     // for mut i in 0..a[3]+1 {
+//     //     a[i] += 1;
+//     //     if (a[i] == 1)
 //     //     {
 //     //         continue;
 //     //     }
+//     //     break;
 //     // }
-//     for mut i in 0..4 {
-//         a[i] += 1;
-//     }
 // }
 
 // fn main(){
@@ -178,7 +183,40 @@ fn main1() {
 // }
 
 fn main() {
-    let mut a = 5/2+3*2;
-    let b = &a;
-    let mut c = 3 + *b * 2;
+    let mut d:bool = true;
+    let mut a:i32 = 5;
+    let mut e = &a;
+    // let mut c = if d && a == 5 {
+    //     a = 6;
+    //     1
+    // } else {
+    //     a = 7+4*5;
+    //     *e
+    // };
+    // let mut c = loop {
+        
+    //     if d && a == 5 {
+    //         a = 6;
+    //         break a;
+    //     } else if true {
+    //         a = 7 + 4 * 5;
+    //         break *e;
+    //     }
+    // };
+    while d && *e == 5 {
+        a += 1;
+        break;
+    }
 }
+
+// // bad pointer
+// fn main2() -> &mut i32 {
+//     let mut a:i32 = 5;
+//     &mut a
+// }
+
+// fn main() {
+//     let mut d:bool = true;
+//     let mut a:i32 = 5;
+//     let mut e = main2();
+// }

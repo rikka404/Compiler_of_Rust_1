@@ -158,3 +158,6 @@ YUAN_ZU_YUAN_SU_LIE_BIAO -> /zero [ 116 ] | BIAO_DA_SHI [ 117 ] | BIAO_DA_SHI /c
 
 # 9.2 元组元素
 YUAN_SU -> YUAN_SU /dot /int [ 119 ] #
+
+# bool类型
+LEI_XING -> /bool [ 121 ] #

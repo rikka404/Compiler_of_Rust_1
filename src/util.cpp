@@ -20,6 +20,7 @@ std::map<std::string, enum lexical_type> Util::terminalType =
         {"continue", CONTINUE},
         {"false", FALSE},
         {"true", TRUE},
+        {"bool", BOOL},
 
         {"assign", ASSIGN},
         {"add", ADD},

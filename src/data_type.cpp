@@ -14,7 +14,7 @@ std::shared_ptr<data_type> data_type::create(base_data_type b_type)
         ptr->siz = 4;
         break;
     case BOOL_TYPE:
-        ptr->siz = 1;
+        ptr->siz = 4;
         break;
     default:
         break;

@@ -23,6 +23,7 @@ enum lexical_type
     CONTINUE,
     FALSE,
     TRUE,
+    BOOL,
 
     ASSIGN,
     ADD,

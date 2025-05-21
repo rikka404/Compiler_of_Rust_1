@@ -25,7 +25,8 @@ const std::vector<lexical> key_word = {
     {"break", BREAK}, 
     {"continue", CONTINUE},
     {"false", FALSE},
-    {"true", TRUE}
+    {"true", TRUE},
+    {"bool", BOOL},
 };
 const std::vector<lexical> key_symbol = {
     {"=", ASSIGN},

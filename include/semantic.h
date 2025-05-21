@@ -92,8 +92,6 @@ class Semantic
 public:
     // 语义动作函数指针
     static std::vector<void (Semantic::*)(std::vector<attribute> &, attribute &)> semanticActions;
-    // 终结符动作函数指针
-    static std::vector<void (Semantic::*)(attribute &)> semanticTerminalActions;
 
     static int EIPoffset; // 返回eip偏移量
     static int EBPoffset; // 返回ebp偏移量
@@ -276,60 +274,5 @@ public:
     void act148_(std::vector<attribute> &args, attribute &result);
     void act149_(std::vector<attribute> &args, attribute &result);
     void act150_(std::vector<attribute> &args, attribute &result);
-
-
-    // 终结符动作函数
-    void tact0_(attribute &result);
-    void tact1_(attribute &result);
-    void tact2_(attribute &result);
-    void tact3_(attribute &result);
-    void tact4_(attribute &result);
-    void tact5_(attribute &result);
-    void tact6_(attribute &result);
-    void tact7_(attribute &result);
-    void tact8_(attribute &result);
-    void tact9_(attribute &result);
-    void tact10_(attribute &result);
-    void tact11_(attribute &result);
-    void tact12_(attribute &result);
-    void tact13_(attribute &result);
-    void tact14_(attribute &result);
-    void tact15_(attribute &result);
-    void tact16_(attribute &result);
-    void tact17_(attribute &result);
-    void tact18_(attribute &result);
-    void tact19_(attribute &result);
-    void tact20_(attribute &result);
-    void tact21_(attribute &result);
-    void tact22_(attribute &result);
-    void tact23_(attribute &result);
-    void tact24_(attribute &result);
-    void tact25_(attribute &result);
-    void tact26_(attribute &result);
-    void tact27_(attribute &result);
-    void tact28_(attribute &result);
-    void tact29_(attribute &result);
-    void tact30_(attribute &result);
-    void tact31_(attribute &result);
-    void tact32_(attribute &result);
-    void tact33_(attribute &result);
-    void tact34_(attribute &result);
-    void tact35_(attribute &result);
-    void tact36_(attribute &result);
-    void tact37_(attribute &result);
-    void tact38_(attribute &result);
-    void tact39_(attribute &result);
-    void tact40_(attribute &result);
-    void tact41_(attribute &result);
-    void tact42_(attribute &result);
-    void tact43_(attribute &result);
-    void tact44_(attribute &result);
-    void tact45_(attribute &result);
-    void tact46_(attribute &result);
-    void tact47_(attribute &result);
-    void tact48_(attribute &result);
-    void tact49_(attribute &result);
-    void tact50_(attribute &result);
-
     
 };

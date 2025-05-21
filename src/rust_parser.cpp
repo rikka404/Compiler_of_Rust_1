@@ -727,7 +727,6 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
             nodeID.push_back(parserTree.size());
             parserTree.push_back({a, -1, {}, pos});
             semantic.attributes.push_back(attribute());
-            (semantic.*Semantic::semanticTerminalActions[a.type])(semantic.attributes.back());
             if(a.type == ID) //特判一下ID和数字吧
             {
                 semantic.attributes.back()["name"] = a.val;

@@ -2017,15 +2017,15 @@ void Semantic::act79_(std::vector<attribute> &args, attribute &result) {
             // 赋初值
             if (args[3].count("rangeEndVal"))
             {
-                codes.push_back(quaternary(":=", Operand{Literal, std::any_cast<int>(args[3]["rangeEndVal"])}, Operand{Literal, 0}, Operand{Offset, sym.relativeAddress}));
+                codes.push_back(quaternary(":=", Operand{Literal, std::any_cast<int>(args[3]["rangeEndVal"])}, Operand{Literal, sym.type.dataType->siz}, Operand{Offset, sym.relativeAddress}));
             }
             else if (args[3].count("rangeEndAddress"))
             {
-                codes.push_back(quaternary(":=", Operand{Offset, std::any_cast<int>(args[3]["rangeEndAddress"])}, Operand{Literal, 0}, Operand{Offset, sym.relativeAddress}));
+                codes.push_back(quaternary(":=", Operand{Offset, std::any_cast<int>(args[3]["rangeEndAddress"])}, Operand{Literal, sym.type.dataType->siz}, Operand{Offset, sym.relativeAddress}));
             }
             else
             {
-                codes.push_back(quaternary(":=", Operand{Address, std::any_cast<int>(args[3]["rangeEndAbsoluteAddress"])}, Operand{Literal, 0}, Operand{Offset, sym.relativeAddress}));
+                codes.push_back(quaternary(":=", Operand{Address, std::any_cast<int>(args[3]["rangeEndAbsoluteAddress"])}, Operand{Literal, sym.type.dataType->siz}, Operand{Offset, sym.relativeAddress}));
             }
         }
 
@@ -3141,9 +3141,9 @@ void Semantic::act119_(std::vector<attribute> &args, attribute &result) {
 void Semantic::act120_(std::vector<attribute> &args, attribute &result) {
     // M_FOR -> /zero
     result["codeID"] = (int)codes.size();
-    codes.push_back(quaternary{"null", Operand{Offset, 0}, Operand{Literal, 0}, Operand{Lable, 0}});
-    codes.push_back(quaternary{"null", Operand{Offset, 0}, Operand{Literal, 0}, Operand{Lable, 0}});
-    codes.push_back(quaternary{"null", Operand{Offset, 0}, Operand{Literal, 0}, Operand{Lable, 0}});
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
+    codes.push_back(quaternary{"null", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Literal, 0}});
     // 通过先插入M的方式解决“需要规约到上层才知道要往里面加入语句”的问题和需要回填的问题
     result["base_esp"] = c_esp;
 }

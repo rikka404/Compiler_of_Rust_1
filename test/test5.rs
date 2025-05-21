@@ -142,3 +142,12 @@ fn main()
 //         out b[i];
 //     }
 // }
+
+// fn main()
+// {
+//     let mut i = 10;
+//     for j in 0..(i-1)
+//     {
+//         out j;
+//     }
+// }

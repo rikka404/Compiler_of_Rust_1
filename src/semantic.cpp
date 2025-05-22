@@ -2496,6 +2496,12 @@ void Semantic::act94_(std::vector<attribute> &args, attribute &result) {
         std::cout << "[ERROR] [SEMANTIC]" << "continue is not allowed in funtion expression statement." << std::endl;
         exit(0);
     }
+    // 如果是带return的
+    if (args[0].count("returnType"))
+    {
+        std::cout << "[ERROR] [SEMANTIC] return statement is not allowed in function expression." << std::endl;
+        exit(0);
+    }
     result["returnExpAddress"] = std::any_cast<int>(args[1]["returnExpAddress"]);
     result["returnExpElementType"] = std::any_cast<element_type>(args[1]["returnExpElementType"]);
     sentenceReturn(args[0], args[1], result);

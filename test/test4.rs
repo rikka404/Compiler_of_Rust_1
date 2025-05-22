@@ -237,5 +237,9 @@
 // fn main() {
 //     let mut d:bool = true;
 //     let mut a:i32 = 5;
-//     let mut e = main2();
+//     let mut e = {
+//         a += 1;
+//         a
+//     };
+//     return;
 // }

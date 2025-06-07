@@ -53,10 +53,6 @@ fn main()
     for ai in a {
         out ai;
     }
-    // for i in 0..20
-    // {
-    //     out a[i];
-    // }
 }
 
 

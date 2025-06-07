@@ -1556,14 +1556,14 @@ void Semantic::act61_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act62_(std::vector<attribute> &args, attribute &result) {
     // 因子 -> /false
-    result["name"] = "false";
+    result["name"] = (std::string) "false";
     result["elementType"] = element_type{data_type::create(BOOL_TYPE), LITERAL};
     result["val"] = 0;
     result["symbolNum"] = 0;
 }
 void Semantic::act63_(std::vector<attribute> &args, attribute &result) {
     // 因子 -> /ture
-    result["name"] = "true";
+    result["name"] = (std::string) "true";
     result["elementType"] = element_type{data_type::create(BOOL_TYPE), LITERAL};
     result["val"] = 1;
     result["symbolNum"] = 0;
@@ -2616,7 +2616,7 @@ void Semantic::act98_(std::vector<attribute> &args, attribute &result) {
     // 如果这俩类型不一样直接报错，我不管了
     if(*elementType1.dataType != *elementType2.dataType)
     {
-        std::cout << "[ERROR] [SEMANTIC] In if expression: type \"" << elementType1.dataType << "\" and \"" << elementType2.dataType << "\" not match" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] In if expression: type \"" << *elementType1.dataType << "\" and \"" << *elementType2.dataType << "\" not match" << std::endl;
         exit(0);
     }
     element_type elementType = elementType1;

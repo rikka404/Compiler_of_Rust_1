@@ -12,21 +12,22 @@ struct lexical
 
 const std::vector<lexical> key_word = {
     {"let", LET},
-    {"mut", MUT}, 
-    {"i32", I32}, 
-    {"if", IF}, 
-    {"else", ELSE}, 
-    {"while", WHILE}, 
-    {"return", RETURN}, 
-    {"fn", FN}, 
-    {"for", FOR}, 
-    {"in", IN}, 
-    {"loop", LOOP}, 
-    {"break", BREAK}, 
+    {"mut", MUT},
+    {"i32", I32},
+    {"if", IF},
+    {"else", ELSE},
+    {"while", WHILE},
+    {"return", RETURN},
+    {"fn", FN},
+    {"for", FOR},
+    {"in", IN},
+    {"loop", LOOP},
+    {"break", BREAK},
     {"continue", CONTINUE},
     {"false", FALSE},
     {"true", TRUE},
     {"bool", BOOL},
+    {"out", OUT}
 };
 const std::vector<lexical> key_symbol = {
     {"=", ASSIGN},
@@ -66,9 +67,8 @@ const std::vector<lexical> key_symbol = {
     {"&", REFER},
     {"&&", AND},
     {"||", OR},
-    {"!", NOT}, 
-
-    {"out", OUT}
+    {"!", NOT}
+    
 };
 
 const int MAXCHAR = 128;

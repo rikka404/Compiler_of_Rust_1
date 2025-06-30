@@ -698,7 +698,7 @@ void Rules::printActionTable()
     fout.close();
 }
 
-int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
+int Rules::analysis(const std::vector<symbol> &lexSymbols, const std::vector<int> &linelist, Semantic &semantic)
 {
     // 最后一个是end
     assert(lexSymbols.back().type == END);
@@ -716,7 +716,7 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
         {
             // std::cerr << "state=" << state.back() << std::endl;
             // std::cerr << "next=" << a.type << ' ' << Util::terminalStr[a.type] << std::endl;
-            std::cout << "[ERROR] [RULES] " << "parser analysis not accepted at pos " << pos << std::endl;
+            std::cout << "[ERROR] [RULES] " << "line" << linelist[pos] << ": " << "parser analysis not accepted at pos " << pos << ", \'" << a.val << "\'." << std::endl;
             exit(0);
         }
         action act = actionTable[state.back()][a];
@@ -727,6 +727,8 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
             nodeID.push_back(parserTree.size());
             parserTree.push_back({a, -1, {}, pos});
             semantic.attributes.push_back(attribute());
+            // 所有终结符具有行号
+            semantic.attributes.back()["srcline"] = linelist[pos];
             if(a.type == ID) //特判一下ID和数字吧
             {
                 semantic.attributes.back()["name"] = a.val;
@@ -768,9 +770,9 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
             semantic.attributes.push_back(attribute());
             if(ruleToSemantic[act.rule_id] != -1)
             {
-                // std::cerr << "act" << std::to_string(ruleToSemantic[act.rule_id]) << "_ begin" << std::endl;
+                std::cerr << "act" << std::to_string(ruleToSemantic[act.rule_id]) << "_ begin" << std::endl;
                 (semantic.*Semantic::semanticActions[ruleToSemantic[act.rule_id]])(vt_attr, semantic.attributes.back());
-                // std::cerr << "act" << std::to_string(ruleToSemantic[act.rule_id]) << "_ end" << std::endl;
+                std::cerr << "act" << std::to_string(ruleToSemantic[act.rule_id]) << "_ end" << std::endl;
             }
             pos--;
         }
@@ -782,7 +784,7 @@ int Rules::analysis(const std::vector<symbol> &lexSymbols, Semantic& semantic)
             return nodeID[0];
         }
     }
-    std::cout << "[ERROR] [RULES] " << "parser analysis not accepted" << std::endl;
+    std::cout << "[ERROR] [RULES] " << "parser analysis not accepted at last" << std::endl;
     return -1;
 }
 

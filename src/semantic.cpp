@@ -174,7 +174,7 @@ void Semantic::sentenceInherit(attribute &arg1, attribute &arg2, attribute &resu
         else if(*ret.dataType != *std::any_cast<element_type>(arg1["breakElementType"]).dataType)
         {
             std::cout << "[ERROR] [SEMANTIC] break type \"" << *ret.dataType
-                          << "\" and \"" << *std::any_cast<element_type>(arg1["breakElementType"]).dataType << "\" not same" << std::endl;
+                      << "\" and \"" << *std::any_cast<element_type>(arg1["breakElementType"]).dataType << "\" not same" << std::endl;
             exit(0);
         }
     }
@@ -336,11 +336,12 @@ void Semantic::act2_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act3_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act4_(std::vector<attribute> &args, attribute &result) {
     // 函数声明 -> 函数头声明 语句块
+    int errline = std::any_cast<int>(args[0]["srcline"]);
     // 检查返回类型
     if (!args[1].count("returnType")){
         if (std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"])->type != VOID_TYPE)
         {
-            std::cout << "[ERROR] [SEMANTIC] return type \"" << *std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"]) << "\" and \"void\" not match" << std::endl;
+            std::cout << "[ERROR] [SEMANTIC] line" << errline << ": return type \"" << *std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"]) << "\" and \"void\" not match" << std::endl;
             exit(0);
         }
         else
@@ -353,7 +354,7 @@ void Semantic::act4_(std::vector<attribute> &args, attribute &result) {
     {
         if (*std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"]) != *std::any_cast<std::shared_ptr<data_type>>(args[1]["returnType"]))
         {
-            std::cout << "[ERROR] [SEMANTIC] return type \"" << *std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"])
+            std::cout << "[ERROR] [SEMANTIC] line" << errline << ": return type \"" << *std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"])
                       << "\" and \"" << *std::any_cast<std::shared_ptr<data_type>>(args[1]["returnType"]) << "\" not match" << std::endl;
             exit(0);
         }
@@ -368,23 +369,26 @@ void Semantic::act4_(std::vector<attribute> &args, attribute &result) {
     // 如果是带break表达式的
     if (args[1].count("breakElementType") && std::any_cast<element_type>(args[1]["breakElementType"]).readType != NONETYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC]" << "break expression is not allowed in while statement." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": break expression is not allowed in fuction statement." << std::endl;
         exit(0);
     }
     // 如果带break和continue
     if (args[1].count("breakList") && std::any_cast<int>(args[1]["breakList"]) != 0)
     {
-        std::cout << "[ERROR] [SEMANTIC]" << "break is not allowed in funtion statement." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": break is not allowed in funtion statement." << std::endl;
         exit(0);
     }
     if (args[1].count("continueList") && std::any_cast<int>(args[1]["continueList"]) != 0)
     {
-        std::cout << "[ERROR] [SEMANTIC]" << "continue is not allowed in funtion statement." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": continue is not allowed in funtion statement." << std::endl;
         exit(0);
     }
 }
 void Semantic::act5_(std::vector<attribute> &args, attribute &result) {
     //函数头声明 -> /fn /id /lpra 形参列表 /rpra
+    int errline = std::any_cast<int>(args[1]["srcline"]);
+    result["srcline"] = errline;
+    
     element_type ret_type;
     ret_type.dataType = data_type::create(VOID_TYPE);
     auto para_list = std::any_cast<std::vector<std::pair<element_type, std::string>>>(args[3]["formalParameter"]);
@@ -394,7 +398,7 @@ void Semantic::act5_(std::vector<attribute> &args, attribute &result) {
     // 检查main函数不能有参数
     if (std::any_cast<std::string>(args[1]["name"]) == "main" && !para_list.empty())
     {
-        std::cout << "[ERROR] [SEMANTIC] main function can not have parameters" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": main function can not have parameters" << std::endl;
         exit(0);
     }
     // 从前往后地址不断靠前，实际上要倒着压栈，事实上大部分编译器确实是这么做的
@@ -409,7 +413,7 @@ void Semantic::act5_(std::vector<attribute> &args, attribute &result) {
     // 检查函数重定义
     if (functionTable.count(functionEntry{0, std::any_cast<std::string>(args[1]["name"]), {}, {}}))
     {
-        std::cout << "[ERROR] [SEMANTIC] function \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is redefined" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": function \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is redefined" << std::endl;
         exit(0);
     }
     // 注意这里一定要指明functionEntry类型，不然insert不进去，不知道为什么
@@ -423,6 +427,8 @@ void Semantic::act6_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act7_(std::vector<attribute> &args, attribute &result) {
     // 语句块 -> M { 语句串 }
+    int errline = std::any_cast<int>(args[1]["srcline"]);
+    
     int num = std::any_cast<int>(args[2]["symbolNum"]);
     std::set<std::string> symName;
     int sizesum = 0;
@@ -430,7 +436,7 @@ void Semantic::act7_(std::vector<attribute> &args, attribute &result) {
     {
         if(symName.count(symbolStack.back().name))
         {
-            std::cout << "[WARN] [SEMANTIC] \"" << symbolStack.back().name << "\" is redeclared" << std::endl;
+            std::cout << "[WARN] [SEMANTIC] line" << errline << ": \"" << symbolStack.back().name << "\" is redeclared" << std::endl;
             // exit(0);
         }
         symName.insert(symbolStack.back().name);
@@ -521,6 +527,9 @@ void Semantic::act17_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act18_(std::vector<attribute> &args, attribute &result) {
     //函数头声明 -> /fn /id ( 形参列表 ) -> 类型
+    int errline = std::any_cast<int>(args[1]["srcline"]);
+    result["srcline"] = errline;
+    
     element_type ret_type;
     ret_type.dataType = std::any_cast<std::shared_ptr<data_type>>(args[6]["dataType"]);
     auto para_list = std::any_cast<std::vector<std::pair<element_type, std::string>>>(args[3]["formalParameter"]);
@@ -530,7 +539,7 @@ void Semantic::act18_(std::vector<attribute> &args, attribute &result) {
     // 检查main函数不能有返回值
     if (std::any_cast<std::string>(args[1]["name"]) == "main")
     {
-        std::cout << "[ERROR] [SEMANTIC] main function can not have return type" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": main function can not have return type" << std::endl;
         exit(0);
     }
     // 从前往后地址不断靠前，实际上要倒着压栈，事实上大部分编译器确实是这么做的
@@ -549,7 +558,7 @@ void Semantic::act18_(std::vector<attribute> &args, attribute &result) {
     // 检查函数重定义
     if (functionTable.count(functionEntry{0, std::any_cast<std::string>(args[1]["name"]), {}, {}}))
     {
-        std::cout << "[ERROR] [SEMANTIC] function \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is redefined" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": function \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is redefined" << std::endl;
         exit(0);
     }
     // 注意这里一定要指明functionEntry类型，不然insert不进去，不知道为什么
@@ -612,7 +621,9 @@ void Semantic::act21_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act22_(std::vector<attribute> &args, attribute &result) {
     // 变量声明语句 -> /let 变量声明内部 /semicolon
-    std::cout << "[ERROR] [SEMANTIC] Type inference is not supported" << std::endl;
+    int errline = std::any_cast<int>(args[0]["srcline"]);
+    
+    std::cout << "[ERROR] [SEMANTIC] line" << errline << ": Type inference is not supported" << std::endl;
     exit(0);
     // element_type ele_type;
     // ele_type.dataType = NULL;
@@ -631,10 +642,11 @@ void Semantic::act23_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act24_(std::vector<attribute> &args, attribute &result) {
     // 赋值语句 -> 表达式 赋值元素 表达式 /;
+    int errline = std::any_cast<int>(args[1]["srcline"]);
 
     if (std::any_cast<element_type>(args[0]["elementType"]).readType != VARIABLE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not variable." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not variable." << std::endl;
         exit(0);
     }
     
@@ -660,9 +672,9 @@ void Semantic::act24_(std::vector<attribute> &args, attribute &result) {
     else if (*std::any_cast<element_type>(args[0]["elementType"]).dataType != 
         *std::any_cast<element_type>(args[2]["elementType"]).dataType)//注意取*再比较
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" and " << "\"" << std::any_cast<std::string>(args[2]["name"]) << "\" are not same type" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\" and " << "\"" << std::any_cast<std::string>(args[2]["name"]) << "\" are not same type" << std::endl;
         exit(0);
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) 
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) 
         << "\":" << *std::any_cast<element_type>(args[0]["elementType"]).dataType << " and " 
         << "\"" << std::any_cast<std::string>(args[2]["name"]) << "\":"
         << *std::any_cast<element_type>(args[2]["elementType"]).dataType << " are not same type" << std::endl;
@@ -693,7 +705,7 @@ void Semantic::act24_(std::vector<attribute> &args, attribute &result) {
     {
         if(std::any_cast<element_type>(args[0]["elementType"]).dataType->type != I32_TYPE)
         {
-            std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a INT " << std::endl;
+            std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a INT " << std::endl;
             exit(0);
         }
         // 运算四元式
@@ -721,26 +733,32 @@ void Semantic::act24_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act25_(std::vector<attribute> &args, attribute &result) {
     // 赋值元素 -> /=
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)":=";
 }
 void Semantic::act26_(std::vector<attribute> &args, attribute &result) {
     // 赋值元素 -> / +=
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"+=";
 }
 void Semantic::act27_(std::vector<attribute> &args, attribute &result) {
     // 赋值元素 -> / -=
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"-=";
 }
 void Semantic::act28_(std::vector<attribute> &args, attribute &result) {
     // 赋值元素 -> / *=
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"*=";
 }
 void Semantic::act29_(std::vector<attribute> &args, attribute &result) {
     // 赋值元素 -> / /=
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"/=";
 }
 void Semantic::act30_(std::vector<attribute> &args, attribute &result) {
     // 赋值元素 -> / %=
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"%=";
 }
 void Semantic::act31_(std::vector<attribute> &args, attribute &result) {
@@ -750,6 +768,8 @@ void Semantic::act31_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act32_(std::vector<attribute> &args, attribute &result) {
     // 变量声明赋值语句 -> /let 变量声明内部 /colon 类型 = 表达式 /semicolon
+    int errline = std::any_cast<int>(args[4]["srcline"]);
+    
     element_type ele_type;
     ele_type.dataType = std::any_cast<std::shared_ptr<data_type>>(args[3]["dataType"]);
     ele_type.readType = std::any_cast<read_type>(args[1]["readType"]);
@@ -758,9 +778,9 @@ void Semantic::act32_(std::vector<attribute> &args, attribute &result) {
     // 检查类型相同
     if (*std::any_cast<element_type>(args[5]["elementType"]).dataType != *ele_type.dataType)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << name 
-        << "\":" << *ele_type.dataType << " and " << "\"" << std::any_cast<std::string>(args[5]["name"]) << "\":"
-        << *std::any_cast<element_type>(args[5]["elementType"]).dataType << " are not same type" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << name
+                  << "\":" << *ele_type.dataType << " and " << "\"" << std::any_cast<std::string>(args[5]["name"]) << "\":"
+                  << *std::any_cast<element_type>(args[5]["elementType"]).dataType << " are not same type" << std::endl;
         exit(0);
     }
     if (std::any_cast<element_type>(args[5]["elementType"]).readType == TEMPORARY)
@@ -810,7 +830,7 @@ void Semantic::act32_(std::vector<attribute> &args, attribute &result) {
     
 }
 void Semantic::act33_(std::vector<attribute> &args, attribute &result) {
-    // 变量声明赋值语句 -> /let 变量声明内部 = 表达式 /semicolon
+    // 变量声明赋值语句 -> /let 变量声明内部 = 表达式 /semicolon 
     element_type ele_type;
     ele_type.dataType = std::any_cast<element_type>(args[3]["elementType"]).dataType;
     ele_type.readType = std::any_cast<read_type>(args[1]["readType"]);
@@ -902,6 +922,7 @@ void Semantic::act41_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act42_(std::vector<attribute> &args, attribute &result) {
     //元素 -> /id
+    int errline = std::any_cast<int>(args[0]["srcline"]);
     symbolEntry sym = getSymbol(std::any_cast<std::string>(args[0]["name"]));
     if (sym.type.readType == NONETYPE)
     {
@@ -913,7 +934,7 @@ void Semantic::act42_(std::vector<attribute> &args, attribute &result) {
             return;
         }
 
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not declared." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not declared." << std::endl;
         exit(0);
     }
     result["name"] = sym.name;
@@ -945,15 +966,16 @@ void Semantic::act44_(std::vector<attribute> &args, attribute &result) {
      * c := 1
      * next:
      */
+    int errline = std::any_cast<int>(args[1]["srcline"]);
     // 检查两个都要是bool
     if (std::any_cast<element_type>(args[0]["elementType"]).dataType->type != BOOL_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a BOOL " << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a BOOL " << std::endl;
         exit(0);
     }
     if (std::any_cast<element_type>(args[3]["elementType"]).dataType->type != BOOL_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[3]["name"]) << "\" is not a BOOL " << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[3]["name"]) << "\" is not a BOOL " << std::endl;
         exit(0);
     }
     int a_symbolNum = std::any_cast<int>(args[0]["symbolNum"]);
@@ -1071,15 +1093,16 @@ void Semantic::act45_(std::vector<attribute> &args, attribute &result) {
      * c := 0
      * next:
      */
+    int errline = std::any_cast<int>(args[1]["srcline"]);
     // 检查两个都要是bool
     if (std::any_cast<element_type>(args[0]["elementType"]).dataType->type != BOOL_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a BOOL " << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a BOOL " << std::endl;
         exit(0);
     }
     if (std::any_cast<element_type>(args[3]["elementType"]).dataType->type != BOOL_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[3]["name"]) << "\" is not a BOOL " << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[3]["name"]) << "\" is not a BOOL " << std::endl;
         exit(0);
     }
     int a_symbolNum = std::any_cast<int>(args[0]["symbolNum"]);
@@ -1179,25 +1202,25 @@ void Semantic::act45_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act46_(std::vector<attribute> &args, attribute &result) {
     // AND表达式 -> AND表达式 比较运算符 加法表达式
-    // TODO: 这是之后的事情，第一版可以不实现，这里同时记录原始的式子，在规约到上层的时候可以尝试归于成jeq, j<之类的
+    int errline = std::any_cast<int>(args[1]["srcline"]);
     std::string op = std::any_cast<std::string>(args[1]["opSymbol"]);
     if(op == "==" || op == "!=")
     {
         if(std::any_cast<element_type>(args[0]["elementType"]).dataType->type != I32_TYPE && 
             std::any_cast<element_type>(args[0]["elementType"]).dataType->type != BOOL_TYPE)
         {
-            std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a int or a bool." << std::endl;
+            std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a int or a bool." << std::endl;
             exit(0);
         }
         if(std::any_cast<element_type>(args[2]["elementType"]).dataType->type != I32_TYPE && 
             std::any_cast<element_type>(args[2]["elementType"]).dataType->type != BOOL_TYPE)
         {
-            std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[2]["name"]) << "\" is not a int or a bool." << std::endl;
+            std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[2]["name"]) << "\" is not a int or a bool." << std::endl;
             exit(0);
         }
         if (*std::any_cast<element_type>(args[0]["elementType"]).dataType != *std::any_cast<element_type>(args[2]["elementType"]).dataType)
         {
-            std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" and " << "\"" << std::any_cast<std::string>(args[2]["name"]) << "\" are not same type" << std::endl;
+            std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\" and " << "\"" << std::any_cast<std::string>(args[2]["name"]) << "\" are not same type" << std::endl;
             exit(0);
         }
     }
@@ -1205,12 +1228,12 @@ void Semantic::act46_(std::vector<attribute> &args, attribute &result) {
     {
         if(std::any_cast<element_type>(args[0]["elementType"]).dataType->type != I32_TYPE)
         {
-            std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a int." << std::endl;
+            std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a int." << std::endl;
             exit(0);
         }
         if(std::any_cast<element_type>(args[2]["elementType"]).dataType->type != I32_TYPE)
         {
-            std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[2]["name"]) << "\" is not a int." << std::endl;
+            std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[2]["name"]) << "\" is not a int." << std::endl;
             exit(0);
         }
     }
@@ -1266,14 +1289,16 @@ void Semantic::act46_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act47_(std::vector<attribute> &args, attribute &result) {
     // 加法表达式 -> 加法表达式 +/- 项
+    int errline = std::any_cast<int>(args[1]["srcline"]);
+    
     if(std::any_cast<element_type>(args[0]["elementType"]).dataType->type != I32_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a int." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a int." << std::endl;
         exit(0);
     }
     if(std::any_cast<element_type>(args[2]["elementType"]).dataType->type != I32_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[2]["name"]) << "\" is not a int." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[2]["name"]) << "\" is not a int." << std::endl;
         exit(0);
     }
     // 声明临时变量
@@ -1344,14 +1369,16 @@ void Semantic::act47_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act48_(std::vector<attribute> &args, attribute &result) {
     // 项 -> 项 * / % 因子
+    int errline = std::any_cast<int>(args[1]["srcline"]);
+    
     if(std::any_cast<element_type>(args[0]["elementType"]).dataType->type != I32_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a int." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not a int." << std::endl;
         exit(0);
     }
     if(std::any_cast<element_type>(args[2]["elementType"]).dataType->type != I32_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[2]["name"]) << "\" is not a int." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[2]["name"]) << "\" is not a int." << std::endl;
         exit(0);
     }
     // 声明临时变量
@@ -1422,53 +1449,66 @@ void Semantic::act48_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act49_(std::vector<attribute> &args, attribute &result) {
     // 比较运算符 -> <
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"<";
 }
 void Semantic::act50_(std::vector<attribute> &args, attribute &result) {
     // 比较运算符 -> <=
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"<=";
 }
 void Semantic::act51_(std::vector<attribute> &args, attribute &result) {
     // 比较运算符 -> >
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)">";
 }
 void Semantic::act52_(std::vector<attribute> &args, attribute &result) {
     // 比较运算符 -> >=
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)">=";
 }
 void Semantic::act53_(std::vector<attribute> &args, attribute &result) {
     // 比较运算符 -> ==
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"==";
 }
 void Semantic::act54_(std::vector<attribute> &args, attribute &result) {
     // 比较运算符 -> !=
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"!=";
 }
 void Semantic::act55_(std::vector<attribute> &args, attribute &result) {
     //+/- -> +
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"+";
 }
 void Semantic::act56_(std::vector<attribute> &args, attribute &result) {
     //+/- -> -
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"-";
 }
 void Semantic::act57_(std::vector<attribute> &args, attribute &result) {
     //*///% -> *
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"*";
 }
 void Semantic::act58_(std::vector<attribute> &args, attribute &result) {
     //*///% -> /
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"/";
 }
 void Semantic::act59_(std::vector<attribute> &args, attribute &result) {
     //*///% -> %
+    result["srcline"] = args[0]["srcline"];
     result["opSymbol"] = (std::string)"%";
 }
 void Semantic::act60_(std::vector<attribute> &args, attribute &result) {
     // 因子 -> /- 因子
+    int errline = std::any_cast<int>(args[0]["srcline"]);
+    
     if (std::any_cast<element_type>(args[1]["elementType"]).dataType->type != I32_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is not a int." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is not a int." << std::endl;
         exit(0);
     }
     // 声明临时变量
@@ -1511,10 +1551,12 @@ void Semantic::act60_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act61_(std::vector<attribute> &args, attribute &result) {
     // 因子 -> not 因子
-    // 默认只能对bool类型取not？
+    // 默认只能对bool类型取not
+    int errline = std::any_cast<int>(args[0]["srcline"]);
+    
     if(std::any_cast<element_type>(args[1]["elementType"]).dataType->type != BOOL_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is not a bool." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is not a bool." << std::endl;
         exit(0);
     }
     symbolEntry sym;
@@ -1570,16 +1612,17 @@ void Semantic::act63_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act64_(std::vector<attribute> &args, attribute &result) {
     // 元素->/id /( 实参列表 /)
+    int errline = std::any_cast<int>(args[0]["srcline"]);
     
     if (std::any_cast<std::string>(args[0]["name"]) == "main")
     {
-        std::cout << "[ERROR] [SEMANTIC] function \"main\" is not callable." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": function \"main\" is not callable." << std::endl;
         exit(0);
     }
     // 检查函数是否存在
     if (!this->functionTable.count(functionEntry{0, std::any_cast<std::string>(args[0]["name"]), {}, {}}))
     {
-        std::cout << "[ERROR] [SEMANTIC] function \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not declared." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": function \"" << std::any_cast<std::string>(args[0]["name"]) << "\" is not declared." << std::endl;
         exit(0);
     }
     
@@ -1613,8 +1656,8 @@ void Semantic::act64_(std::vector<attribute> &args, attribute &result) {
     auto para_list = std::any_cast<std::vector<std::pair<element_type, std::pair<bool, int>>>>(args[2]["actualParameter"]);
     if (func->argsTypes.size() != para_list.size())
     {
-        std::cout << "[ERROR] [SEMANTIC] function \"" << std::any_cast<std::string>(args[0]["name"]) 
-        << "\" expected " << func->argsTypes.size() << " parameters, but got " << para_list.size() << "." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": function \"" << std::any_cast<std::string>(args[0]["name"])
+                  << "\" expected " << func->argsTypes.size() << " parameters, but got " << para_list.size() << "." << std::endl;
         exit(0);
     }
     // 原本是倒过来的,但是我本来就是要倒着压栈
@@ -1623,8 +1666,8 @@ void Semantic::act64_(std::vector<attribute> &args, attribute &result) {
     {
         if (*func->argsTypes[argsnum - i - 1].type.dataType != *para_list[i].first.dataType)
         {
-            std::cout << "[ERROR] [SEMANTIC] function \"" << std::any_cast<std::string>(args[0]["name"]) 
-            << "\" expected " << *func->argsTypes[argsnum - i - 1].type.dataType << ", but got " << *para_list[i].first.dataType << "." << std::endl;
+            std::cout << "[ERROR] [SEMANTIC] line" << errline << ": function \"" << std::any_cast<std::string>(args[0]["name"])
+                      << "\" expected " << *func->argsTypes[argsnum - i - 1].type.dataType << ", but got " << *para_list[i].first.dataType << "." << std::endl;
             exit(0);
         }
         if (para_list[i].first.readType == LITERAL)
@@ -1848,9 +1891,10 @@ void Semantic::act76_(std::vector<attribute> &args, attribute &result) {
         popList = nxt;
     }
     // 如果是带break表达式的
+    int errline = std::any_cast<int>(args[0]["srcline"]);
     if (args[4].count("breakElementType") && std::any_cast<element_type>(args[4]["breakElementType"]).readType != NONETYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC]" << "break expression is not allowed in while statement." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": break expression is not allowed in while statement." << std::endl;
         exit(0);
     }
     // 计数临时变量
@@ -1882,6 +1926,8 @@ void Semantic::act78_(std::vector<attribute> &args, attribute &result) {
      * j M
      * L pop所有变量
      */
+    int errline = std::any_cast<int>(args[0]["srcline"]);
+    
     element_type ele_type;
     ele_type.dataType = std::any_cast<std::shared_ptr<data_type>>(args[0]["IterativeDataType"]);
 
@@ -1920,7 +1966,7 @@ void Semantic::act78_(std::vector<attribute> &args, attribute &result) {
     {
         if(symName.count(symbolStack.back().name))
         {
-            std::cout << "[WARN] [SEMANTIC] \"" << symbolStack.back().name << "\" is redeclared" << std::endl;
+            std::cout << "[WARN] [SEMANTIC] line" << errline << ": \"" << symbolStack.back().name << "\" is redeclared" << std::endl;
             // exit(0);
         }
         symName.insert(symbolStack.back().name);
@@ -1958,13 +2004,16 @@ void Semantic::act78_(std::vector<attribute> &args, attribute &result) {
     // 如果是带break表达式的
     if (args[2].count("breakElementType") && std::any_cast<element_type>(args[2]["breakElementType"]).readType != NONETYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC]" << "break expression is not allowed in for statement." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": break expression is not allowed in for statement." << std::endl;
         exit(0);
     }
     sentenceReturn(args[2], result);
 }
 void Semantic::act79_(std::vector<attribute> &args, attribute &result) {
     // FOR语句声明 -> for 变量声明内部 in 可迭代结构
+    int errline = std::any_cast<int>(args[0]["srcline"]);
+    result["srcline"] = errline;
+
     element_type ele_type;
     ele_type.dataType = std::any_cast<std::shared_ptr<data_type>>(args[3]["IterativeDataType"]);
     ele_type.readType = std::any_cast<read_type>(args[1]["readType"]);
@@ -2032,7 +2081,7 @@ void Semantic::act79_(std::vector<attribute> &args, attribute &result) {
         // 临时变量计数 + 声明变量2
         result["symbolNum"] = std::any_cast<int>(args[3]["symbolNum"]) + 2;
     }
-    else
+    else if (ele_type.dataType->type == ARRAY_TYPE)
     {
         // 数组
         {
@@ -2091,18 +2140,25 @@ void Semantic::act79_(std::vector<attribute> &args, attribute &result) {
         // 临时变量计数 + 声明变量3
         result["symbolNum"] = std::any_cast<int>(args[3]["symbolNum"]) + 3;
     }
+    else
+    {
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": iteration are not array or int..int" << std::endl;
+        exit(0);
+    }
 }
 void Semantic::act80_(std::vector<attribute> &args, attribute &result) {
-    // 可迭代结构 -> 表达式 , 表达式
+    // 可迭代结构 -> 表达式 /.. 表达式
+    int errline = std::any_cast<int>(args[1]["srcline"]);
+    
     if (*std::any_cast<element_type>(args[0]["elementType"]).dataType != *std::any_cast<element_type>(args[2]["elementType"]).dataType)
     {
-        std::cout << "[ERROR] [SEMANTIC] " << std::any_cast<std::string>(args[0]["name"]) << " and " << std::any_cast<std::string>(args[2]["name"]) << " are not same type" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": " << std::any_cast<std::string>(args[0]["name"]) << " and " << std::any_cast<std::string>(args[2]["name"]) << " are not same type" << std::endl;
         exit(0);
     }
     // 必须是i32
     if (std::any_cast<element_type>(args[0]["elementType"]).dataType->type != I32_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] " << std::any_cast<std::string>(args[0]["name"]) << " and " << std::any_cast<std::string>(args[2]["name"]) << " are not int" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": " << std::any_cast<std::string>(args[0]["name"]) << " and " << std::any_cast<std::string>(args[2]["name"]) << " are not int" << std::endl;
         exit(0);
     }
 
@@ -2137,6 +2193,8 @@ void Semantic::act82_(std::vector<attribute> &args, attribute &result) {
      * j M
      * L
      */
+    result["srcline"] = std::any_cast<int>(args[0]["srcline"]);
+     
     int M = std::any_cast<int>(args[1]["codeID"]);
     codes.push_back(quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, M}});
     int L = codes.size();
@@ -2229,10 +2287,12 @@ void Semantic::act85_(std::vector<attribute> &args, attribute &result) {
 void Semantic::act86_(std::vector<attribute> &args, attribute &result) {
     // 因子 -> /* 因子
     // 检查是否可以解引用
+    int errline = std::any_cast<int>(args[0]["srcline"]);
+    
     if (std::any_cast<element_type>(args[1]["elementType"]).dataType->type != REFER_TYPE
         && std::any_cast<element_type>(args[1]["elementType"]).dataType->type != MUT_REFER_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is not a reference." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[1]["name"]) << "\" is not a reference." << std::endl;
         exit(0);
     }
 
@@ -2283,10 +2343,12 @@ void Semantic::act86_(std::vector<attribute> &args, attribute &result) {
 void Semantic::act87_(std::vector<attribute> &args, attribute &result) {
     // 因子 -> /& /mut 因子
     // 检查是否可以可变引用
+    int errline = std::any_cast<int>(args[0]["srcline"]);
+    
     if (std::any_cast<element_type>(args[2]["elementType"]).readType != VARIABLE 
         && std::any_cast<element_type>(args[2]["elementType"]).readType != TEMPORARY)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[2]["name"]) << "\" can not be mut reference." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[2]["name"]) << "\" can not be mut reference." << std::endl;
         exit(0);
     }
     // 声明临时变量
@@ -2324,11 +2386,13 @@ void Semantic::act87_(std::vector<attribute> &args, attribute &result) {
 void Semantic::act88_(std::vector<attribute> &args, attribute &result) {
     // 因子 -> /& 因子
     // 检查是否可以引用
+    int errline = std::any_cast<int>(args[0]["srcline"]);
+    
     if (std::any_cast<element_type>(args[1]["elementType"]).readType != VARIABLE &&
      std::any_cast<element_type>(args[1]["elementType"]).readType != TEMPORARY &&
      std::any_cast<element_type>(args[1]["elementType"]).readType != CONSTANT)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[1]["name"]) << "\" can not be reference." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[1]["name"]) << "\" can not be reference." << std::endl;
         exit(0);
     }
     // 声明临时变量
@@ -2482,18 +2546,18 @@ void Semantic::act94_(std::vector<attribute> &args, attribute &result) {
     // 如果是带break表达式的
     if (args[0].count("breakElementType") && std::any_cast<element_type>(args[0]["breakElementType"]).readType != NONETYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC]" << "break expression is not allowed in funtion expression statement." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] break expression is not allowed in funtion expression statement." << std::endl;
         exit(0);
     }
     // 如果带break和continue
     if (args[0].count("breakList") && std::any_cast<int>(args[0]["breakList"]) != 0)
     {
-        std::cout << "[ERROR] [SEMANTIC]" << "break is not allowed in funtion expression statement." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] break is not allowed in funtion expression statement." << std::endl;
         exit(0);
     }
     if (args[0].count("continueList") && std::any_cast<int>(args[0]["continueList"]) != 0)
     {
-        std::cout << "[ERROR] [SEMANTIC]" << "continue is not allowed in funtion expression statement." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] continue is not allowed in funtion expression statement." << std::endl;
         exit(0);
     }
     // 如果是带return的
@@ -2529,21 +2593,23 @@ void Semantic::act96_(std::vector<attribute> &args, attribute &result) {
     // result["retAddress"] = sym.relativeAddress;
     // result["retElementType"] = retElementType;
     // 此处不能含有return语句
+    int errline = std::any_cast<int>(args[0]["srcline"]);
+    
     if (args[1].count("returnType"))
     {
-        std::cout << "[ERROR] [SEMANTIC] return statement is not allowed in function expression." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": return statement is not allowed in function expression." << std::endl;
         exit(0);
     }
     // 检查返回类型
     if (!args[1].count("retElementType")){ // 必须有返回类型
-        std::cout << "[ERROR] [SEMANTIC] return type \"" << *std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"]) << "\" and \"void\" not match" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": return type \"" << *std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"]) << "\" and \"void\" not match" << std::endl;
         exit(0);
     }
     else
     {
         if (*std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"]) != *std::any_cast<element_type>(args[1]["retElementType"]).dataType)
         {
-            std::cout << "[ERROR] [SEMANTIC] return type \"" << *std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"])
+            std::cout << "[ERROR] [SEMANTIC] line" << errline << ": return type \"" << *std::any_cast<std::shared_ptr<data_type>>(args[0]["returnType"])
                       << "\" and \"" << *std::any_cast<element_type>(args[1]["retElementType"]).dataType << "\" not match" << std::endl;
             exit(0);
         }
@@ -2566,18 +2632,18 @@ void Semantic::act96_(std::vector<attribute> &args, attribute &result) {
     // 如果是带break表达式的
     if (args[1].count("breakElementType") && std::any_cast<element_type>(args[1]["breakElementType"]).readType != NONETYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC]" << "break expression is not allowed in while statement." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": break expression is not allowed in while statement." << std::endl;
         exit(0);
     }
     // 如果带break和continue
     if (args[1].count("breakList") && std::any_cast<int>(args[1]["breakList"]) != 0)
     {
-        std::cout << "[ERROR] [SEMANTIC]" << "break is not allowed in funtion statement." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": break is not allowed in funtion statement." << std::endl;
         exit(0);
     }
     if (args[1].count("continueList") && std::any_cast<int>(args[1]["continueList"]) != 0)
     {
-        std::cout << "[ERROR] [SEMANTIC]" << "continue is not allowed in funtion statement." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": continue is not allowed in funtion statement." << std::endl;
         exit(0);
     }
 }
@@ -2606,6 +2672,8 @@ void Semantic::act98_(std::vector<attribute> &args, attribute &result) {
     // result["symbolNum"] = 1; //这一个返回值
     // result["retAddress"] = sym.relativeAddress;
     // result["retElementType"] = retElementType;
+    int errline = std::any_cast<int>(args[0]["srcline"]);
+    
     int M1 = std::any_cast<int>(args[2]["codeID"]), M2 = std::any_cast<int>(args[4]["codeID"]);
     int address1 = std::any_cast<int>(args[3]["retAddress"]), address2 = std::any_cast<int>(args[6]["retAddress"]);
     assert(address1 == address2);
@@ -2616,7 +2684,7 @@ void Semantic::act98_(std::vector<attribute> &args, attribute &result) {
     // 如果这俩类型不一样直接报错，我不管了
     if(*elementType1.dataType != *elementType2.dataType)
     {
-        std::cout << "[ERROR] [SEMANTIC] In if expression: type \"" << *elementType1.dataType << "\" and \"" << *elementType2.dataType << "\" not match" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": In if expression: type \"" << *elementType1.dataType << "\" and \"" << *elementType2.dataType << "\" not match" << std::endl;
         exit(0);
     }
     element_type elementType = elementType1;
@@ -2657,9 +2725,10 @@ void Semantic::act99_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act100_(std::vector<attribute> &args, attribute &result) {
     // 表达式 -> LOOP语句
+    int errline = std::any_cast<int>(args[0]["srcline"]);
     if(!args[0].count("symbolNum"))
     {
-        std::cout << "[ERROR] [SEMANTIC] LOOP sentence is not a expression" << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": LOOP sentence is not a expression" << std::endl;
         exit(0);
     }
     result = args[0];
@@ -2704,9 +2773,10 @@ void Semantic::act101_(std::vector<attribute> &args, attribute &result) {
 }
 void Semantic::act102_(std::vector<attribute> &args, attribute &result) {
     // 类型 -> /[ 类型 /; /int /]
+    int errline = std::any_cast<int>(args[3]["srcline"]);
     if (std::any_cast<int>(args[3]["val"]) <= 0)
     {
-        std::cout << "[ERROR] [SEMANTIC] array size must be greater than 0." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": array size must be greater than 0." << std::endl;
         exit(0);
     }
     result["dataType"] = data_type::create(ARRAY_TYPE,
@@ -2716,10 +2786,11 @@ void Semantic::act102_(std::vector<attribute> &args, attribute &result) {
 void Semantic::act103_(std::vector<attribute> &args, attribute &result) {
     // 元素 -> /[ 数组元素列表 /]
     // 检查数组元素列表不为空
+    int errline = std::any_cast<int>(args[0]["srcline"]);
     auto array_list = std::any_cast<std::vector<std::pair<element_type, std::pair<bool, int>>>>(args[1]["arrayList"]);
     if (array_list.empty())
     {
-        std::cout << "[ERROR] [SEMANTIC] array element list is empty." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": array element list is empty." << std::endl;
         exit(0);
     }
     // 注意原本是反的
@@ -2745,7 +2816,7 @@ void Semantic::act103_(std::vector<attribute> &args, attribute &result) {
     {
         if (*array_list[i].first.dataType != *baseType)
         {
-            std::cout << "[ERROR] [SEMANTIC] array element type is not same." << std::endl;
+            std::cout << "[ERROR] [SEMANTIC] line" << errline << ": array element type is not same." << std::endl;
             exit(0);
         }
         if (array_list[i].first.readType == LITERAL)
@@ -2818,17 +2889,18 @@ void Semantic::act106_(std::vector<attribute> &args, attribute &result) {
 void Semantic::act107_(std::vector<attribute> &args, attribute &result) {
     // 元素 -> 元素 /[ 表达式 /]
     // 检查是否可以数组下标
+    int errline = std::any_cast<int>(args[1]["srcline"]);
+    
     element_type src_ele_type = std::any_cast<element_type>(args[0]["elementType"]);
     element_type index_ele_type = std::any_cast<element_type>(args[2]["elementType"]);
     if (src_ele_type.dataType->type != ARRAY_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\":" << 
-        *src_ele_type.dataType << " is not a array." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\":" << *src_ele_type.dataType << " is not a array." << std::endl;
         exit(0);
     }
     if (index_ele_type.dataType->type != I32_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[2]["name"]) << "\":" << 
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[2]["name"]) << "\":" << 
         *index_ele_type.dataType << " is not a int." << std::endl;
         exit(0);
     }
@@ -2926,14 +2998,16 @@ void Semantic::act108_(std::vector<attribute> &args, attribute &result) {
     // 可迭代结构 -> 表达式
     // 必须是数组
     element_type ele_type = std::any_cast<element_type>(args[0]["elementType"]);
-    if (ele_type.dataType->type != ARRAY_TYPE)
-    {
-        std::cout << "[ERROR] [SEMANTIC] " << std::any_cast<std::string>(args[0]["name"]) << " are not array" << std::endl;
-        exit(0);
-    }
-
+    
     // 用于指示是int..int还是某个数组
     result["IterativeDataType"] = ele_type.dataType;
+    
+    if (ele_type.dataType->type != ARRAY_TYPE)
+    {
+        // 本来应该在这里报错，为了方便报行数在更上层报了
+        result["IterativeDataType"] = data_type::create(VOID_TYPE);
+        return;
+    }
 
     if (args[0].count("address"))
         result["arrayAddress"] = args[0]["address"];
@@ -3086,10 +3160,11 @@ void Semantic::act118_(std::vector<attribute> &args, attribute &result) {
 void Semantic::act119_(std::vector<attribute> &args, attribute &result) {
     // 元素 -> 元素 /. /int
     // 检查是否是元组
+    int errline = std::any_cast<int>(args[1]["srcline"]);
     element_type src_ele_type = std::any_cast<element_type>(args[0]["elementType"]);
     if (src_ele_type.dataType->type != TUPLE_TYPE)
     {
-        std::cout << "[ERROR] [SEMANTIC] \"" << std::any_cast<std::string>(args[0]["name"]) << "\":" << *src_ele_type.dataType << " is not a tuple." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": \"" << std::any_cast<std::string>(args[0]["name"]) << "\":" << *src_ele_type.dataType << " is not a tuple." << std::endl;
         exit(0);
     }
 
@@ -3178,9 +3253,10 @@ void Semantic::act139_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act140_(std::vector<attribute> &args, attribute &result) {
     // 语句 -> out 表达式 ;
     // 只有4字节可以out
+    int errline = std::any_cast<int>(args[0]["srcline"]);
     if (std::any_cast<element_type>(args[1]["elementType"]).dataType->siz != 4)
     {
-        std::cout << "[ERROR] [SEMANTIC] out only support 4 bytes." << std::endl;
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": out only support 4 bytes." << std::endl;
         exit(0);
     }
     if(args[1].count("address"))

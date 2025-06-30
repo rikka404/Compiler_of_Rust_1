@@ -61,7 +61,7 @@ void lexical_analyzer::init()
 
     const int idnode = 2;
     // 对于关键字建立trie树，这些如果失配后可以到ID节点
-    for (auto [s, tp] : key_word)
+    for (auto [s, tp, _] : key_word)
     {
         int p = 0;
         for (int ch : s)
@@ -96,7 +96,7 @@ void lexical_analyzer::init()
 
     // 对符号关键字建立trie树，如果失配则只能直接返回0
     int oldsize = trie.size();
-    for (auto [s, tp] : key_symbol)
+    for (auto [s, tp, _] : key_symbol)
     {
         int p = 0;
         for (int ch : s)
@@ -212,14 +212,14 @@ void lexical_analyzer::init()
     }
 }
 
-int lexical_analyzer::analyse(const std::string& s)
+int lexical_analyzer::analyse(const std::string& s, int line)
 {
     for (int i = 0; i < (int)s.length(); i++)
     {
         int ch = s[i];
         if (trie[ptr].opt[ch] & OPT_UPDLEX)
         {
-            lex.push_back({nowstr, trie[ptr].type});
+            lex.push_back({nowstr, trie[ptr].type, line});
             nowstr.clear();
         }
         if (trie[ptr].opt[ch] & OPT_RETRACT)

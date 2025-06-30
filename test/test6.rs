@@ -16,14 +16,13 @@
 //     out b; // 9
 // }
 
+fn sum(a: i32, b: i32) -> i32
+{
+    return a + b;
+}
+
 fn main()
 {
-    let a =
-    loop {
-        if (2 == 1)
-        {
-            break 2;
-        }
-        break;
-    };
+    let a = 7;
+    out sum(a, a + a);
 }

@@ -8,67 +8,66 @@ struct lexical
 {
     std::string s;
     lexical_type type;
+    int line; // 词法单元所在行号
 };
 
 const std::vector<lexical> key_word = {
-    {"let", LET},
-    {"mut", MUT},
-    {"i32", I32},
-    {"if", IF},
-    {"else", ELSE},
-    {"while", WHILE},
-    {"return", RETURN},
-    {"fn", FN},
-    {"for", FOR},
-    {"in", IN},
-    {"loop", LOOP},
-    {"break", BREAK},
-    {"continue", CONTINUE},
-    {"false", FALSE},
-    {"true", TRUE},
-    {"bool", BOOL},
-    {"out", OUT}
-};
+    {"let", LET, 0},
+    {"mut", MUT, 0},
+    {"i32", I32, 0},
+    {"if", IF, 0},
+    {"else", ELSE, 0},
+    {"while", WHILE, 0},
+    {"return", RETURN, 0},
+    {"fn", FN, 0},
+    {"for", FOR, 0},
+    {"in", IN, 0},
+    {"loop", LOOP, 0},
+    {"break", BREAK, 0},
+    {"continue", CONTINUE, 0},
+    {"false", FALSE, 0},
+    {"true", TRUE, 0},
+    {"bool", BOOL, 0},
+    {"out", OUT, 0}};
 const std::vector<lexical> key_symbol = {
-    {"=", ASSIGN},
-    {"+", ADD},
-    {"-", SUB},
-    {"*", MUL},
-    {"/", DIV},
-    {"%", MOD},
-    {"+=", ADDASSIGN},
-    {"-=", SUBASSIGN},
-    {"*=", MULASSIGN},
-    {"/=", DIVASSIGN},
-    {"%=", MODASSIGN},
-    {"==", EQU},
-    {">", GT},
-    {">=", GE},
-    {"<", LT},
-    {"<=", LE},
-    {"!=", NE},
-    
-    {"(", LPRA},
-    {")", RPRA},
-    {"{", LBRA},
-    {"}", RBRA},
-    {"[", LSQB},
-    {"]", RSQB},
+    {"=", ASSIGN, 0},
+    {"+", ADD, 0},
+    {"-", SUB, 0},
+    {"*", MUL, 0},
+    {"/", DIV, 0},
+    {"%", MOD, 0},
+    {"+=", ADDASSIGN, 0},
+    {"-=", SUBASSIGN, 0},
+    {"*=", MULASSIGN, 0},
+    {"/=", DIVASSIGN, 0},
+    {"%=", MODASSIGN, 0},
+    {"==", EQU, 0},
+    {">", GT, 0},
+    {">=", GE, 0},
+    {"<", LT, 0},
+    {"<=", LE, 0},
+    {"!=", NE, 0},
 
+    {"(", LPRA, 0},
+    {")", RPRA, 0},
+    {"{", LBRA, 0},
+    {"}", RBRA, 0},
+    {"[", LSQB, 0},
+    {"]", RSQB, 0},
 
-    {";", SEMICOLON},
-    {":", COLON},
-    {",", COMMA}, 
+    {";", SEMICOLON, 0},
+    {":", COLON, 0},
+    {",", COMMA, 0},
 
-    {"->", ARROW},
-    {".", DOT},
-    {"..", DDOT},
-    
-    {"&", REFER},
-    {"&&", AND},
-    {"||", OR},
-    {"!", NOT}
-    
+    {"->", ARROW, 0},
+    {".", DOT, 0},
+    {"..", DDOT, 0},
+
+    {"&", REFER, 0},
+    {"&&", AND, 0},
+    {"||", OR, 0},
+    {"!", NOT, 0}
+
 };
 
 const int MAXCHAR = 128;
@@ -103,5 +102,5 @@ public:
     
     lexical_analyzer() : ptr(0) {}
     static void init();
-    int analyse(const std::string &s);
+    int analyse(const std::string &s, int line);
 };

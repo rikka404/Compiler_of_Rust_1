@@ -95,6 +95,9 @@ public:
 
     static int EIPoffset; // 返回eip偏移量
     static int EBPoffset; // 返回ebp偏移量
+    
+    // 记录行数的东西，不想改语义函数了直接在这里写
+    int nowline; // 当前行号
 
     std::set<functionEntry> functionTable; // 函数表
     std::map<std::string, std::vector<int>> symbolIDTable;     // 符号表

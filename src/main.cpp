@@ -11,7 +11,7 @@ int main()
 {
     /* 预处理 */
     // test是用来测试词法分析的，test2是用来测试语法分析的
-    std::string filename = "test/test5.rs";
+    std::string filename = "test/test6.rs";
     std::ifstream fin(filename);
     std::string s;
     if (!fin.is_open())
@@ -32,20 +32,20 @@ int main()
     {
         ++linecnt;
         s += '\n';
-        if (lex_analyzer.analyse(s))
+        if (lex_analyzer.analyse(s, linecnt))
         {
             std::cout << "[ERROE] [LEXICAL] at line " << linecnt << std::endl;
             return 0;
         }
     }
-    if (lex_analyzer.analyse(" "))
+    if (lex_analyzer.analyse(" ", linecnt))
     {
         std::cout << "[ERROE] [LEXICAL] at line " << linecnt << std::endl;
         return 0;
     }
     std::cout << "[LOG] [LEXICAL] Complete lexical analyse at " << filename << std::endl;
     int i = 0;
-    for (auto [s, _] : lex_analyzer.lex)
+    for (auto [s, tp, _] : lex_analyzer.lex)
     {
         std::cout << i << ":" << s << std::endl;
         ++i;
@@ -58,16 +58,19 @@ int main()
     semantic.init();
 
     std::vector<symbol> sym;
+    std::vector<int> linelist;
     std::vector<std::string> strList;
-    for (auto [s, tp] : lex_analyzer.lex)
+    for (auto [s, tp, lncnt] : lex_analyzer.lex)
     {
         sym.push_back(symbol(1, tp, s));
+        linelist.push_back(lncnt);
         strList.push_back(s);
     }
     sym.push_back({1, END});
+    linelist.push_back(linecnt);
 
     Rules rules;
-    rules.analysis(sym, semantic);
+    rules.analysis(sym, linelist, semantic);
 
     rules.drawParserTree(std::cout, strList);
 

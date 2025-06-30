@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 #include "lexical.h"
 #include "rust_parser.h"
@@ -7,11 +6,33 @@
 
 const std::vector<quaternary> *codes;
 
-int main()
+int main(int argc, char *argv[])
 {
     /* 预处理 */
-    // test是用来测试词法分析的，test2是用来测试语法分析的
-    std::string filename = "test/test5.rs";
+    argParser arg_parser;
+    arg_parser.parse(argc, argv);
+
+    // 现阶段使用默认参数
+    arg_parser.args["i"] = "test/test6.rs";
+    arg_parser.args["m"] = "itp";
+
+    if (!arg_parser.args.count("i"))
+    {
+        std::cout << "[ERROR] [ARGUMENT] No input file specified" << std::endl;
+        return 0;
+    }
+    if (!arg_parser.args.count("m"))
+    {
+        std::cout << "[ERROR] [ARGUMENT] No mode specified" << std::endl;
+        return 0;
+    }
+    if (!arg_parser.args.count("o") && arg_parser.args["m"] != "interpreter")
+    {
+        arg_parser.args["o"] = arg_parser.args["i"] + ".s";
+    }
+
+    // 开始执行
+    std::string filename = arg_parser.args["i"];
     std::ifstream fin(filename);
     std::string s;
     if (!fin.is_open())
@@ -77,7 +98,27 @@ int main()
     semantic.printCodes(std::cout);
 
     codes = &(semantic.codes);
-    test();
+    
+    /* 目标代码生成 / 解释执行 */
+    if (arg_parser.args["m"] == "itp")
+    {
+        std::cout << "[LOG] [GENRETION] Start interpreter" << std::endl;
+        test();
+        std::cout << "[LOG] [GENRETION] Interpreter finished" << std::endl;
+    }
+    else if (arg_parser.args["m"] == "x86")
+    {
+        std::cout << "[LOG] [GENRETION] Start compile to win_x86" << std::endl;
+        
+        std::cout << "[LOG] [GENRETION] Write to file " << arg_parser.args["o"] << std::endl;
+    }
+    else if (arg_parser.args["m"] == "arm")
+    {
+        std::cout << "[LOG] [GENRETION] Start compile to android_arm" << std::endl;
+        
+        std::cout << "[LOG] [GENRETION] Write to file " << arg_parser.args["o"] << std::endl;
+    }
+    
 
     // // 第一组测试
     // auto ele1 = data_type::create(I32_TYPE);

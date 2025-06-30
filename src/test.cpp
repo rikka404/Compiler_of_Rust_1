@@ -16,10 +16,33 @@ int test()
         {
             *(int *)esp = eip + 1;
             esp += 4;
+            eip = result.value;
+        }
+        else if (op == "build")
+        {
             *(int *)esp = (char*)ebp - mem;
             ebp = esp;
             esp += 4;
-            eip = result.value;
+            eip++;
+        }
+        else if(op == "end")
+        {
+            break;
+        }
+        else if(op == "return")
+        {
+            void *src = arg1.type == Offset ? ebp + arg1.value : mem + *(int *)(ebp + arg1.value);
+            void *dst = result.type == Offset ? ebp + result.value : mem + *(int *)(ebp + result.value);
+            memcpy(dst, src, arg2.value);
+            eip = *(int *)(ebp - 4);
+            esp = ebp - 4;
+            ebp = mem + *(int *)ebp;
+        }
+        else if(op == "leave")
+        {
+            eip = *(int *)(ebp - 4);
+            esp = ebp - 4;
+            ebp = mem + *(int *)ebp;
         }
         else if(op == "push")
         {
@@ -40,12 +63,6 @@ int test()
         {
             esp -= arg2.value;
             eip++;
-        }
-        else if(op == "leave")
-        {
-            eip = *(int *)(ebp - 4);
-            esp = ebp - 4;
-            ebp = mem + *(int *)ebp;
         }
         else if(op == ":=" || op == "return")
         {

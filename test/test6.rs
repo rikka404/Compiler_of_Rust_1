@@ -36,3 +36,9 @@ fn main()
         output a;
     }
 }
+
+// fn main()
+// {
+//     let mut a : (i32, [i32;4]) = (5, [1, 2, 3, 4]);
+//     output a.1[1];
+// }

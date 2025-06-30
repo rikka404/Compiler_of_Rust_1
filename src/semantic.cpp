@@ -420,6 +420,11 @@ void Semantic::act5_(std::vector<attribute> &args, attribute &result) {
     functionTable.insert(functionEntry{(int)this->codes.size(), std::any_cast<std::string>(args[1]["name"]), para_sym_list, symbolEntry{"", ret_type, 0}});
     result["returnType"] = ret_type.dataType;
     result["symbolNum"] = (int)para_list.size();
+    // 建立栈帧指令
+    codes.push_back(quaternary("build", 
+        Operand{Literal, 0}, 
+        Operand{Literal, 0}, 
+        Operand{Literal, 0}));
 }
 void Semantic::act6_(std::vector<attribute> &args, attribute &result) {
     // 形参列表 -> /zero
@@ -565,6 +570,11 @@ void Semantic::act18_(std::vector<attribute> &args, attribute &result) {
     functionTable.insert(functionEntry{(int)this->codes.size(), std::any_cast<std::string>(args[1]["name"]), para_sym_list, ret_sym});
     result["returnType"] = ret_type.dataType;
     result["symbolNum"] = (int)para_list.size();
+    // 建立栈帧指令
+    codes.push_back(quaternary("build", 
+        Operand{Literal, 0}, 
+        Operand{Literal, 0}, 
+        Operand{Literal, 0}));
 }
 void Semantic::act19_(std::vector<attribute> &args, attribute &result) {
     // 返回语句 -> /return 表达式 /;

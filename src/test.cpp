@@ -170,7 +170,7 @@ int test()
         {
             eip++;
         }
-        else if(op == "out")
+        else if(op == "output")
         {
             if(arg1.type == Offset)
                 std::cout << *(int *)(ebp + arg1.value) << std::endl;
@@ -178,6 +178,16 @@ int test()
                 std::cout << *(int *)(mem + *(int*)(ebp + arg1.value)) << std::endl;
             else 
                 std::cout << arg1.value << std::endl;
+            eip++;
+        }
+        else if(op == "input")
+        {
+            int a;
+            std::cin >> a;
+            if (arg1.type == Offset)
+                *(int *)(ebp + arg1.value) = a;
+            else if (arg1.type == Address)
+                *(int *)(mem + *(int *)(ebp + arg1.value)) = a;
             eip++;
         }
     }

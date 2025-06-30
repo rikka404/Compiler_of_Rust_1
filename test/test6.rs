@@ -23,6 +23,16 @@ fn sum(a: i32, b: i32) -> i32
 
 fn main()
 {
-    let a = 7;
-    out sum(a, a + a);
+    let mut a: i32;
+    input a;
+    let b = &mut a;
+    if (a + 5 > 10)
+    {
+        output sum(a, a);
+    }
+    else
+    {
+        *b = 10;
+        output a;
+    }
 }

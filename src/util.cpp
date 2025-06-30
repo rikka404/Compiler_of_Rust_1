@@ -57,13 +57,14 @@ std::map<std::string, enum lexical_type> Util::terminalType =
 
         {"id", ID},
         {"int", INT},
-        
+
         {"refer", REFER},
         {"and", AND},
         {"or", OR},
         {"not", NOT},
-        
-        {"out", OUT},
+
+        {"output", OUTPUT},
+        {"input", INPUT},
 
         {"end", END} // 结束符
 };

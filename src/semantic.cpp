@@ -3251,8 +3251,8 @@ void Semantic::act137_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act138_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act139_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act140_(std::vector<attribute> &args, attribute &result) {
-    // 语句 -> out 表达式 ;
-    // 只有4字节可以out
+    // 语句 -> output 表达式 ;
+    // 只有4字节可以output
     int errline = std::any_cast<int>(args[0]["srcline"]);
     if (std::any_cast<element_type>(args[1]["elementType"]).dataType->siz != 4)
     {
@@ -3260,15 +3260,35 @@ void Semantic::act140_(std::vector<attribute> &args, attribute &result) {
         exit(0);
     }
     if(args[1].count("address"))
-        codes.push_back(quaternary{"out", Operand{Offset, std::any_cast<int>(args[1]["address"])}, Operand{Literal, 0}, Operand{Literal, 0}});
+        codes.push_back(quaternary{"output", Operand{Offset, std::any_cast<int>(args[1]["address"])}, Operand{Literal, 0}, Operand{Literal, 0}});
     else if(args[1].count("absoluteAddress"))
-        codes.push_back(quaternary{"out", Operand{Address, std::any_cast<int>(args[1]["absoluteAddress"])}, Operand{Literal, 0}, Operand{Literal, 0}});
+        codes.push_back(quaternary{"output", Operand{Address, std::any_cast<int>(args[1]["absoluteAddress"])}, Operand{Literal, 0}, Operand{Literal, 0}});
     else
-        codes.push_back(quaternary{"out", Operand{Literal, std::any_cast<int>(args[1]["val"])}, Operand{Literal, 0}, Operand{Literal, 0}});
+        codes.push_back(quaternary{"output", Operand{Literal, std::any_cast<int>(args[1]["val"])}, Operand{Literal, 0}, Operand{Literal, 0}});
 
     result["symbolNum"] = std::any_cast<int>(args[1]["symbolNum"]);
 }
-void Semantic::act141_(std::vector<attribute> &args, attribute &result) {}
+void Semantic::act141_(std::vector<attribute> &args, attribute &result) {
+    // 语句 -> input 表达式 ;
+    // 只有4字节可以input
+    int errline = std::any_cast<int>(args[0]["srcline"]);
+    if (std::any_cast<element_type>(args[1]["elementType"]).dataType->siz != 4)
+    {
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": in only support 4 bytes." << std::endl;
+        exit(0);
+    }
+    if (std::any_cast<element_type>(args[1]["elementType"]).readType == LITERAL)
+    {
+        std::cout << "[ERROR] [SEMANTIC] line" << errline << ": in only support variable." << std::endl;
+        exit(0);
+    }
+    if (args[1].count("address"))
+        codes.push_back(quaternary{"input", Operand{Offset, std::any_cast<int>(args[1]["address"])}, Operand{Literal, 0}, Operand{Literal, 0}});
+    else if (args[1].count("absoluteAddress"))
+        codes.push_back(quaternary{"input", Operand{Address, std::any_cast<int>(args[1]["absoluteAddress"])}, Operand{Literal, 0}, Operand{Literal, 0}});
+
+    result["symbolNum"] = std::any_cast<int>(args[1]["symbolNum"]);
+}
 void Semantic::act142_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act143_(std::vector<attribute> &args, attribute &result) {}
 void Semantic::act144_(std::vector<attribute> &args, attribute &result) {}

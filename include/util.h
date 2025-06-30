@@ -66,7 +66,8 @@ enum lexical_type
     OR,  // ||
     NOT, // !
 
-    OUT, // 输出
+    OUTPUT, // 输出
+    INPUT,
 
     END // 结束符
 };

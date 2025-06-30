@@ -51,7 +51,7 @@ fn main()
     let mut b:[i32;20];
     sort(&mut a, &mut b, 0, 19);
     for ai in a {
-        out ai;
+        output ai;
     }
 }
 

@@ -41,19 +41,19 @@ fn main() {
     identity_matrix();
     for i in 0..20 {
         let fib = fast_fibonacci(i);
-        out fib;  
+        output fib;  
     }
     
-    out fast_fibonacci(30);  // 832040
-    out fast_fibonacci(31);  // 1346269
-    out fast_fibonacci(32);  // 2178309
+    output fast_fibonacci(30);  // 832040
+    output fast_fibonacci(31);  // 1346269
+    output fast_fibonacci(32);  // 2178309
     
     let a = [[1, 1], [1, 0]];
     let b = matrix_power(a, 10);
-    out b[0][0];  // 89
-    out b[0][1];  // 55
-    out b[1][0];  // 55
-    out b[1][1];  // 34
+    output b[0][0];  // 89
+    output b[0][1];  // 55
+    output b[1][0];  // 55
+    output b[1][1];  // 34
 }
 
 

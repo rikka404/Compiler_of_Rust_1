@@ -162,5 +162,6 @@ YUAN_SU -> YUAN_SU /dot /int [ 119 ] #
 # bool类型
 LEI_XING -> /bool [ 121 ] #
 
-# 输出
-YU_JU -> /out BIAO_DA_SHI /semicolon [ 140 ] #
+# 输入输出
+YU_JU -> /output BIAO_DA_SHI /semicolon [ 140 ] #
+YU_JU -> /input BIAO_DA_SHI /semicolon [ 141 ] #

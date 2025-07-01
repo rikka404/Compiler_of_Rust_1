@@ -16,32 +16,32 @@
 //     out b; // 9
 // }
 
-fn sum(a: i32, b: i32) -> i32
-{
-    return a + b;
-}
-
-fn main()
-{
-    let mut a: i32;
-    input a;
-    let b = &mut a;
-    if (a + 5 > 10)
-    {
-        output sum(a, a);
-    }
-    else
-    {
-        *b = 10;
-        output a;
-    }
-}
+// fn sum(a: i32, b: i32) -> i32
+// {
+//     return a + b;
+// }
 
 // fn main()
 // {
-//     let mut a : (i32, [i32;4]) = (5, [1, 2, 3, 4]);
-//     output a.1[1];
+//     let mut a: i32;
+//     input a;
+//     let b = &mut a;
+//     if (a + 5 > 10)
+//     {
+//         output sum(a, a);
+//     }
+//     else
+//     {
+//         *b = 10;
+//         output a;
+//     }
 // }
+
+fn main()
+{
+    let mut a : (i32, [i32;4]) = (5, [1, 2, 3, 4]);
+    output a.1[1];
+}
 
 // fn main()
 // {

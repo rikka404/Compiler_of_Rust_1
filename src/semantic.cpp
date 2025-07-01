@@ -2997,9 +2997,9 @@ void Semantic::act107_(std::vector<attribute> &args, attribute &result) {
         codes.push_back(quat);
 
         // 2 计算数组绝对地址到临时变量(加数组绝对地址)
-        quat.op = "+";
-        quat.arg1 = Operand{Offset, temp_sym.relativeAddress};
-        quat.arg2 = Operand{Offset, std::any_cast<int>(args[0]["absoluteAddress"])};
+        quat.op = "-";
+        quat.arg1 = Operand{Offset, std::any_cast<int>(args[0]["absoluteAddress"])};
+        quat.arg2 = Operand{Offset, temp_sym.relativeAddress};
         quat.result = Operand{Offset, temp_sym.relativeAddress};
         codes.push_back(quat);
     }
@@ -3222,9 +3222,9 @@ void Semantic::act119_(std::vector<attribute> &args, attribute &result) {
         // 计算该地址的四元式
         quaternary quat;
         // 1 计算数组绝对地址到临时变量(加数组绝对地址)
-        quat.op = "+";
-        quat.arg1 = Operand{Literal, tupleEleOffset};
-        quat.arg2 = Operand{Offset, std::any_cast<int>(args[0]["absoluteAddress"])};
+        quat.op = "-";
+        quat.arg1 = Operand{Offset, std::any_cast<int>(args[0]["absoluteAddress"])};
+        quat.arg2 = Operand{Literal, tupleEleOffset};
         quat.result = Operand{Offset, temp_sym.relativeAddress};
         codes.push_back(quat);
     }

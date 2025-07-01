@@ -708,7 +708,15 @@ void GeneratorX86::genJrop(quaternary &quat, std::ofstream &fout)
 
 void GeneratorX86::genSea(quaternary &quat, std::ofstream &fout)
 {
-    fout << "    leal " << -quat.arg1.value << "(%ebp), %eax\n";
+    if (quat.arg1.type == Literal)
+        fout << "    leal " << -quat.arg1.value << "(%ebp), %eax\n";
+    else if (quat.arg1.type == Offset)
+    {
+        fout << "    movl " << -quat.arg1.value << "(%ebp), %eax\n";
+        fout << "    negl %eax\n"; // 取反
+        fout << "    addl %ebp, %eax\n";
+    }
+    
     this->storeValTo(quat.result, "eax", fout);
 }
 

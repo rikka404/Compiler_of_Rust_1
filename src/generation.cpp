@@ -334,7 +334,7 @@ void GeneratorX86::loadValTo(Operand &oper, std::string reg, std::ofstream &fout
 
 void GeneratorX86::loadAdrTo(int address, std::string reg, std::ofstream &fout)
 {
-    fout << "    leal " << -address << "(%ebp), %" << reg << "\n";
+    fout << "    movl " << -address << "(%ebp), %" << reg << "\n";
 }
 
 void GeneratorX86::storeValTo(Operand &oper, std::string reg, std::ofstream &fout)
@@ -467,7 +467,12 @@ void GeneratorX86::genCal(quaternary &quat, std::ofstream &fout)
         fout << "    idivl ";
     
     if (quat.arg2.type == Literal)
-        fout << "%ecx";
+    {
+        if (quat.op == "/" || quat.op == "%")
+            fout << "%ecx";
+        else
+            fout << "$" << quat.arg2.value;
+    }
     else if (quat.arg2.type == Offset)
         fout << -quat.arg2.value << "(%ebp)";
     else if (quat.arg2.type == Address)
@@ -645,7 +650,7 @@ void GeneratorX86::genJrop(quaternary &quat, std::ofstream &fout)
             quat.op == "j>" && quat.arg1.value > quat.arg2.value || 
             quat.op == "j>=" && quat.arg1.value >= quat.arg2.value)
         {
-            fout << "    j L" << quat.result.value << '\n';
+            fout << "    jmp L" << quat.result.value << '\n';
         }
         return;
     }
@@ -694,7 +699,7 @@ void GeneratorX86::genJrop(quaternary &quat, std::ofstream &fout)
 
 void GeneratorX86::genSea(quaternary &quat, std::ofstream &fout)
 {
-    this->loadAdrTo(quat.arg1.value, "eax", fout);
+    fout << "    leal " << -quat.arg1.value << "(%ebp), %eax\n";
     this->storeValTo(quat.result, "eax", fout);
 }
 
@@ -702,7 +707,7 @@ void GeneratorX86::genOutput(quaternary &quat, std::ofstream &fout)
 {
     if(quat.arg1.type == Literal)
         fout << "    push $" << quat.arg1.value << '\n';
-    else if(quat.arg2.type == Offset)
+    else if(quat.arg1.type == Offset)
         fout << "    push " << -quat.arg1.value << "(%ebp)\n";
     else
     {

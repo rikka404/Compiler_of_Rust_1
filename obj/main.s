@@ -30,7 +30,7 @@ L106:
     movl %eax,-8(%ebp)
     pushl $0
     movl -4(%ebp), %eax
-    addl %ecx, %eax
+    addl $5, %eax
     movl %eax,-12(%ebp)
     pushl $0
     movl -12(%ebp), %eax
@@ -47,18 +47,16 @@ L106:
     call L100
     addl $4, %esp
     addl $4, %esp
-    leal -20(%ebp), %ebx
-    push (%ebx)
+    push -20(%ebp)
     call _output
     add $4, %esp
     addl $4, %esp
     jmp L128
 L125:
     movl $10, %eax
-    leal -8(%ebp), %ebx
+    movl -8(%ebp), %ebx
     movl %eax, (%ebx)
-    leal -4(%ebp), %ebx
-    push (%ebx)
+    push -4(%ebp)
     call _output
     add $4, %esp
 L128:

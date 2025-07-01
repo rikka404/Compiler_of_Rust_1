@@ -40,7 +40,9 @@
 fn main()
 {
     let mut a : (i32, [i32;4]) = (5, [1, 2, 3, 4]);
-    output a.1[1];
+    let mut b = & & mut a;
+    (**b).1[0] = (**b).1[1];
+    output a.1[0];
 }
 
 // fn main()

@@ -1964,8 +1964,8 @@ void Semantic::act78_(std::vector<attribute> &args, attribute &result) {
         codes.push_back(quaternary{"j", Operand{Literal, 0}, Operand{Literal, 0}, Operand{Lable, M}});
         L = codes.size();
         // 回填
-        codes[M] = quaternary{"+", Operand{Offset, addressRefer}, Operand{Literal, ele_type.dataType->get_sub_class(0)->siz}, Operand{Offset, addressRefer}};
-        codes[M + 1] = quaternary{"j>", Operand{Offset, addressRefer}, Operand{Offset, addressReferEnd}, Operand{Lable, L}};
+        codes[M] = quaternary{"-", Operand{Offset, addressRefer}, Operand{Literal, ele_type.dataType->get_sub_class(0)->siz}, Operand{Offset, addressRefer}};
+        codes[M + 1] = quaternary{"j<", Operand{Offset, addressRefer}, Operand{Offset, addressReferEnd}, Operand{Lable, L}};
         codes[M + 2] = quaternary{":=", Operand{Address, addressRefer}, Operand{Literal, ele_type.dataType->get_sub_class(0)->siz}, Operand{Offset, address}};
     }
         
@@ -2131,7 +2131,7 @@ void Semantic::act79_(std::vector<attribute> &args, attribute &result) {
                 codes.push_back(quaternary(":=", Operand{Offset, std::any_cast<int>(args[3]["arrayAbsoluteAddress"])}, Operand{Literal, sym.type.dataType->siz}, Operand{Offset, sym.relativeAddress}));
             }
             // a减去siz
-            codes.push_back(quaternary("-", Operand{Offset, sym.relativeAddress}, Operand{Literal, ele_type.dataType->get_sub_class(0)->siz}, Operand{Offset, sym.relativeAddress}));
+            codes.push_back(quaternary("+", Operand{Offset, sym.relativeAddress}, Operand{Literal, ele_type.dataType->get_sub_class(0)->siz}, Operand{Offset, sym.relativeAddress}));
 
             int a_relativeAddress = sym.relativeAddress;
 
@@ -2144,7 +2144,7 @@ void Semantic::act79_(std::vector<attribute> &args, attribute &result) {
             result["referEndAddress"] = sym.relativeAddress;
 
             // a_end:=a+数组大小
-            codes.push_back(quaternary("+", Operand{Offset, a_relativeAddress}, Operand{Literal, ele_type.dataType->siz}, Operand{Offset, sym.relativeAddress}));
+            codes.push_back(quaternary("-", Operand{Offset, a_relativeAddress}, Operand{Literal, ele_type.dataType->siz}, Operand{Offset, sym.relativeAddress}));
         }
 
         // 临时变量计数 + 声明变量3

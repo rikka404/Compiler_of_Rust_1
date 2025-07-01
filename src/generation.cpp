@@ -215,26 +215,26 @@ void Generator::generate(std::vector<quaternary> &code)
     this->header(fout);
 
     // 统计标号
-    this->flags.clear();
-    this->nowfpos = 0;
+    std::set<int> flags;
+    flags.clear();
     for (int i = Generator::beginpos; i < code.size(); ++i)
     {
         if (code[i].op == "call" || code[i].op == "j" || code[i].op == "jz" || code[i].op == "jnz" ||
             code[i].op == "j>=" || code[i].op == "j<=" || code[i].op == "j<" || code[i].op == "j>")
         {
-            this->flags.push_back(code[i].result.value);
+            flags.insert(code[i].result.value);
         }
     }
-    sort(this->flags.begin(), this->flags.end());
 
     //逐句翻译
+    auto it = flags.begin();
     for (int i = Generator::beginpos; i < code.size(); ++i)
     {
         auto [op, arg1, arg2, result] = code[i];
-        if (i == this->flags[this->nowfpos])
+        if (i == *it)
         {
             this->genFlag(i, fout);
-            ++nowfpos;
+            ++it;
         }
 
         if (op == "call" || op == "j")

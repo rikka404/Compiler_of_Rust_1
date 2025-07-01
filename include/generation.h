@@ -10,9 +10,6 @@ class Generator
 public:
     static std::string dstfilepath;
     static int beginpos;
-
-    std::vector<int> flags;
-    int nowfpos = 0;
     
     void generate(std::vector<quaternary> &code);
     virtual void header(std::ofstream &fout) = 0; // 生成头部

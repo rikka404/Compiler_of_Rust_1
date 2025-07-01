@@ -395,8 +395,17 @@ void GeneratorX86::genCopy(quaternary &quat, std::ofstream &fout)
     }
     else if (quat.arg2.value > 4)
     {
-        // to do
-        exit(0);
+        fout << "    cld\n";
+        if(quat.arg1.type == Offset)
+            fout << "    leal " << -quat.arg1.value << "(%ebp), %esi\n";
+        else
+            fout << "    movl " << -quat.arg1.value << "(%ebp), %esi\n";
+        if(quat.result.type == Offset)
+            fout << "    leal " << -quat.result.value << "(%ebp), %edi\n";
+        else
+            fout << "    movl " << -quat.result.value << "(%ebp), %edi\n";
+        fout << "    movl $" << quat.arg2.value << ", %ecx\n";
+        fout << "    rep movsb\n";
     }
 }
 

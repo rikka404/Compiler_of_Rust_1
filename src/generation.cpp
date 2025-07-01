@@ -1,4 +1,5 @@
-#include <generation.h>
+#include "generation.h"
+#include <assert.h>
 
 int interpreter(std::vector<quaternary> &code)
 {
@@ -333,6 +334,17 @@ void GeneratorX86::loadAdrTo(int address, std::string reg, std::ofstream &fout)
     fout << "    leal " << -address << "(%ebp), %" << reg << "\n";
 }
 
+void GeneratorX86::storeValTo(Operand &oper, std::string reg, std::ofstream &fout)
+{
+    if (oper.type == Offset)
+        fout << "    movl %" << reg << "," << -oper.value << "(%ebp)\n";
+    else if (oper.type == Address)
+    {
+        this->loadAdrTo(oper.value, "ebx", fout);
+        fout << "    movl %" << reg << ", (%ebx)\n";
+    }
+}
+
 void GeneratorX86::genFlag(int flag, std::ofstream &fout)
 {
     fout << "L" << flag << ":\n";
@@ -561,3 +573,89 @@ void GeneratorX86::genAssign(quaternary &quat, std::ofstream &fout)
 }
 
 
+void GeneratorX86::genJt(quaternary &quat, std::ofstream &fout)
+{
+    if(quat.arg1.type == Literal)
+    {
+        if((quat.arg1.value == 0) == (quat.op == "jz"))
+        {
+            fout << "    j L" << quat.result.value << '\n';
+        }
+        return;
+    }
+    this->loadValTo(quat.arg1, "eax", fout);
+    fout << "    cmpl eax, $0\n";
+    if(quat.op == "jz")
+        fout << "    je L" << quat.result.value << '\n';
+    else
+        fout << "    jne L" << quat.result.value << '\n';
+}
+
+
+void GeneratorX86::genJrop(quaternary &quat, std::ofstream &fout)
+{
+    if(quat.arg1.type == Literal && quat.arg2.type == Literal)
+    {
+        if(quat.op == "j<" && quat.arg1.value < quat.arg2.value || 
+            quat.op == "j<=" && quat.arg1.value <= quat.arg2.value || 
+            quat.op == "j>" && quat.arg1.value > quat.arg2.value || 
+            quat.op == "j>=" && quat.arg1.value >= quat.arg2.value)
+        {
+            fout << "    j L" << quat.result.value << '\n';
+        }
+        return;
+    }
+
+    this->loadValTo(quat.arg1, "eax", fout);
+    if (quat.arg2.type == Address)
+    {
+        this->loadAdrTo(quat.arg2.value, "ebx", fout);
+    }
+
+    fout << "    cmpl ";
+
+    if (quat.arg2.type == Literal)
+        fout << "$" << quat.arg2.value;
+    else if (quat.arg2.type == Offset)
+        fout << -quat.arg2.value << "(%ebp)";
+    else if (quat.arg2.type == Address)
+        fout << "(%ebx)";
+
+    fout << ", %eax\n";
+
+    if(quat.op == "j<")
+        fout << "    jl L" << quat.result.value << '\n';
+    if(quat.op == "j<=")
+        fout << "    jle L" << quat.result.value << '\n';
+    if(quat.op == "j>")
+        fout << "    jg L" << quat.result.value << '\n';
+    if(quat.op == "j>=")
+        fout << "    jge L" << quat.result.value << '\n';
+}
+
+void GeneratorX86::genSea(quaternary &quat, std::ofstream &fout)
+{
+    this->loadAdrTo(quat.arg1.value, "eax", fout);
+    this->storeValTo(quat.result, "eax", fout);
+}
+
+void GeneratorX86::genOutput(quaternary &quat, std::ofstream &fout)
+{
+    if(quat.arg1.type == Literal)
+        fout << "    push $" << quat.arg1.value << '\n';
+    else if(quat.arg2.type == Offset)
+        fout << "    push " << -quat.arg1.value << "(ebp)\n";
+    else
+    {
+        this->loadAdrTo(quat.arg1.value, "ebx", fout);
+        fout << "    push (ebx)\n";
+    }
+    fout << "    call _output\n";
+    fout << "    add $4, %esp\n";
+}
+
+void GeneratorX86::genInput(quaternary &quat, std::ofstream &fout)
+{
+    fout << "    call _input\n";
+    this->storeValTo(quat.arg1, "eax", fout);
+}

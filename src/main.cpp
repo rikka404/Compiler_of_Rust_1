@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     // 现阶段使用默认参数
     arg_parser.args["i"] = "test/test6.rs";
-    arg_parser.args["m"] = "itp";
+    arg_parser.args["m"] = "x86";
 
     if (!arg_parser.args.count("i"))
     {
@@ -105,7 +105,8 @@ int main(int argc, char *argv[])
     else if (arg_parser.args["m"] == "x86")
     {
         std::cout << "[LOG] [GENRETION] Start compile to win_x86" << std::endl;
-        
+        GeneratorX86 generator;
+        generator.generate(semantic.codes);
         std::cout << "[LOG] [GENRETION] Write to file " << arg_parser.args["o"] << std::endl;
     }
     else if (arg_parser.args["m"] == "arm")

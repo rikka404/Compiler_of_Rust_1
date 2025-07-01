@@ -44,6 +44,7 @@ class GeneratorX86 : public Generator
 
     void loadValTo(Operand &oper, std::string reg, std::ofstream &fout);
     void loadAdrTo(int address, std::string reg, std::ofstream &fout);
+    void storeValTo(Operand &oper, std::string reg, std::ofstream &fout);
 
     void genFlag(int flag, std::ofstream &fout) override;
     void genJmp(quaternary &quat, std::ofstream &fout) override;
@@ -56,9 +57,9 @@ class GeneratorX86 : public Generator
     void genCal(quaternary &quat, std::ofstream &fout) override;
     void genRop(quaternary &quat, std::ofstream &fout);
     void genAssign(quaternary &quat, std::ofstream &fout) override;
-    // void genJt(quaternary &quat, std::ofstream &fout) override;
-    // void genJrop(quaternary &quat, std::ofstream &fout) override;
-    // void genSea(quaternary &quat, std::ofstream &fout) override;
-    // void genOutput(quaternary &quat, std::ofstream &fout) override;
-    // void genInput(quaternary &quat, std::ofstream &fout) override;
+    void genJt(quaternary &quat, std::ofstream &fout) override;
+    void genJrop(quaternary &quat, std::ofstream &fout) override;
+    void genSea(quaternary &quat, std::ofstream &fout) override;
+    void genOutput(quaternary &quat, std::ofstream &fout) override;
+    void genInput(quaternary &quat, std::ofstream &fout) override;
 };

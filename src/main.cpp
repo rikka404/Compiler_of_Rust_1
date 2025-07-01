@@ -2,9 +2,7 @@
 #include "lexical.h"
 #include "rust_parser.h"
 #include "data_type.h"
-#include "test.h"
-
-const std::vector<quaternary> *codes;
+#include "generation.h"
 
 int main(int argc, char *argv[])
 {
@@ -96,14 +94,12 @@ int main(int argc, char *argv[])
     rules.drawParserTree(std::cout, strList);
 
     semantic.printCodes(std::cout);
-
-    codes = &(semantic.codes);
     
     /* 目标代码生成 / 解释执行 */
     if (arg_parser.args["m"] == "itp")
     {
         std::cout << "[LOG] [GENRETION] Start interpreter" << std::endl;
-        test();
+        interpreter(semantic.codes);
         std::cout << "[LOG] [GENRETION] Interpreter finished" << std::endl;
     }
     else if (arg_parser.args["m"] == "x86")

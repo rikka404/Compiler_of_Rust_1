@@ -4,10 +4,10 @@
     .extern _output
     .text
 _main:
-L98:
     call L106
     xor %eax, %eax
     ret
+L100:
     pushl %ebp
     movl %esp, %ebp
     pushl $0
@@ -19,6 +19,7 @@ L98:
     leave
     ret
     addl $4, %esp
+L106:
     pushl %ebp
     movl %esp, %ebp
     pushl $0
@@ -38,7 +39,7 @@ L98:
     movzbl %al, %eax
     movl %eax,-16(%ebp)
     movl -16(%ebp), %eax
-    cmpl eax, $0
+    cmpl $0, %eax
     je L125
     pushl $0
     pushl -4(%ebp)
@@ -47,18 +48,20 @@ L98:
     addl $4, %esp
     addl $4, %esp
     leal -20(%ebp), %ebx
-    push (ebx)
+    push (%ebx)
     call _output
     add $4, %esp
     addl $4, %esp
     jmp L128
+L125:
     movl $10, %eax
     leal -8(%ebp), %ebx
     movl %eax, (%ebx)
     leal -4(%ebp), %ebx
-    push (ebx)
+    push (%ebx)
     call _output
     add $4, %esp
+L128:
     addl $16, %esp
     leave
     ret

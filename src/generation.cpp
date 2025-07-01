@@ -1,4 +1,5 @@
 #include "generation.h"
+#include <algorithm>
 #include <assert.h>
 
 int interpreter(std::vector<quaternary> &code)
@@ -146,11 +147,7 @@ int interpreter(std::vector<quaternary> &code)
             int a = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp + arg1.value) : *(int *)(mem + *(int*)(ebp + arg1.value));
             int b = arg2.type == Literal ? arg2.value : arg2.type == Offset ? *(int *)(ebp + arg2.value) : *(int *)(mem + *(int*)(ebp + arg2.value));
             int c;
-            if(op == "jnz")
-                c = a;
-            else if(op == "jz")
-                c = !a;
-            else if(op == "j>=")
+            if(op == "j>=")
                 c = a >= b;
             else if(op == "j<=")
                 c = a <= b;
@@ -222,8 +219,13 @@ void Generator::generate(std::vector<quaternary> &code)
     this->nowfpos = 0;
     for (int i = Generator::beginpos; i < code.size(); ++i)
     {
-        flags.push_back(i);
+        if (code[i].op == "call" || code[i].op == "j" || code[i].op == "jz" || code[i].op == "jnz" ||
+            code[i].op == "j>=" || code[i].op == "j<=" || code[i].op == "j<" || code[i].op == "j>")
+        {
+            this->flags.push_back(code[i].result.value);
+        }
     }
+    sort(this->flags.begin(), this->flags.end());
 
     //逐句翻译
     for (int i = Generator::beginpos; i < code.size(); ++i)
@@ -232,6 +234,7 @@ void Generator::generate(std::vector<quaternary> &code)
         if (i == this->flags[this->nowfpos])
         {
             this->genFlag(i, fout);
+            ++nowfpos;
         }
 
         if (op == "call" || op == "j")
@@ -484,6 +487,47 @@ void GeneratorX86::genCal(quaternary &quat, std::ofstream &fout)
 
 void GeneratorX86::genRop(quaternary &quat, std::ofstream &fout)
 {
+    if (quat.arg1.type == Literal && quat.arg2.type == Literal)
+    {
+        int result = 0;
+        if (quat.op == "<" && quat.arg1.value < quat.arg2.value ||
+            quat.op == "<=" && quat.arg1.value <= quat.arg2.value ||
+            quat.op == ">" && quat.arg1.value > quat.arg2.value ||
+            quat.op == ">=" && quat.arg1.value >= quat.arg2.value ||
+            quat.op == "==" && quat.arg1.value == quat.arg2.value ||
+            quat.op == "!=" && quat.arg1.value != quat.arg2.value)
+        {
+            result = 1;
+        }
+        else
+        {
+            result = 0;
+        }
+        if (quat.result.type == Offset)
+            fout << "    movl $" << result << ", " << -quat.result.value << "(%ebp)\n";
+        else if (quat.result.type == Address)
+        {
+            this->loadAdrTo(quat.result.value, "ebx", fout);
+            fout << "    movl $" << result << ", (%ebx)\n";
+        }
+        return;
+    }
+    
+    // 立即数不能作为目标操作数
+    if (quat.arg1.type == Literal)
+    {
+        quaternary newquat;
+        newquat.arg2 = quat.arg1;
+        newquat.arg1 = quat.arg2;
+        newquat.op = quat.op == "<" ? ">" : 
+                     quat.op == ">" ? "<" : 
+                     quat.op == "<=" ? ">=" : 
+                     quat.op == ">=" ? "<=" : 
+                     quat.op;
+        this->genRop(newquat, fout);
+        return;
+    }
+
     this->loadValTo(quat.arg1, "eax", fout);
     if (quat.arg2.type == Address)
     {
@@ -584,7 +628,7 @@ void GeneratorX86::genJt(quaternary &quat, std::ofstream &fout)
         return;
     }
     this->loadValTo(quat.arg1, "eax", fout);
-    fout << "    cmpl eax, $0\n";
+    fout << "    cmpl $0, %eax\n";
     if(quat.op == "jz")
         fout << "    je L" << quat.result.value << '\n';
     else
@@ -594,7 +638,7 @@ void GeneratorX86::genJt(quaternary &quat, std::ofstream &fout)
 
 void GeneratorX86::genJrop(quaternary &quat, std::ofstream &fout)
 {
-    if(quat.arg1.type == Literal && quat.arg2.type == Literal)
+    if (quat.arg1.type == Literal && quat.arg2.type == Literal)
     {
         if(quat.op == "j<" && quat.arg1.value < quat.arg2.value || 
             quat.op == "j<=" && quat.arg1.value <= quat.arg2.value || 
@@ -603,6 +647,21 @@ void GeneratorX86::genJrop(quaternary &quat, std::ofstream &fout)
         {
             fout << "    j L" << quat.result.value << '\n';
         }
+        return;
+    }
+    
+    // 立即数不能作为目标操作数
+    if (quat.arg1.type == Literal)
+    {
+        quaternary newquat;
+        newquat.arg2 = quat.arg1;
+        newquat.arg1 = quat.arg2;
+        newquat.op = quat.op == "<" ? ">" : 
+                     quat.op == ">" ? "<" : 
+                     quat.op == "<=" ? ">=" : 
+                     quat.op == ">=" ? "<=" : 
+                     quat.op;
+        this->genJrop(newquat, fout);
         return;
     }
 
@@ -644,11 +703,11 @@ void GeneratorX86::genOutput(quaternary &quat, std::ofstream &fout)
     if(quat.arg1.type == Literal)
         fout << "    push $" << quat.arg1.value << '\n';
     else if(quat.arg2.type == Offset)
-        fout << "    push " << -quat.arg1.value << "(ebp)\n";
+        fout << "    push " << -quat.arg1.value << "(%ebp)\n";
     else
     {
         this->loadAdrTo(quat.arg1.value, "ebx", fout);
-        fout << "    push (ebx)\n";
+        fout << "    push (%ebx)\n";
     }
     fout << "    call _output\n";
     fout << "    add $4, %esp\n";

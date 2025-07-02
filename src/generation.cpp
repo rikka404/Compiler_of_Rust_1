@@ -406,6 +406,7 @@ void GeneratorX86::genCopy(quaternary &quat, std::ofstream &fout)
             fout << "    movl " << -quat.result.value << "(%ebp), %edi\n";
         fout << "    movl $" << quat.arg2.value << ", %ecx\n";
         fout << "    rep movsb\n";
+        fout << "    cld\n";
     }
 }
 
@@ -622,11 +623,16 @@ void GeneratorX86::genAssign(quaternary &quat, std::ofstream &fout)
     else if (quat.op == "%=")
         fout << "    idivl ";
 
-    if (quat.arg2.type == Literal)
-        fout << "%ecx";
-    else if (quat.arg2.type == Offset)
-        fout << -quat.arg2.value << "(%ebp)";
-    else if (quat.arg2.type == Address)
+    if (quat.arg1.type == Literal)
+    {
+        if (quat.op == "/=" || quat.op == "%=")
+            fout << "%ecx";
+        else
+            fout << "$" << quat.arg1.value;
+    }
+    else if (quat.arg1.type == Offset)
+        fout << -quat.arg1.value << "(%ebp)";
+    else if (quat.arg1.type == Address)
         fout << "(%ecx)";
 
     fout << ", %eax\n";

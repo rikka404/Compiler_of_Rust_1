@@ -69,7 +69,7 @@ fn main()
 //     }
 // }
 // fn main() {
-//     out nnn(12);
+//     output nnn(12);
 // }
 
 
@@ -82,7 +82,7 @@ fn main()
 // fn main(){
 //     let mut a = [1,2,3,4];
 //     s2(&mut a);
-//     out a[3];
+//     output a[3];
 // }
 
 
@@ -95,47 +95,50 @@ fn main()
 //         sum *= a;
 //         a -= 1;
 //     }
-//     out sum;
+//     output sum;
 // }
 
 // fn main()
 // {
-//     let m = (0 + 19) / 2;
+//     let inl = 0;
+//     let inr = 19;
+//     let m = (inl + inr) / 2;
 //     let mut lp = 0;
 //     let mut rp = m + 1;
 //     let mut np = 0;
-//     let mut a = [1,2,6,8,13,78,90,345,789,888,-5,4,43,67,89,123,256,543,678,890];
+//     let mut a = &[1,2,6,8,13,78,90,345,789,888,-5,4,43,67,89,123,256,543,678,890];
 //     let mut b:[i32;20];
+//     let mut c = &mut b;
 //     while lp <= m && rp <= 20
 //     {
-//         if a[lp] <= a[rp]
+//         if (*a)[lp] <= (*a)[rp]
 //         {
-//             b[np] = a[lp];
+//             (*c)[np] = (*a)[lp];
 //             np += 1;
 //             lp += 1;
 //         }
 //         else
 //         {
-//             b[np] = a[rp];
+//             (*c)[np] = (*a)[rp];
 //             np += 1;
 //             rp += 1;
 //         }
 //     }
 //     while lp <= m
 //     {
-//         b[np] = a[lp];
+//         (*c)[np] = (*a)[lp];
 //         np += 1;
 //         lp += 1;
 //     }
 //     while rp <= 19
 //     {
-//         b[np] = a[rp];
+//         (*c)[np] = (*a)[rp];
 //         np += 1;
 //         rp += 1;
 //     }
 //     for i in 0..20
 //     {
-//         out b[i];
+//         output b[i];
 //     }
 // }
 
@@ -144,6 +147,6 @@ fn main()
 //     let mut i = 10;
 //     for j in 0..(i-1)
 //     {
-//         out j;
+//         output j;
 //     }
 // }

@@ -1,4 +1,5 @@
 #include <fstream>
+#include <cstdlib>
 #include "lexical.h"
 #include "rust_parser.h"
 #include "data_type.h"
@@ -11,8 +12,8 @@ int main(int argc, char *argv[])
     arg_parser.parse(argc, argv);
 
     // 现阶段使用默认参数
-    // arg_parser.args["i"] = "test/test6.rs";
-    arg_parser.args["m"] = "x86";
+    // arg_parser.args["i"] = "test/test5.rs";
+    // arg_parser.args["m"] = "x86";
 
     if (!arg_parser.args.count("i"))
     {
@@ -21,12 +22,11 @@ int main(int argc, char *argv[])
     }
     if (!arg_parser.args.count("m"))
     {
-        std::cout << "[ERROR] [ARGUMENT] No mode specified" << std::endl;
-        return 0;
+        arg_parser.args["m"] = "itp"; // 默认模式为解释器
     }
-    if (!arg_parser.args.count("o") && arg_parser.args["m"] != "interpreter")
+    if (!arg_parser.args.count("o") && arg_parser.args["m"] != "itp")
     {
-        arg_parser.args["o"] = arg_parser.args["i"] + ".s";
+        arg_parser.args["o"] = arg_parser.args["i"] + ".exe";
     }
 
     // 开始执行
@@ -106,14 +106,29 @@ int main(int argc, char *argv[])
     {
         std::cout << "[LOG] [GENRETION] Start compile to win_x86" << std::endl;
         GeneratorX86 generator;
-        generator.generate(semantic.codes, arg_parser.args["o"]);
-        std::cout << "[LOG] [GENRETION] Write to file " << arg_parser.args["o"] << std::endl;
+        generator.generate(semantic.codes);
+
+        // 执行编译命令
+        std::string compile_cmd = "obj\\mingw32\\bin\\gcc.exe -m32 obj\\src\\main.s obj\\src\\io.s -o " + arg_parser.args["o"];
+        std::cout << "[LOG] [GENRETION] Executing: " << compile_cmd << std::endl;
+
+        int result = system(compile_cmd.c_str());
+        if (result == 0)
+        {
+            std::cout << "[LOG] [GENRETION] Compilation successful, write to file " << arg_parser.args["o"] << std::endl;
+        }
+        else
+        {
+            std::cout << "[ERROR] [GENRETION] Compilation failed with code " << result << std::endl;
+        }
     }
-    else if (arg_parser.args["m"] == "arm")
+    else
     {
-        std::cout << "[LOG] [GENRETION] Start compile to android_arm" << std::endl;
-        
-        std::cout << "[LOG] [GENRETION] Write to file " << arg_parser.args["o"] << std::endl;
+        std::cout << "[ERROR] [ARGUMENT] Unknown mode: " << arg_parser.args["m"] << std::endl;
+        std::cout << "[LOG] please use -h to see help" << std::endl;
+        std::cout << "[LOG] [GENRETION] Start interpreter" << std::endl;
+        interpreter(semantic.codes);
+        std::cout << "[LOG] [GENRETION] Interpreter finished" << std::endl;
     }
     
 

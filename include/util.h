@@ -134,7 +134,7 @@ public:
         std::cout << "Usage: program [options]\n";
         std::cout << "Options:\n";
         std::cout << "  -h           Show this help message\n";
-        std::cout << "  -m  <mode>   *must* Specify mode (e.g. itp: interpreter, x86: win_x86, arm: android_arm)\n";
+        std::cout << "  -m  <mode>   *must* Specify mode (e.g. itp: interpreter, x86: win_x86)\n";
         std::cout << "  -i  <file>   *must* Specify input file\n";
         std::cout << "  -o  <file>   Specify output file\n";
     }

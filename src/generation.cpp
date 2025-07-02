@@ -2,11 +2,13 @@
 #include <algorithm>
 #include <assert.h>
 
+#define STACKSIZE 100000
+
 int interpreter(std::vector<quaternary> &code)
 {
-    static char mem[100000];
-    
-    void* ebp = mem + 50, *esp = mem + 100;
+    static char mem[STACKSIZE];
+
+    void *ebp = mem + STACKSIZE - 48, *esp = mem + STACKSIZE - 100;
     int eip = 98;
     while (code[eip].op != "end")
     {
@@ -16,14 +18,14 @@ int interpreter(std::vector<quaternary> &code)
         if(op == "call")
         {
             *(int *)esp = eip + 1;
-            esp += 4;
+            esp -= 4;
             eip = result.value;
         }
         else if (op == "build")
         {
             *(int *)esp = (char*)ebp - mem;
             ebp = esp;
-            esp += 4;
+            esp -= 4;
             eip++;
         }
         else if(op == "end")
@@ -32,8 +34,8 @@ int interpreter(std::vector<quaternary> &code)
         }
         else if(op == "leave")
         {
-            eip = *(int *)(ebp - 4);
-            esp = ebp - 4;
+            eip = *(int *)(ebp + 4);
+            esp = ebp + 4;
             ebp = mem + *(int *)ebp;
         }
         else if(op == "push")
@@ -45,36 +47,36 @@ int interpreter(std::vector<quaternary> &code)
             }
             else
             {
-                void *src = arg1.type == Offset ? ebp + arg1.value : mem + *(int *)(ebp + arg1.value);
-                memcpy(dst, src, arg2.value);
+                void *src = arg1.type == Offset ? ebp - arg1.value : mem + *(int *)(ebp - arg1.value);
+                memcpy(dst - arg2.value + 4, src - arg2.value + 4, arg2.value);
             }
-            esp += arg2.value;
+            esp -= arg2.value;
             eip++;
         }
         else if(op == "pop")
         {
-            esp -= arg2.value;
+            esp += arg2.value;
             eip++;
         }
         else if(op == ":=" || op == "return")
         {
-            void *dst = result.type == Offset ? ebp + result.value : mem + *(int*)(ebp + result.value);
+            void *dst = result.type == Offset ? ebp - result.value : mem + *(int*)(ebp - result.value);
             if(arg1.type == Literal)
             {
                 *(int *)(dst) = arg1.value;
             }
             else
             {
-                void *src = arg1.type == Offset ? ebp + arg1.value : mem + *(int*)(ebp + arg1.value);
-                memcpy(dst, src, arg2.value);
+                void *src = arg1.type == Offset ? ebp - arg1.value : mem + *(int*)(ebp - arg1.value);
+                memcpy(dst - arg2.value + 4, src - arg2.value + 4, arg2.value);
             }
             eip++;
         }
         else if(op == "+" || op == "-" || op == "*" || op == "/" || op == "%" ||
              op == "==" || op == "!=" || op == "<" || op == ">" || op == "<=" || op == ">=")
         {
-            int a = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp + arg1.value) : *(int *)(mem + *(int*)(ebp + arg1.value));
-            int b = arg2.type == Literal ? arg2.value : arg2.type == Offset ? *(int *)(ebp + arg2.value) : *(int *)(mem + *(int*)(ebp + arg2.value));
+            int a = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp - arg1.value) : *(int *)(mem + *(int*)(ebp - arg1.value));
+            int b = arg2.type == Literal ? arg2.value : arg2.type == Offset ? *(int *)(ebp - arg2.value) : *(int *)(mem + *(int*)(ebp - arg2.value));
             int c;
             if(op == "+")
                 c = a + b;
@@ -99,15 +101,15 @@ int interpreter(std::vector<quaternary> &code)
             else if(op == "<=")
                 c = a <= b;
             if(result.type == Offset)
-                *(int *)(ebp + result.value) = c;
+                *(int *)(ebp - result.value) = c;
             else if(result.type == Address)
-                *(int *)(mem + *(int*)(ebp + result.value)) = c;
+                *(int *)(mem + *(int*)(ebp - result.value)) = c;
             eip++;
         }
         else if (op == "+=" || op == "-=" || op == "*=" || op == "/=" || op == "%=")
         {
-            int b = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp + arg1.value) : *(int *)(mem + *(int*)(ebp + arg1.value));
-            int a = result.type == Literal ? result.value : result.type == Offset ? *(int *)(ebp + result.value) : *(int *)(mem + *(int*)(ebp + result.value));
+            int b = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp - arg1.value) : *(int *)(mem + *(int*)(ebp - arg1.value));
+            int a = result.type == Literal ? result.value : result.type == Offset ? *(int *)(ebp - result.value) : *(int *)(mem + *(int*)(ebp - result.value));
             int c;
             if(op == "+=")
                 c = a + b;
@@ -120,9 +122,9 @@ int interpreter(std::vector<quaternary> &code)
             else if(op == "%=")
                 c = a % b;
             if(result.type == Offset)
-                *(int *)(ebp + result.value) = c;
+                *(int *)(ebp - result.value) = c;
             else if(result.type == Address)
-                *(int *)(mem + *(int*)(ebp + result.value)) = c;
+                *(int *)(mem + *(int*)(ebp - result.value)) = c;
             eip++;
         }
         else if(op == "j")
@@ -131,7 +133,7 @@ int interpreter(std::vector<quaternary> &code)
         }
         else if (op == "jnz" || op == "jz")
         {
-            int a = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp + arg1.value) : *(int *)(mem + *(int*)(ebp + arg1.value));
+            int a = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp - arg1.value) : *(int *)(mem + *(int*)(ebp - arg1.value));
             int c;
             if(op == "jnz")
                 c = a;
@@ -144,8 +146,8 @@ int interpreter(std::vector<quaternary> &code)
         }
         else if(op == "j>=" || op == "j<=" || op == "j<" || op == "j>")
         {
-            int a = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp + arg1.value) : *(int *)(mem + *(int*)(ebp + arg1.value));
-            int b = arg2.type == Literal ? arg2.value : arg2.type == Offset ? *(int *)(ebp + arg2.value) : *(int *)(mem + *(int*)(ebp + arg2.value));
+            int a = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp - arg1.value) : *(int *)(mem + *(int*)(ebp - arg1.value));
+            int b = arg2.type == Literal ? arg2.value : arg2.type == Offset ? *(int *)(ebp - arg2.value) : *(int *)(mem + *(int*)(ebp - arg2.value));
             int c;
             if(op == "j>=")
                 c = a >= b;
@@ -164,11 +166,12 @@ int interpreter(std::vector<quaternary> &code)
         {
             // std::cerr << arg1.value << std::endl;
             // std::cerr << arg1.value + (char*)ebp - mem << std::endl;
-            int a = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp + arg1.value) : *(int *)(mem + *(int*)(ebp + arg1.value));
+            int a = arg1.type == Literal ? arg1.value : arg1.type == Offset ? *(int *)(ebp - arg1.value) : *(int *)(mem + *(int*)(ebp - arg1.value));
+            a = -a;
             if(result.type == Offset)
-                *(int *)(ebp + result.value) = a + (char*)ebp - mem;
+                *(int *)(ebp - result.value) = a + (char*)ebp - mem;
             else if(result.type == Address)
-                *(int *)(mem + *(int *)(ebp + result.value)) = a + (char *)ebp - mem;
+                *(int *)(mem + *(int *)(ebp - result.value)) = a + (char *)ebp - mem;
             eip++;
         }
         else if(op == "null")
@@ -178,9 +181,9 @@ int interpreter(std::vector<quaternary> &code)
         else if(op == "output")
         {
             if(arg1.type == Offset)
-                std::cout << *(int *)(ebp + arg1.value) << std::endl;
+                std::cout << *(int *)(ebp - arg1.value) << std::endl;
             else if(arg1.type == Address)
-                std::cout << *(int *)(mem + *(int*)(ebp + arg1.value)) << std::endl;
+                std::cout << *(int *)(mem + *(int*)(ebp - arg1.value)) << std::endl;
             else 
                 std::cout << arg1.value << std::endl;
             eip++;
@@ -190,21 +193,21 @@ int interpreter(std::vector<quaternary> &code)
             int a;
             std::cin >> a;
             if (arg1.type == Offset)
-                *(int *)(ebp + arg1.value) = a;
+                *(int *)(ebp - arg1.value) = a;
             else if (arg1.type == Address)
-                *(int *)(mem + *(int *)(ebp + arg1.value)) = a;
+                *(int *)(mem + *(int *)(ebp - arg1.value)) = a;
             eip++;
         }
     }
     return 0;
 }
 
-std::string Generator::dstfilepath = "obj/main.s";
+std::string Generator::dstfilepath = "obj/src/main.s";
 int Generator::beginpos = 98;
 
-void Generator::generate(std::vector<quaternary> &code, std::string outfile)
+void Generator::generate(std::vector<quaternary> &code)
 {
-    std::ofstream fout(outfile);
+    std::ofstream fout(Generator::dstfilepath);
     if (!fout.is_open())
     {
         std::cerr << "[ERROR] [FILE] " << Generator::dstfilepath << " cannot be opened" << std::endl;
@@ -309,7 +312,6 @@ void GeneratorX86::header(std::ofstream &fout)
 {
     fout << "    .globl _main\n";
     fout << "    .extern _input\n";
-    fout << "    .extern _output\n";
     fout << "    .extern _output\n";
     fout << "    .text\n";
     fout << "_main:\n";

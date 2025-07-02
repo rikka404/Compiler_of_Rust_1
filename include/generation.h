@@ -11,7 +11,7 @@ public:
     static std::string dstfilepath;
     static int beginpos;
     
-    void generate(std::vector<quaternary> &code, std::string outfile);
+    void generate(std::vector<quaternary> &code);
     virtual void header(std::ofstream &fout) = 0; // 生成头部
     
     // 具体翻译函数

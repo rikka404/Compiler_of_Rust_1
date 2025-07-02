@@ -3,3 +3,4 @@ build/
 parse/*.tmp
 Makefile
 *.exe
+obj/mingw32/

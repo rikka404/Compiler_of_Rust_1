@@ -327,7 +327,7 @@ void GeneratorX86::loadValTo(Operand &oper, std::string reg, std::ofstream &fout
     }
     else if (oper.type == Address)
     {
-        fout << "    leal " << -oper.value << "(%ebp), %ebx\n";
+        fout << "    movl " << -oper.value << "(%ebp), %ebx\n";
         fout << "    movl (%ebx), %" << reg << "\n";
     }
 }
@@ -395,7 +395,7 @@ void GeneratorX86::genCopy(quaternary &quat, std::ofstream &fout)
     }
     else if (quat.arg2.value > 4)
     {
-        fout << "    cld\n";
+        fout << "    std\n";
         if(quat.arg1.type == Offset)
             fout << "    leal " << -quat.arg1.value << "(%ebp), %esi\n";
         else
@@ -436,8 +436,18 @@ void GeneratorX86::genPush(quaternary &quat, std::ofstream &fout)
     else if (quat.arg2.value > 4)
     {
         fout << "    subl $" << quat.arg2.value << ", %esp\n";
-        if (quat.arg1.type != Literal)
-            this->genCopy(quat, fout);
+        if(quat.arg1.type == Offset)
+            fout << "    leal " << -quat.arg1.value << "(%ebp), %esi\n";
+        else
+            fout << "    movl " << -quat.arg1.value << "(%ebp), %esi\n";
+        fout << "    movl %esp, %eax\n";
+        fout << "    addl $" << quat.arg2.value - 4 << ", %eax\n";
+        fout << "    movl %eax, %edi\n";
+        fout << "    std\n";
+        fout << "    movl $" << quat.arg2.value << ", %ecx\n";
+        fout << "    rep movsb\n";
+        // if (quat.arg1.type != Literal)
+        //     this->genCopy(quat, fout);
     }
 }
 
@@ -723,16 +733,16 @@ void GeneratorX86::genSea(quaternary &quat, std::ofstream &fout)
 void GeneratorX86::genOutput(quaternary &quat, std::ofstream &fout)
 {
     if(quat.arg1.type == Literal)
-        fout << "    push $" << quat.arg1.value << '\n';
+        fout << "    pushl $" << quat.arg1.value << '\n';
     else if(quat.arg1.type == Offset)
-        fout << "    push " << -quat.arg1.value << "(%ebp)\n";
+        fout << "    pushl " << -quat.arg1.value << "(%ebp)\n";
     else
     {
         this->loadAdrTo(quat.arg1.value, "ebx", fout);
-        fout << "    push (%ebx)\n";
+        fout << "    pushl (%ebx)\n";
     }
     fout << "    call _output\n";
-    fout << "    add $4, %esp\n";
+    fout << "    addl $4, %esp\n";
 }
 
 void GeneratorX86::genInput(quaternary &quat, std::ofstream &fout)

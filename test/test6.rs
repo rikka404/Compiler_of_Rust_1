@@ -37,10 +37,20 @@
 //     }
 // }
 
+fn myoutput(a : [i32; 4])
+{
+    for i in -4..8
+    {
+        output a[i];
+    }
+}
+
 fn main()
 {
-    let mut a : (i32, [i32;4]) = (5, [1, 2, 3, 4]);
-    output a.1[1];
+    // let mut a : (i32, [i32;4]) = (5, [1, 2, 3, 4]);
+    // output a.1[1];
+    let mut a : [i32;4] = [4, 3, 2, 1];
+    myoutput(a);
 }
 
 // fn main()

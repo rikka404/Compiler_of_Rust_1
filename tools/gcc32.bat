@@ -32,4 +32,4 @@ echo Running: gcc !args!
 REM 执行编译
 C:\msys64\usr\bin\env MSYSTEM=MINGW32 C:\msys64\usr\bin\bash.exe -lc "gcc !args!"
 
-endlocal
+REM endlocal

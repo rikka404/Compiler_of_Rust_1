@@ -67,7 +67,6 @@
 // }
 
 fn matrix_mult(a: [[i32; 2]; 2], b: [[i32; 2]; 2]) -> [[i32; 2]; 2] {
-    output 114514;
     let mut result = [[0, 0], [0, 0]];
     for i in 0..2 {
         for j in 0..2 {
@@ -91,8 +90,11 @@ fn matrix_power(mut base: [[i32; 2]; 2], mut n: i32) -> [[i32; 2]; 2] {
             result = matrix_mult(result, base);
         }
         base = matrix_mult(base, base);
+        output 111;
         n /= 2;
+        output 222;
     }
+    output 114514;
     return result;
 }
 
@@ -103,10 +105,13 @@ fn fast_fibonacci(n: i32) -> i32 {
     
     let m = [[1, 1], [1, 0]];
     let powered = matrix_power(m, n - 1);
+    output 456;
     return powered[0][0];
 }
 
 fn main() {
     identity_matrix();
-    output fast_fibonacci(2);
+    let fib = fast_fibonacci(3);
+    output 123;
+    output fib;
 }

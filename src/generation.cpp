@@ -619,7 +619,7 @@ void GeneratorX86::genAssign(quaternary &quat, std::ofstream &fout)
         if (quat.arg1.type == Literal)
         {
             // 除法不允许除以立即数,需要先存到ecx
-            this->loadValTo(quat.arg2, "ecx", fout);
+            this->loadValTo(quat.arg1, "ecx", fout);
         }
         fout << "    cltd\n"; // 扩展eax的符号位到edx上
     }

@@ -7,7 +7,6 @@ set EXITCODE=%ERRORLEVEL%
 echo ================== END out.exe ==================
 if %EXITCODE% NEQ 0 (
     echo [ERROR] out.exe exited with code %EXITCODE%.
-    pause
     exit /b %EXITCODE%
 ) else (
     echo [OK] out.exe exited normally.

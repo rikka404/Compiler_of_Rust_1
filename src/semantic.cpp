@@ -2972,7 +2972,7 @@ void Semantic::act107_(std::vector<attribute> &args, attribute &result) {
         quat.arg2 = Operand{Literal, 0};
         quat.result = Operand{Offset, temp_sym.relativeAddress};
         codes.push_back(quat);
-        
+        // codes.push_back(quaternary{"null", Operand{Literal, std::any_cast<int>(args[0]["address"])}, Operand{Literal, 0}, Operand{Literal, 0}});
     }
     else
     {

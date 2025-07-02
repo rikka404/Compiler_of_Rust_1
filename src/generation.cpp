@@ -202,9 +202,9 @@ int interpreter(std::vector<quaternary> &code)
 std::string Generator::dstfilepath = "obj/main.s";
 int Generator::beginpos = 98;
 
-void Generator::generate(std::vector<quaternary> &code)
+void Generator::generate(std::vector<quaternary> &code, std::string outfile)
 {
-    std::ofstream fout(Generator::dstfilepath);
+    std::ofstream fout(outfile);
     if (!fout.is_open())
     {
         std::cerr << "[ERROR] [FILE] " << Generator::dstfilepath << " cannot be opened" << std::endl;

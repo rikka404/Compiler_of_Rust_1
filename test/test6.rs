@@ -37,21 +37,21 @@
 //     }
 // }
 
-fn myoutput(a : [i32; 4])
-{
-    for i in -4..8
-    {
-        output a[i];
-    }
-}
+// fn myoutput(a : [i32; 4])
+// {
+//     for i in 0..4
+//     {
+//         output a[i];
+//     }
+// }
 
-fn main()
-{
-    // let mut a : (i32, [i32;4]) = (5, [1, 2, 3, 4]);
-    // output a.1[1];
-    let mut a : [i32;4] = [4, 3, 2, 1];
-    myoutput(a);
-}
+// fn main()
+// {
+//     // let mut a : (i32, [i32;4]) = (5, [1, 2, 3, 4]);
+//     // output a.1[1];
+//     let mut a : [i32;4] = [4, 3, 2, 1];
+//     myoutput(a);
+// }
 
 // fn main()
 // {
@@ -65,3 +65,48 @@ fn main()
 //         output 3;
 //     }
 // }
+
+fn matrix_mult(a: [[i32; 2]; 2], b: [[i32; 2]; 2]) -> [[i32; 2]; 2] {
+    output 114514;
+    let mut result = [[0, 0], [0, 0]];
+    for i in 0..2 {
+        for j in 0..2 {
+            for k in 0..2 {
+                result[i][j] += a[i][k] * b[k][j];
+            }
+        }
+    }
+    return result;
+}
+
+fn identity_matrix() -> [[i32; 2]; 2] {
+    return [[1, 0], [0, 1]];
+}
+
+fn matrix_power(mut base: [[i32; 2]; 2], mut n: i32) -> [[i32; 2]; 2] {
+    let mut result = identity_matrix();
+    
+    while n > 0 {
+        if n % 2 == 1 {
+            result = matrix_mult(result, base);
+        }
+        base = matrix_mult(base, base);
+        n /= 2;
+    }
+    return result;
+}
+
+fn fast_fibonacci(n: i32) -> i32 {
+    if n == 0 {
+        return 0;
+    }
+    
+    let m = [[1, 1], [1, 0]];
+    let powered = matrix_power(m, n - 1);
+    return powered[0][0];
+}
+
+fn main() {
+    identity_matrix();
+    output fast_fibonacci(2);
+}

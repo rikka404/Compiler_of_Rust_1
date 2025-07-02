@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     arg_parser.parse(argc, argv);
 
     // 现阶段使用默认参数
-    arg_parser.args["i"] = "test/test5.rs";
+    arg_parser.args["i"] = "test/test6.rs";
     arg_parser.args["m"] = "x86";
 
     if (!arg_parser.args.count("i"))

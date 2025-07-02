@@ -40,6 +40,7 @@ fn fast_fibonacci(n: i32) -> i32 {
 fn main() {
     identity_matrix();
     for i in 0..20 {
+        output i;
         let fib = fast_fibonacci(i);
         output fib;  
     }

@@ -404,8 +404,8 @@ void GeneratorX86::genCopy(quaternary &quat, std::ofstream &fout)
             fout << "    leal " << -quat.result.value << "(%ebp), %edi\n";
         else
             fout << "    movl " << -quat.result.value << "(%ebp), %edi\n";
-        fout << "    movl $" << quat.arg2.value << ", %ecx\n";
-        fout << "    rep movsb\n";
+        fout << "    movl $" << (quat.arg2.value) / 4 << ", %ecx\n";
+        fout << "    rep movsl\n";
         fout << "    cld\n";
     }
 }
@@ -437,16 +437,28 @@ void GeneratorX86::genPush(quaternary &quat, std::ofstream &fout)
     else if (quat.arg2.value > 4)
     {
         fout << "    subl $" << quat.arg2.value << ", %esp\n";
-        if(quat.arg1.type == Offset)
-            fout << "    leal " << -quat.arg1.value << "(%ebp), %esi\n";
-        else
-            fout << "    movl " << -quat.arg1.value << "(%ebp), %esi\n";
-        fout << "    movl %esp, %eax\n";
-        fout << "    addl $" << quat.arg2.value - 4 << ", %eax\n";
-        fout << "    movl %eax, %edi\n";
         fout << "    std\n";
-        fout << "    movl $" << quat.arg2.value << ", %ecx\n";
-        fout << "    rep movsb\n";
+        fout << "    movl $" << (quat.arg2.value) / 4 << ", %ecx\n";
+        if(quat.arg1.type == Literal)
+        {
+            fout << "    movl %esp, %eax\n";
+            fout << "    addl $" << quat.arg2.value - 4 << ", %eax\n";
+            fout << "    movl %eax, %edi\n";
+            fout << "    movl $" << quat.arg1.value << ", %eax\n";
+            fout << "    rep stosl\n";
+        }
+        else 
+        {
+            if(quat.arg1.type == Offset)
+                fout << "    leal " << -quat.arg1.value << "(%ebp), %esi\n";
+            else
+                fout << "    movl " << -quat.arg1.value << "(%ebp), %esi\n";
+            fout << "    movl %esp, %eax\n";
+            fout << "    addl $" << quat.arg2.value - 4 << ", %eax\n";
+            fout << "    movl %eax, %edi\n";
+            fout << "    rep movsl\n";
+        }
+        fout << "    cld\n";
         // if (quat.arg1.type != Literal)
         //     this->genCopy(quat, fout);
     }

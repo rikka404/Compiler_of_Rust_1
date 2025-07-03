@@ -24,6 +24,10 @@ int main(int argc, char *argv[])
     {
         arg_parser.args["i"] = teminal_path + arg_parser.args["i"];
     }
+    if (arg_parser.args.count("o"))
+    {
+        arg_parser.args["o"] = teminal_path + arg_parser.args["o"];
+    }
 
     // 现阶段使用默认参数
     // arg_parser.args["i"] = "test/test5.rs";

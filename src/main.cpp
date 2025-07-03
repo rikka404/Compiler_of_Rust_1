@@ -1,5 +1,6 @@
 #include <fstream>
 #include <cstdlib>
+#include <filesystem>
 #include "lexical.h"
 #include "rust_parser.h"
 #include "data_type.h"
@@ -7,9 +8,22 @@
 
 int main(int argc, char *argv[])
 {
+    // 终端所在目录
+    std::string teminal_path = std::filesystem::current_path().string() + "\\";
+    // 切换到可执行文件所在目录
+    std::filesystem::path exe_dir = std::filesystem::path(argv[0]).parent_path();
+    if (!exe_dir.empty())
+    {
+        std::filesystem::current_path(exe_dir);
+    }
     /* 预处理 */
     argParser arg_parser;
     arg_parser.parse(argc, argv);
+    // 给输入输出路径加上终端所在目录
+    if (arg_parser.args.count("i"))
+    {
+        arg_parser.args["i"] = teminal_path + arg_parser.args["i"];
+    }
 
     // 现阶段使用默认参数
     // arg_parser.args["i"] = "test/test5.rs";

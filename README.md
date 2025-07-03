@@ -892,6 +892,8 @@ gcc -m32 main.s io.s -o xx.exe
 
 需要在`obj/`下放置文件夹`mingw32`，里面是32位gcc编译器
 
+(选择32位下载) [网址](https://winlibs.com/#download-release)
+
 ## 4.1 重要说明
 
 我们写到这才发现我们的栈增长方向刚好和现实中栈的增长方向是反的，但仅仅是方向反了，其他都是对的：

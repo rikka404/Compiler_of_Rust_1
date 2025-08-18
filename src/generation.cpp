@@ -432,7 +432,7 @@ void GeneratorX86::genPush(quaternary &quat, std::ofstream &fout)
         }
         else if (quat.arg1.type == Address)
         {
-            fout << "    leal " << -quat.arg1.value << "(%ebp), %eax\n";
+            fout << "    leal " << -quat.arg1.value << "(%ebp), %ebx\n";
             fout << "    pushl (%ebx)\n";
         }
     }

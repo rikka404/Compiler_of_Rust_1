@@ -1,5 +1,105 @@
 # 编译原理大作业
 
+# 0 使用说明
+克隆代码到本地后，源代码分布于`/src`和`/include`中，但是由于不同人电脑的配置和环境原因，我们没有直接提供makefile文件。但是我们也提供了环境和参考，以及必须的要求：
+
+必须要求：
+
+* 到达项目根目录的路径不能有中文，因为c++会出问题的
+* 编译该rust编译器生成的程序需要位于根目录下
+* 到达`.rs`的源程序目录和生成目标目录也不能有中文
+* `.rs`里面不能有中文，注释也不行。因为中文的ascii码不在0-127之间
+
+`makefile`文件参考：
+
+Q同学没有配置gcc环境变量，编译器路径在`C:/MinGW/bin/g++.exe`在windows环境下运行。他在根目录下新建一个`makefile`文件，里面写：
+```
+# 指定编译器
+CXX = C:/MinGW/bin/g++.exe
+
+# 编译选项
+CXXFLAGS = -std=c++20 -Wall -Wextra -Iinclude -g -Wunused-parameter
+DEPFLAGS := -MMD -MP
+
+# 文件目录
+SRC_DIR = src
+INC_DIR := include
+BUILD_DIR = build
+
+# 查找源文件目录下的所有 .cpp 文件
+SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+# 将 .cpp 文件替换为对应的 .o 文件，并放入 build 目录
+OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
+# 将 .o 文件替换为对应的 .d 文件
+DEPS := $(OBJS:.o=.d)
+
+# 生成的目标可执行文件
+TARGET = main.exe
+
+ensure_dir = @if not exist "$(@D)" mkdir "$(@D)"
+
+# 默认目标
+all: $(TARGET)
+
+# 链接目标文件生成可执行文件
+$(TARGET): $(OBJS)
+	$(ensure_dir)
+	$(CXX) -o $@ $(OBJS)
+
+# build/xyz.o 的规则由 src/xyz.cpp 生成:
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(ensure_dir)
+	$(CXX) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
+	
+-include $(DEPS)
+
+# 清理 build 目录
+clean:
+	if exist $(BUILD_DIR) rmdir /s /q $(BUILD_DIR)
+	if exist $(TARGET) del $(TARGET)
+	
+
+```
+
+这时他运行`C:\MinGW\bin\mingw32-make.exe all`就可以编译出`main.exe`。这个make一般也在你下载的gcc编译器里，具体就看你的make叫什么了。
+
+如果你想更加方便的运行，可以尝试修改`.vscode`下的`tasks.json`，其本质是连接运行按钮，在终端中使用对应命令行。此外，需要调试的话，需要修改`launch.json`文件。
+
+现在你就可以使用解释运行功能了。
+
+我们的编译器能翻译成目标代码，也只是到x86的汇编语言，即`/obj/src`下的`.s`文件。
+
+如果还要编译出可执行文件，你还需要配置一个特殊的32位的gcc在指定位置，供编译程序调用。
+
+在`obj/`下放置文件夹`mingw32`，里面是32位gcc编译器
+
+(选择32位下载) [网址](https://winlibs.com/#download-release)
+
+好的，现在你可以使用全部功能！
+
+你输入`.\main.exe -h`，会显示帮助：
+
+```
+Usage: program [options]
+Options:
+  -h           Show this help message
+  -m  <mode>   *must* Specify mode (e.g. itp: interpreter, x86: win_x86)
+  -i  <file>   *must* Specify input file
+  -o  <file>   Specify output file
+```
+
+`-i`输入文件是必要的
+
+`-m`不指定的话默认解释执行
+
+`-o`不指定自动在输入文件的文件夹下
+
+例如，你可以编译这个排序程序`test8.rs`
+
+`.\main.exe -m x86 -i .\test\test8.rs`
+
+就会在`.\test`下产生`test8.rs.exe`
+
 # 1 词法分析
 
 以trie树为基础构建了边带有操作的自动机。可以读取一个字符后根据这条边决定是否要回退，是否要把这个加入现字符串，是否需要将现字符串作为一个词。用bit来表示每个操作的有无，所以目前还是可以轻松支持32种操作的，应该大概是用不完的。
